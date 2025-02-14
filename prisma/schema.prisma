@@ -1,0 +1,340 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Shop {
+  id        String    @id  @unique @default(uuid())
+  name      String    @map("shop_name")
+  email     String    @map("shop_email")  @unique()
+  password  String    @map("shop_password")
+  salt      String    @map("shop_salt")
+  roles     String    @map("shop_role")
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+
+  discount  Discount[]
+  products  Product[]
+  @@map("shops")
+}
+
+model KeyToken {
+  id                String      @id  @unique @default(uuid())
+  accountId         String      @unique@map("account_id")  
+  publicKey         String      @map("public_key")
+  refreshToken      String      @map("refresh_token")
+  createdAt         DateTime    @map("created_at") @default(now())
+  updatedAt         DateTime    @map("updated_at") @updatedAt
+  roles             AccountRole @map("roles")
+
+  refreshtokenused  RefreshTokenUsed[]
+
+  @@map("key_tokens")
+}
+
+model RefreshTokenUsed {
+  id          String    @id @default(uuid())
+  token       String    @map("refresh_token")
+  usedAt      DateTime  @default(now())@map("used_at")
+  userAgent   String?   @map("user_agent")
+  ipAddress   String?   @map("ip_address")
+  keyTokenId  String    @map("refresh_token_use")
+  keyToken    KeyToken  @relation(fields: [keyTokenId], references: [id])
+
+  @@index([token])
+  @@map("refresh_tokens_used")
+}
+
+
+model APIkey {
+  id         String    @id  @unique @default(uuid())
+  key        String  
+  status     Boolean
+  permission String[]
+
+  createdAt  DateTime  @map("created_at") @default(now())
+  updatedAt  DateTime  @map("updated_at") @updatedAt
+
+  @@map("api_keys")
+}
+
+model Product {
+  id                    String      @id  @unique @default(uuid())
+  productName           String      @map("product_name")
+  productThumb          String      @map("product_thumb")
+  productDescription    String?     @map("product_description")
+  productSlug           String?     @map("product_slug")
+  productPrice          Float       @map("product_price")
+  productQuantity       Int         @map("product_quantity")
+  productType           ProductType @map("product_type")
+  productShop           Shop        @relation(fields: [productShopId], references: [id])
+  productShopId         String      @map("product_shop")
+  productRatingsAverage Float       @default(4.5) @map("product_ratingsAverage")
+  productVariation      String[]    @default([]) @map("product_variation")
+  isDraft               Boolean     @default(true)
+  isPublished           Boolean     @default(false)
+  createdAt             DateTime    @map("created_at") @default(now())
+  updatedAt             DateTime    @map("updated_at") @updatedAt
+
+  inventory   Inventory?
+  comment     Comment?
+  clothing    Clothing?
+  electronic  Electronic?
+  furniture   Furniture?
+
+  @@index([productName, productDescription]) // Create a text index for search
+  @@map("products")
+}
+
+// Clothing Model
+model Clothing {
+  id        String    @id  @unique @default(uuid())
+  brand     String @map("clothing_brand")
+  size      String @map("clothing_size")
+  material  String @map("clothing_material")
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String    @unique@map("product_id")
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+
+  @@map("clothes")
+}
+
+// Electronics Model
+model Electronic {
+  id            String    @id  @unique @default(uuid())
+  manufacturer  String    @map("electronic_manufacturer")
+  model         String    @map("electronic_model")
+  color         String    @map("electronic_color")
+  product       Product   @relation(fields: [productId], references: [id])
+  productId     String    @unique@map("product_id")
+  createdAt     DateTime  @map("created_at") @default(now())
+  updatedAt     DateTime  @map("updated_at") @updatedAt
+
+  @@map("electronics")
+}
+
+// Furniture Model
+model Furniture {
+  id        String    @id  @unique @default(uuid())
+  brand     String    @map("furniture_brand")
+  size      String    @map("furniture_size")
+  material  String    @map("furniture_material")
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String    @unique@map("product_id")
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+
+  @@map("furnitures")
+}
+
+model Inventory {
+  id                    String    @id  @unique @default(uuid())
+  inventoryProduct      Product   @relation(fields: [inventoryProductId], references: [id])
+  inventoryProductId    String    @unique @map("inventory_product_id")
+  inventoryLocation     String    @default("unKnow")@map("inventory_location")
+  inventoryStock        Int       @map("inventory_stock")
+  inventoryReservations Json[]    @map("inventory_reservations")
+  createdAt             DateTime  @map("created_at") @default(now())
+  updatedAt             DateTime  @map("updated_at") @updatedAt
+
+  @@map("inventories")
+
+}
+
+model Discount {
+  id                      String            @id  @unique @default(uuid())
+  discountName            String            @map("discount_name")
+  discountDescription     String            @map("discount_description")
+  discountType            String            @map("discount_type") @default("fixed_amount")
+  discountValue           Float             @map("discount_value")
+  discountCode            String            @unique @map("discount_code") 
+  discountStartDates      DateTime          @map("discount_start_dates")
+  discountEndDates        DateTime          @map("discount_end_dates")
+  discountMaxUses         Int               @map("discount_max_uses")//number of discount applied
+  discountUsesCount       Int               @map("discount_uses_count")//number of discount had been used
+  discountUsersUsed       String[]          @default([]) @map("discount_users_used")//who been used this discount
+  discountMaxUsesPerUser  Int               @map("discount_max_uses_per_user")
+  discountMinOrderValue   Float             @map("discount_min_order_value")//min price of user's order to activate this discount
+  discountShop            Shop              @relation(fields: [discountShopId], references: [id])
+  discountShopId          String            @map("discount_shop")
+  discountIsActive        Boolean           @default(true) @map("discount_is_active") 
+  discountAppliesTo       DiscountAppliesTo @map("discount_applies_to")
+  discountProductIds      String[]          @default([]) @map("discount_product_ids")
+  createdAt               DateTime          @map("created_at") @default(now())
+  updatedAt               DateTime          @map("updated_at") @updatedAt
+
+  @@map("discounts")
+}
+
+model Cart {
+  id            String    @id  @unique @default(uuid())
+  state         CartState @default(ACTIVE)  @map("cart_state")
+  countProduct  Int       @default(0) @map("cart_count_product")
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String    @unique  @map("cart_userId")
+  cartProducts  CartProduct[]
+
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+
+  @@map("carts")
+}
+
+model CartProduct {
+  id        String    @id  @unique @default(uuid())
+  productId String    @map("cart_product_productId")
+  shopId    String    @map("cart_product_shopId")
+  quantity  Int       @map("cart_product_quantity")
+  name      String    @map("cart_product_name")
+  price     Float     @map("cart_product_price")
+  cart      Cart      @relation(fields: [cartId], references: [id])
+  cartId    String    @map("cart_product_cartId")
+
+  createdAt DateTime  @map("created_at") @default(now())
+  updatedAt DateTime  @map("updated_at") @updatedAt
+  @@unique([cartId, productId])
+  @@map("cart_products")
+}
+
+model Order {
+  id                  String      @id  @unique @default(uuid())
+  orderUser           User        @relation(fields: [orderUserId], references: [id])
+  orderUserId         String      @unique @map("order_userId")
+  orderCheckout       Json        @map("order_checkout")
+  orderPayment        Json        @map("order_payment")
+  orderProduct        Json[]      @map("order_product")
+  orderTrackingNumber String      @default("'#0000127032024")@map("order_tracking_number")
+  orderStatus         OrderStatus @default(PENDING)@map("order_status")
+
+  createdAt           DateTime  @map("created_at") @default(now())
+  updatedAt           DateTime  @map("updated_at") @updatedAt
+
+  @@map("orders")
+}
+
+
+model Comment {
+  id                String    @id  @unique @default(uuid())
+  commentProduct    Product   @relation(fields: [commentProductId], references: [id])
+  commentProductId  String    @unique @map("comment_product")
+  commentUser       User      @relation(fields: [commentUserId], references: [id])
+  commentUserId     String    @unique @map("comment_user")
+  commentContent    String    @map("comment_content")
+  commentLeft       Int       @default(0)@map("comment_left")
+  commentRight      Int       @default(0)@map("comment_right")
+  commentParentId   String    @unique@map("comment_parent_id")
+  isDeleted         Boolean   @default(false)@map("is_deleted")
+
+  createdAt         DateTime  @map("created_at") @default(now())
+  updatedAt         DateTime  @map("updated_at") @updatedAt
+
+  @@map("comments")
+}
+
+model User {
+  id          String    @id  @unique @default(uuid())
+  name        String    @map("user_name")
+  email       String    @map("user_email")  @unique()
+  password    String    @map("user_password")
+  salt        String    @map("user_salt")
+  phone       String    @unique @map("user_phone")
+  sex         Sex       @map("user_sex")
+  avatar      String    @map("user_avatar")
+  dateOfBirth DateTime  @map("user_date_of_birth")
+  status      Status    @default(ACTIVE)@map("user_status")
+  createdAt   DateTime  @map("created_at") @default(now())
+  updatedAt   DateTime  @map("updated_at") @updatedAt
+
+  cart          Cart?
+  order         Order?
+  comment       Comment?
+
+  @@map("users")
+}
+
+model SdProduct {
+  id                String    @id  @unique @default(uuid())
+  productName String  @default("")@map("sd_product_name")
+  productDesc String  @default("")@map("sd_product_desc")
+  productStatus Int @map("sd_product_status")//0: out of stock, 1: in stock,
+  productAttributes Json @map("sd_product_attributes")
+  productShopId String  @map("sd_product_shop_id")
+  isDeleted Int //0: delete, 1: null
+
+  createdAt         DateTime  @map("created_at") @default(now())
+  updatedAt         DateTime  @map("updated_at") @updatedAt
+}
+
+model SKU{
+  id                String    @id  @unique @default(uuid())
+  skuNo String  @default("")  @map("sku_no")
+  skuDescription  String  @map("sku_description")
+  skuType Int @map("sku_type")
+  skuStatus Int @map("sku_status")
+  skuSort Int @map("sku_sort")
+  skuStoct  Int @default(0)@map("sku_stock")
+  skuPrice  Float @map("sku_price")
+
+  createdAt         DateTime  @map("created_at") @default(now())
+  updatedAt         DateTime  @map("updated_at") @updatedAt
+
+  @@map("sku")
+}
+
+enum AccountLoginRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountRole {
+  SHOP
+  USER
+}
+enum CartState {
+  ACTIVE
+  COMPLETE
+  FAIL
+  PENDING
+}
+
+enum RoleShop {
+  SHOP 
+  WRITER 
+  EDITOR 
+  ADMIN 
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum ProductType {
+  Clothing
+  Electronic
+  Furniture
+}
+
+enum DiscountAppliesTo {
+  all
+  specific
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  CANCELLED
+  DELIVERED
+}
+enum Sex {
+  MALE
+  FEMALE
+}
