@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { AccessModule } from './modules/access/access.module';
-
+import { ShopModule } from './modules/shop/shop.module';
+import { PrismaModule } from './services/prisma/prisma.module';
+import { KeyTokenModule } from './modules/keytoken/keytoken.module';
 @Module({
-  imports: [AuthModule, AccessModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [AuthModule, ShopModule, PrismaModule, KeyTokenModule],
 })
 export class AppModule {}
