@@ -12,7 +12,7 @@ import { AuthRequestDTO } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
 import { AuthGuard } from "../auth/auth-jwt.guard";
 @Controller('shop')
-// @UseGuards(ApiKeyGuard)
+@UseGuards(ApiKeyGuard)
 export class ShopController{
     constructor( private readonly shopService: ShopService ){}
 

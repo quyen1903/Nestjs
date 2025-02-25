@@ -5,9 +5,14 @@
 
     //onmoduleinit means we call this once 
     @Injectable()
-    export class PrismaService extends PrismaClient implements OnModuleInit {
+    export class PrismaService extends PrismaClient implements OnModuleInit  {
 
         //automatically connect to database once nestjs start
+        constructor(){
+            super({
+                log: ['query', 'info', 'warn', 'error'],
+              });
+        }
         async onModuleInit() {
             await this.$connect();
 
@@ -81,6 +86,10 @@
                     },
                 }),
             );
+        }
+
+        async onModuleDestroy() {
+            await this.$disconnect();
         }
 
         async gracefulShutdown(application: INestApplication) {

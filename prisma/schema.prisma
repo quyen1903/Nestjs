@@ -30,7 +30,7 @@ model KeyToken {
   createdAt BigInt  @default(0) @map("created_at")
   updatedAt BigInt  @default(0) @map("updated_at")
 
-  accountId         String      @unique@map("account_id")  
+  accountId         String      @unique @map("account_id")  
   publicKey         String      @map("public_key")
   refreshToken      String      @map("refresh_token")
   roles             AccountRole @map("roles")
@@ -103,13 +103,13 @@ model Product {
 // Clothing Model
 model Clothing {
   id        String    @id  @unique @default(uuid())
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt BigInt    @default(0) @map("created_at")
+  updatedAt BigInt    @default(0) @map("updated_at")
 
-  brand     String @map("clothing_brand")
-  size      String @map("clothing_size")
-  material  String @map("clothing_material")
+  brand     String    @map("clothing_brand")
+  size      String    @map("clothing_size")
+  material  String    @map("clothing_material")
   product   Product   @relation(fields: [productId], references: [id])
   productId String    @unique@map("product_id")
 
@@ -127,7 +127,7 @@ model Electronic {
   model         String    @map("electronic_model")
   color         String    @map("electronic_color")
   product       Product   @relation(fields: [productId], references: [id])
-  productId     String    @unique@map("product_id")
+  productId     String    @unique @map("product_id")
 
   @@map("electronics")
 }
@@ -143,7 +143,7 @@ model Furniture {
   size      String    @map("furniture_size")
   material  String    @map("furniture_material")
   product   Product   @relation(fields: [productId], references: [id])
-  productId String    @unique@map("product_id")
+  productId String    @unique @map("product_id")
 
   @@map("furnitures")
 }
@@ -307,7 +307,7 @@ model SKU{
   skuType Int @map("sku_type")
   skuStatus Int @map("sku_status")
   skuSort Int @map("sku_sort")
-  skuStoct  Int @default(0)@map("sku_stock")
+  skuStoct  Int @default(0) @map("sku_stock")
   skuPrice  Float @map("sku_price")
 
   createdAt         DateTime  @map("created_at") @default(now())

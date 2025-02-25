@@ -20,6 +20,9 @@
     "typeRoots": [
       "./node_modules/@types",
       "./types"
-    ]
+    ],
+    "esModuleInterop": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
