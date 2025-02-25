@@ -1,16 +1,11 @@
-import {   
-    Body,
-    Controller,
-    Post,
-    Req,
-    UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { ShopService } from "./shop.service";
 import { RegisterShopDTO } from "./dto/register.dto";
 import { LoginShopDTO } from "./dto/login.dto";
-import { AuthRequestDTO } from "../auth/dto/auth-request.dto";
+import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
 import { AuthGuard } from "../auth/auth-jwt.guard";
+import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 @Controller('shop')
 @UseGuards(ApiKeyGuard)
 export class ShopController{
@@ -28,13 +23,13 @@ export class ShopController{
 
     @Post('logout')
     @UseGuards(AuthGuard)
-    logoutShop(@Req() req: AuthRequestDTO){
-        return this.shopService.logout(req.keyStore)
+    logoutShop(@AuthRequest('keyStore') req: IKeyToken){
+        return this.shopService.logout(req)
     }
 
     @Post('handlerRefreshToken')
     @UseGuards(AuthGuard)
-    handleRefreshToken(@Req() req: AuthRequestDTO){
+    handleRefreshToken(@AuthRequest() req: Authentication){
         return this.shopService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     }
 

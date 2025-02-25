@@ -1,10 +1,11 @@
-import { Req,Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { Factory } from './services/factory.service';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { AuthGuard } from '../auth/auth-jwt.guard';
-import { AuthRequestDTO } from '../auth/dto/auth-request.dto';
+import { AuthRequest } from '../auth/dto/auth-request.dto';
+import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
 
 @UseGuards(ApiKeyGuard)
 @Controller('product')
@@ -13,37 +14,37 @@ export class ProductController {
 
     @Post('')
     @UseGuards(AuthGuard)
-    createProduct( @Body() body: CreateProductDTO, @Req() req: AuthRequestDTO ) {
-        return this.factory.createProduct(body.productType, {
-            ...body, 
-            productShopId: req.account.accountId
+    createProduct( @Body() createProductDTO: CreateProductDTO, @AuthRequest('account') account: IJWTdecode ) {
+        return this.factory.createProduct(createProductDTO.productType, {
+            ...createProductDTO, 
+            productShopId: account.accountId
         });
     }
 
     @Patch(':productId')
     @UseGuards(AuthGuard)
-    updateProduct( @Param('productId') productId: string, @Body() body: UpdateProductDTO, @Req() req: AuthRequestDTO ) {
-        return this.factory.updateProduct( body.productType, productId,{
-                ...body, 
-                productShopId:  req.account.accountId
+    updateProduct( @Param('productId') productId: string, @Body() updateProductDTO: UpdateProductDTO, @AuthRequest('account') account: IJWTdecode ) {
+        return this.factory.updateProduct( updateProductDTO.productType, productId,{
+                ...updateProductDTO, 
+                productShopId: account.accountId
             }
         );
     }
 
     @Post('publish/:id')
     @UseGuards(AuthGuard)
-    publishProduct(@Param('id') productId: string, @Req() req: AuthRequestDTO) {
+    publishProduct(@Param('id') productId: string, @AuthRequest('account') account: IJWTdecode) {
         return this.factory.publishProductByShop({ 
-            productShopId: req.account.accountId,
+            productShopId: account.accountId,
             uuid: productId
         })
     }
 
     @Post('unpublish/:id')
     @UseGuards(AuthGuard)
-    unpublishProduct(@Param('id') productId: string, @Req() req:AuthRequestDTO){
+    unpublishProduct(@Param('id') productId: string, @AuthRequest('account') account: IJWTdecode){
         return this.factory.unPublishProductByShop({
-            productShopId: req.account.accountId,
+            productShopId: account.accountId,
             uuid: productId
         })
     }

@@ -4,18 +4,17 @@ import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class JwtService {
-    private signToken(payload: object, privateKey: string, expiresIn: string) {
+    private signToken(payload: object, privateKey: string, expiresIn: string): string {
         return jwt.sign(payload, privateKey, {
             expiresIn,
             algorithm: 'RS256',
         });
     }
 
-    createToken(
-        payload: { accountId: string; email: string; role: string },
-        publicKey: string,
-        privateKey: string,
-    ) {
+    createToken(payload: { accountId: string; email: string; role: string },publicKey: string,privateKey: string,):{
+        accessToken: string,
+        refreshToken: string
+    } {
         try {
             const accessToken = this.signToken(payload, privateKey, '1d');
             const refreshToken = this.signToken(payload, privateKey, '7d');

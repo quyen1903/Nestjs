@@ -7,7 +7,7 @@ import { Product } from "@prisma/client";
 @Injectable()
 export class FurnitureService extends ProductService {
 
-    async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise< Product & Furniture> {
+    async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise<Product & Furniture> {
         const product = await super.createProduct(payload);
 
         const newFurniture = await this.prismaService.furniture.create({

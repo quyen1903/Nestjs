@@ -8,7 +8,7 @@ import { Product } from "@prisma/client";
 @Injectable()
 export class ElectronicService extends ProductService {
 
-    async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise< Product & Electronic>{
+    async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise<Product & Electronic>{
         const product = await super.createProduct(payload);
 
         const newElectronic = await this.prismaService.electronic.create({
@@ -21,7 +21,7 @@ export class ElectronicService extends ProductService {
         return { ...product, ...newElectronic };
     }
 
-    async updateProduct(productId: string, payload: any) {
+    async updateProduct(productId: string, payload: any): Promise<Product> {
         const objectParams = removeUndefinedObject(payload);
         const currentProduct = await this.prismaService.electronic.findUnique({
             where:{productId}

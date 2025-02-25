@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException} from '@nestjs/common';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
@@ -9,7 +9,8 @@ import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
-
+import { KeyToken } from '@prisma/client';
+import { RefreshTokenUsed } from '@prisma/client';
 @Injectable()
 export class ShopService {
     constructor(
@@ -27,7 +28,10 @@ export class ShopService {
         });
     }
 
-    private generateKeyPair(){
+    private generateKeyPair(): {
+        publicKey: string;
+        privateKey: string;
+    }{
         const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',{
             modulusLength:4096,
             publicKeyEncoding:{
@@ -48,7 +52,14 @@ export class ShopService {
         });
     }
 
-    async handleRefreshToken( keyStore: IKeyToken, account: IJWTdecode, refreshToken: string ){
+    async handleRefreshToken( keyStore: IKeyToken, account: IJWTdecode, refreshToken: string ): Promise<{
+        tokens:{
+            accessToken: string,
+            refreshToken: string
+        };
+        update: KeyToken;
+        createUsedToken: RefreshTokenUsed; 
+    }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
         const {accountId, email} = account;
 
@@ -93,12 +104,17 @@ export class ShopService {
         }
     };
 
-    async logout ( keyStore: IKeyToken ){
-        const delKey = await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
-        return delKey 
+    async logout ( keyStore: IKeyToken ): Promise<KeyToken | null>{
+        return await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
-    async login(login: LoginShopDTO) {
+    async login(login: LoginShopDTO): Promise<{
+        shop: object;
+        tokens: {
+            accessToken: string;
+            refreshToken: string;
+        };
+    }>{
         const foundShop = await this.find(login.email);
         if(!foundShop) throw new BadRequestException('Shop not registed');
 
@@ -116,7 +132,7 @@ export class ShopService {
         })
 
         return{
-            shop:getInfoData(['uuid','email'],foundShop),
+            shop:getInfoData(['id','email'],foundShop),
             tokens
         }
     }
