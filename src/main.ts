@@ -5,8 +5,10 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import cluster from 'node:cluster';
 import os from 'node:os';
-// import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.interceptor';
-
+import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.interceptor';
+import { SuccessInterceptor } from './interceptors/response.interceptor';
+import { ValidationCustomPipe } from './pipes/validation-custom.pipe';
+import { HttpExceptionMiddleware } from './middlewares/http-exception.middlewave';
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -19,10 +21,11 @@ async function bootstrap() {
         console.log(`Primary ${process.pid} is running`);
         
         // Get the number of available CPU cores
-        const cpuCores = os.availableParallelism();
+        let cpuCores = os.availableParallelism();
+        const haflCpu = cpuCores/2
         
         // Fork workers
-        for (let i = 0; i < 3/*cpuCores*/; i++) {
+        for (let i = 0; i < haflCpu; i++) {
             cluster.fork();
         }
 
@@ -75,7 +78,11 @@ async function bootstrap() {
 
             // Global prefix for all routes
             app.setGlobalPrefix('v1/api');
-            
+            app.useGlobalInterceptors(new PrismaExceptionInterceptor());
+            app.useGlobalInterceptors(new SuccessInterceptor())
+            app.useGlobalPipes(ValidationCustomPipe.compactVersion());
+            app.useGlobalFilters(new HttpExceptionMiddleware());
+
             // Start listening
             await app.listen(port);
             console.log(`Worker ${process.pid} started on port ${port}`);
