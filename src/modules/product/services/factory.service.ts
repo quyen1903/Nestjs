@@ -113,22 +113,35 @@ export class Factory{
         })
     }
 
-    async findAllProducts() {
+    async findAllProducts({ take = 50, skip = 0, filter = { isPublished: true } }) {
         return await this.prismaService.product.findMany({
-            //sort by create decending
-            where:  { isPublished: true },
+            where:  { isPublished: filter.isPublished },
             orderBy:{ createdAt: 'asc' },
             select:getSelectData(['productName', 'productThumb', 'productPrice']),
-            take: 50,
-            skip:0,
+            take,
+            skip,
+        })
+    }
+
+    async searchProductByUser (keySearch: string){
+        return await this.prismaService.product.findMany({
+            where:{
+                productName: {
+                    search: keySearch
+                },
+                productDescription:{
+                    search:keySearch
+                }
+            }
         })
     }
 
     async findProduct(id: string) {
-        return this.prismaService.product.findUnique({
-            where:{id},
-            select:unGetSelectData(['productVariation'])
+        const result = await this.prismaService.product.findUnique({
+            where:{id: id},
+            omit:{productVariation: true}
         })
+        return result
     }
 
 }
