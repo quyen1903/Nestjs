@@ -19,7 +19,6 @@ export class ClothingService extends ProductService {
         });
 
         return { ...product, ...newClothing}
-              
     }
     async updateProduct(productId: string, payload: any): Promise< Product >  {
         const objectParams = removeUndefinedObject(payload);

@@ -9,18 +9,6 @@ import { ClothingService } from "./clothing.service";
 import { ElectronicService } from "./electronic.service";
 import { FurnitureService } from "./furniture.service";
 
-interface FindAll {
-    productShopId: string,  // Use UUID in Prisma/Postgres
-    skip?: number,
-    take?: number
-}
-
-interface Publish {
-    productShopId: string;  // UUID as string
-    uuid: string;    // UUID
-}
-
-
 @Injectable()
 export class Factory{
 
@@ -35,6 +23,72 @@ export class Factory{
         this.registerProductType('Furniture', this.furnitureService);
     }
 
+    private async findAll(where: any, skip:number, take:number){
+        return await this.prismaService.product.findMany({
+            where,
+            orderBy: {
+                id: 'desc',
+            },
+            skip,
+            take,
+        })
+    }
+    
+    private async publish (productShopId: string, id: string, isDraft: boolean, isPublished:boolean){
+        return await this.prismaService.product.update({
+            where:{
+                id,
+                productShopId
+            },
+            data:{
+                isDraft,
+                isPublished
+            }
+        })
+    }
+    
+    //full text search
+    private async searchProductByUser(keySearch: string){
+        return await this.prismaService.product.findMany({
+            where:{
+                productName: {
+                    search: keySearch
+                },
+                productDescription:{
+                    search:keySearch
+                }
+            }
+        })
+    }
+    
+    private async findAllProduct(take: number, skip: number, filter: object, select: string[]){
+        return await this.prismaService.product.findMany({
+            //sort by create decending
+            where: filter,
+            orderBy:{
+                createdAt: 'asc'
+            },
+            select:getSelectData(select),
+            take,
+            skip,
+        })
+    }
+    
+    private async findUniqueProduct(id: string, unSelect: string[]){
+        return await this.prismaService.product.findUnique({
+            where:{id},
+            select:unGetSelectData(unSelect)
+        })
+    }
+    
+    // private async getProductById (productId: string){
+    //     return await this.prismaService.product.findUnique({
+    //         where: {
+    //             id:productId
+    //         }
+    //     })
+    // }
+
     private productRegistry: { [key: string]: ProductService } = {};
 
     registerProductType(type: string, classReference: ProductService) {
@@ -44,8 +98,6 @@ export class Factory{
     async createProduct(type: CreateProductDTO['productType'], payload: CreateProductDTO & {productShopId: string}): Promise<Product> {
         const productInstance = this.productRegistry[type];
         if (!productInstance) throw new BadRequestException(`Invalid Product Type ${type}`);
-        
-        // Truyền payload trực tiếp vào method
         return productInstance.createProduct(payload);
     }
 
@@ -56,90 +108,34 @@ export class Factory{
     }
 
     // Queries
-    async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }: FindAll) {
+    async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }) {
         const query = { productShopId, isDraft: true };
-        // return await findAll(query, skip, take);
-        return this.prismaService.product.findMany({
-            where:{
-                productShopId,
-                isDraft: true
-            },
-            orderBy: { id: 'desc' },
-            skip,
-            take,
-        })
-
+        return await this.findAll(query, skip, take);
     }
 
-    async findAllPublishForShop({ productShopId, skip = 0, take = 10 }: FindAll): Promise<Product[]>{
-        return this.prismaService.product.findMany({
-            where:{
-                productShopId,
-                isPublished: true
-            },
-            orderBy: {id: 'desc'},
-            skip,
-            take,
-        })
+    async findAllPublishForShop({ productShopId, skip = 0, take = 10 }) {
+        const query = { productShopId, isPublished: true };
+        return await this.findAll( query, skip, take );
     }
 
-    async publishProductByShop({ productShopId, uuid }: Publish): Promise<Product>{
-        return this.prismaService.product.update({
-            where:{
-                id: uuid,
-                productShopId
-            },
-            data:{ isDraft: false,isPublished: true}
-        })
+     async publishProductByShop({ productShopId, uuid, isDraft = false, isPublished = true }) {
+        return await this.publish( productShopId, uuid, isDraft, isPublished );
     }
 
-    async unPublishProductByShop({ productShopId, uuid }: Publish) {
-        return this.prismaService.product.update({
-            where:{
-                id: uuid,
-                productShopId
-            },
-            data:{ isDraft: true,isPublished: false }
-        })
+     async unPublishProductByShop({ productShopId, uuid, isDraft = true, isPublished = false }) {
+        return await this.publish( productShopId, uuid, isDraft, isPublished );
     }
 
-    async getListSearchProduct(keySearch: string) {
-        //full-text search
-        return await this.prismaService.product.findMany({
-            where:{
-                productName: { search: keySearch },
-                productDescription:{ search:keySearch }
-            }
-        })
+     async getListSearchProduct(keySearch: string) {
+        return this.searchProductByUser(keySearch);
     }
 
-    async findAllProducts() {
-        return await this.prismaService.product.findMany({
-            //sort by create decending
-            where:  { isPublished: true },
-            orderBy:{ createdAt: 'asc' },
-            select:getSelectData(['productName', 'productThumb', 'productPrice']),
-            take: 50,
-            skip:0,
-        })
+     async findAllProducts({ take = 50, skip = 0, filter = { isPublished: true } }) {
+        return await this.findAllProduct(take, skip, filter, ['productName', 'productThumb', 'productPrice']);
     }
 
-    async findProduct(id: string) {
-        return this.prismaService.product.findUnique({
-            where:{id},
-            select:unGetSelectData(['productVariation'])
-        })
+     async findProduct(productId: string) {
+        return await this.findUniqueProduct(productId, ['productVariation']);
     }
 
 }
-
-// const factory = new Factory(new PrismaService());
-// const registerProduct = [
-//     { type: 'Clothing', class: ClothingService },
-//     { type: 'Electronic', class: ElectronicService },
-//     { type: 'Furniture', class: FurnitureService }
-// ];
-
-// registerProduct.forEach((element) => {
-//     factory.registerProductType(element.type, element.class);
-// });

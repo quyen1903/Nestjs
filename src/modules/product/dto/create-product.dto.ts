@@ -45,30 +45,4 @@ export class CreateProductDTO {
     @IsObject()
     @ValidateNested() // To recursively validate nested objects
     productAttributes: ClothingDTO | ElectronicDTO | FurnitureDTO;
-
-    // constructor({
-    //     productName,
-    //     productThumb,
-    //     productDescription,
-    //     productPrice,
-    //     productQuantity,
-    //     productType,
-    //     productAttributes,
-    // }: {
-    //     productName: string;
-    //     productThumb: string;
-    //     productDescription: string;
-    //     productPrice: number;
-    //     productQuantity: number;
-    //     productType: ProductType;
-    //     productAttributes: Clothing | Electronics | Furniture;
-    // }) {
-    //     this.productName = productName;
-    //     this.productThumb = productThumb;
-    //     this.productDescription = productDescription;
-    //     this.productPrice = productPrice;
-    //     this.productQuantity = productQuantity;
-    //     this.product_type = productType;
-    //     this.productAttributes = productAttributes;
-    // }
 }

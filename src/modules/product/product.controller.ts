@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Req, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { Factory } from './services/factory.service';
 import { CreateProductDTO } from './dto/create-product.dto';
@@ -47,5 +47,36 @@ export class ProductController {
             productShopId: account.accountId,
             uuid: productId
         })
+    }
+
+    @Get('drafts/all')
+    @UseGuards(AuthGuard)
+    getAllDraftForShop(@AuthRequest('account') account: IJWTdecode){
+        return this.factory.findAllDraftsForShop({
+            productShopId: account.accountId
+        })
+    }
+
+    @Get('published/all')
+    @UseGuards(AuthGuard)
+    getAllPublishForShop(@AuthRequest('account') account: IJWTdecode){
+        return this.factory.findAllPublishForShop({
+            productShopId: account.accountId
+        })
+    }
+
+    @Get('search/:keySearch')
+    getListSearchProduct(@Param('keySearch') keySearch: string){
+        return this.factory.getListSearchProduct(keySearch)
+    }
+
+    @Get('')
+    findAllProducts(@Req() req){
+        return this.factory.findAllProducts(req.query)
+    }
+
+    @Get(':productId')
+    findProduct( @Param('productId') productId: string){
+        return this.factory.findProduct(productId)
     }
 }

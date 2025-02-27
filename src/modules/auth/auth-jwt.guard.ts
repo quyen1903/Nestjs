@@ -1,4 +1,12 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { 
+    CanActivate, 
+    ExecutionContext, 
+    Injectable, 
+    UnauthorizedException, 
+    ForbiddenException, 
+    BadRequestException, 
+    InternalServerErrorException 
+} from '@nestjs/common';
 import { JwtService } from './jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 
@@ -19,7 +27,6 @@ export class AuthGuard implements CanActivate {
         const keyStore = await this.keyTokenService.findByAccountId(accountId);
         if (!keyStore) throw new UnauthorizedException('KeyStore not found');
 
-        request['keyStore'] = keyStore;
 
         // Check Refresh Token
         const refreshToken = request.headers['x-rtoken-id'] as string;
@@ -29,6 +36,8 @@ export class AuthGuard implements CanActivate {
 
             request['account'] = decodedUser;
             request['refreshToken'] = refreshToken;
+            request['keyStore'] = keyStore;
+
             return true;
         }
 
@@ -36,10 +45,17 @@ export class AuthGuard implements CanActivate {
         const accessToken = request.headers['authorization'] as string;
         if (!accessToken) throw new UnauthorizedException('Invalid Request');
 
-        const decodedUser = this.jwtService.verifyToken(accessToken, keyStore.publicKey);
-        if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
+        try {
+            const decodedUser = this.jwtService.verifyToken(accessToken, keyStore.publicKey);
+            if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
+            request['account'] = decodedUser;
+            request['keyStore'] = keyStore;
 
-        request['account'] = decodedUser;
+        } catch (error) {
+            console.error('AuthGuard Error:', error); // Ghi log để debug
+            throw new BadRequestException('wrong access or refresh token, please relogin');
+        }
+
         return true;
     }
 }

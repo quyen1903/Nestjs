@@ -46,30 +46,4 @@ export class UpdateProductDTO {
     @IsObject()
     @ValidateNested() // To recursively validate nested objects
     productAttributes?: Partial<ClothingDTO | ElectronicDTO | FurnitureDTO>;
-
-    constructor({
-        productName,
-        productThumb,
-        productDescription,
-        productPrice,
-        productQuantity,
-        productType,
-        productAttributes,
-    }: {
-        productName: string;
-        productThumb: string;
-        productDescription: string;
-        productPrice: number;
-        productQuantity: number;
-        productType: ProductType;
-        productAttributes: any;
-    }) {
-        this.productName = productName;
-        this.productThumb = productThumb;
-        this.productDescription = productDescription;
-        this.productPrice = productPrice;
-        this.productQuantity = productQuantity;
-        this.productType = productType;
-        this.productAttributes = productAttributes
-    }
 }
