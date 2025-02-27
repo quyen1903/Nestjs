@@ -5,7 +5,8 @@ import { PrismaModule } from './services/prisma/prisma.module';
 import { KeyTokenModule } from './modules/keytoken/keytoken.module';
 import { ProductModule } from './modules/product/product.module';
 import { DiscountModule } from './modules/discount/discount.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 @Module({
-  imports: [AuthModule, ShopModule, PrismaModule, KeyTokenModule, ProductModule, DiscountModule],
+  imports: [AuthModule, ShopModule, PrismaModule, KeyTokenModule, ProductModule, DiscountModule, InventoryModule],
 })
 export class AppModule {}

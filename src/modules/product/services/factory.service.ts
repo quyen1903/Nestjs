@@ -26,6 +26,9 @@ export class Factory{
     get findAllProductMethod() {
         return this.findAllProduct.bind(this);
     }
+    get getProductByIdMethod(){
+        return this.getProductById.bind(this)
+    }
 
     private async findAll(where: any, skip:number, take:number): Promise<Product[]>{
         return await this.prismaService.product.findMany({
@@ -85,13 +88,13 @@ export class Factory{
         })
     }
     
-    // private async getProductById (productId: string){
-    //     return await this.prismaService.product.findUnique({
-    //         where: {
-    //             id:productId
-    //         }
-    //     })
-    // }
+    private async getProductById (productId: string): Promise<Product | null>{
+        return await this.prismaService.product.findUnique({
+            where: {
+                id:productId
+            }
+        })
+    }
 
     private productRegistry: { [key: string]: ProductService } = {};
 
