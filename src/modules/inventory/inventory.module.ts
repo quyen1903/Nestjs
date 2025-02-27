@@ -7,8 +7,8 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { Factory } from '../product/services/factory.service';
 import { ProductModule } from '../product/product.module';
 @Module({
-  imports: [AuthModule, KeyTokenModule, ProductModule],
-  controllers: [InventoryController,],
-  providers: [InventoryService, PrismaService, Factory],
+    imports: [AuthModule, KeyTokenModule, ProductModule],
+    controllers: [InventoryController,],
+    providers: [InventoryService, PrismaService, Factory],
 })
 export class InventoryModule {}
