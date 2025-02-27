@@ -8,7 +8,6 @@ import { UpdateProductDTO } from "../dto/update-product.dto";
 import { ClothingService } from "./clothing.service";
 import { ElectronicService } from "./electronic.service";
 import { FurnitureService } from "./furniture.service";
-
 @Injectable()
 export class Factory{
 
@@ -23,7 +22,12 @@ export class Factory{
         this.registerProductType('Furniture', this.furnitureService);
     }
 
-    private async findAll(where: any, skip:number, take:number){
+    //getter
+    get findAllProductMethod() {
+        return this.findAllProduct.bind(this);
+    }
+
+    private async findAll(where: any, skip:number, take:number): Promise<Product[]>{
         return await this.prismaService.product.findMany({
             where,
             orderBy: {
@@ -34,7 +38,7 @@ export class Factory{
         })
     }
     
-    private async publish (productShopId: string, id: string, isDraft: boolean, isPublished:boolean){
+    private async publish (productShopId: string, id: string, isDraft: boolean, isPublished:boolean): Promise<Product>{
         return await this.prismaService.product.update({
             where:{
                 id,
@@ -48,7 +52,7 @@ export class Factory{
     }
     
     //full text search
-    private async searchProductByUser(keySearch: string){
+    private async searchProductByUser(keySearch: string): Promise<Product[]>{
         return await this.prismaService.product.findMany({
             where:{
                 productName: {
@@ -61,7 +65,7 @@ export class Factory{
         })
     }
     
-    private async findAllProduct(take: number, skip: number, filter: object, select: string[]){
+    private async findAllProduct(take: number, skip: number, filter: object, select: string[]): Promise<{}>{
         return await this.prismaService.product.findMany({
             //sort by create decending
             where: filter,
@@ -74,7 +78,7 @@ export class Factory{
         })
     }
     
-    private async findUniqueProduct(id: string, unSelect: string[]){
+    private async findUniqueProduct(id: string, unSelect: string[]): Promise<{} | null>{
         return await this.prismaService.product.findUnique({
             where:{id},
             select:unGetSelectData(unSelect)

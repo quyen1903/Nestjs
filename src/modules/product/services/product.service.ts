@@ -6,6 +6,8 @@ import { Product } from "@prisma/client";
 import { Clothing } from "@prisma/client";
 import { Electronic } from "@prisma/client";
 import { Furniture } from "@prisma/client";
+import { removeUndefinedObject } from "src/shared/utils";
+import { BadRequestException } from "@nestjs/common";
 @Injectable()
 export class ProductService {
     constructor( protected readonly prismaService: PrismaService){}

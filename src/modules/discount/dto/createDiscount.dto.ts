@@ -28,11 +28,11 @@ export class CreateDiscountDTO {
 
     @IsString()
     @IsNotEmpty()
-    discountStartDate: string;
+    discountStartDates: string;
 
     @IsString()
     @IsNotEmpty()
-    discountEndDate: string;
+    discountEndDates: string;
 
     @IsInt()
     @IsNotEmpty()

@@ -9,10 +9,10 @@ import { ProductController } from './product.controller';
 import { AuthModule } from '../auth/auth.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 
-
 @Module({
   imports:[ AuthModule, KeyTokenModule],
   controllers: [ProductController],
-  providers: [ProductService, Factory, PrismaService, ClothingService, ElectronicService, FurnitureService],
+  providers: [ Factory, PrismaService, ProductService, ClothingService, ElectronicService, FurnitureService],
+  exports: [Factory, ProductService, ClothingService, ElectronicService, FurnitureService]
 })
 export class ProductModule {}
