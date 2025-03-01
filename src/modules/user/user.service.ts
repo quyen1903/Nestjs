@@ -1,9 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException} from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
 import crypto from 'crypto';
-import { RegisterShopDTO } from './dto/register.dto';
-import { LoginShopDTO } from './dto/login.dto';
+import { RegisterUserDTO } from './dto/register.dto';
+import { LoginUserDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { RoleShop } from 'src/shared/enums/shop.enum';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
@@ -11,8 +10,9 @@ import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { KeyToken } from '@prisma/client';
 import { RefreshTokenUsed } from '@prisma/client';
+
 @Injectable()
-export class ShopService {
+export class UserService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
@@ -46,8 +46,8 @@ export class ShopService {
         return {publicKey, privateKey}
     }
 
-    private async find(find: string){
-        return this.prismaService.shop.findFirst({
+    private find(find: string){
+        return this.prismaService.user.findFirst({
             where: {email:find},
         });
     }
@@ -57,7 +57,7 @@ export class ShopService {
             accountId,
             publicKey,
             refreshToken,
-            roles: 'SHOP'
+            roles: 'USER'
         })
     }
 
@@ -82,12 +82,12 @@ export class ShopService {
 
         //2 if user's token is not valid token, force them to relogin, too
         if(keyStore.refreshToken !== refreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-        const foundShop = await this.find(email)
-        if(!foundShop) throw new UnauthorizedException('shop not registed');
+        const foundUser = await this.find(email)
+        if(!foundUser) throw new UnauthorizedException('shop not registed');
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
         const { publicKey, privateKey } = this.generateKeyPair()
-        const tokens = this.jwtService.createToken({accountId: accountId,email, role: 'SHOP'},publicKey,privateKey)
+        const tokens = this.jwtService.createToken({accountId: accountId,email, role: 'USER'},publicKey,privateKey)
 
         const update = await this.prismaService.keyToken.update({
             where:{
@@ -117,68 +117,61 @@ export class ShopService {
         return await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
-    async login(login: LoginShopDTO): Promise<{
-        shop: object;
+    async login(login: LoginUserDTO): Promise<{
+        user: object;
         tokens: {
             accessToken: string;
             refreshToken: string;
         };
     }>{
-        //check whether shop existed or not
-        const foundShop = await this.find(login.email);
-        if(!foundShop) throw new BadRequestException('Shop not registed');
+        const foundUser = await this.find(login.email);
+        if(!foundUser) throw new BadRequestException('Shop not registed');
 
-        //hash password and compare
-        const passwordHashed =await this.hashPassword(login.password, foundShop.salt);
-        if (passwordHashed !== foundShop.password) throw new UnauthorizedException('Wrong password!!!');
+        const passwordHashed =await this.hashPassword(login.password, foundUser.salt);
+        if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
 
-        //create key pair
         const { publicKey, privateKey } = this.generateKeyPair();
-        const tokens = this.jwtService.createToken({accountId: foundShop.id,email: login.email, role: 'SHOP'}, publicKey, privateKey);
+        const tokens = this.jwtService.createToken({accountId: foundUser.id,email: login.email, role: 'USER'}, publicKey, privateKey);
 
-        //create new keytoken
-        const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, tokens.refreshToken)
+        const keyStore = await this.upsertKeyStore(foundUser.id, publicKey, tokens.refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         return{
-            shop:getInfoData(['id','email'],foundShop),
+            user:getInfoData(['id','email'],foundUser),
             tokens
         }
     }
 
-    async register(register: RegisterShopDTO) {
-        //check whether shop existed
-        const shopHolder = await this.find(register.email);
-        if(shopHolder) throw new BadRequestException('Shop already existed');
+    async register(register: RegisterUserDTO) {
+        const userHolder = await this.find(register.email);
+        if(userHolder) throw new BadGatewayException('User already existed');
 
-        //hash password
         const salt = crypto.randomBytes(32).toString('hex')
         const passwordHashed = await this.hashPassword(register.password, salt)
 
-        //create new shop
-        const newShop = await this.prismaService.shop.create({
+        const newUser = await this.prismaService.user.create({
             data:{
                 name: register.name,
                 salt,
                 email: register.email,
                 password:passwordHashed,
-                roles:RoleShop.SHOP
+                phone: register.phone,
+                sex: register.sex,
+                avatar: register.avatar,
+                dateOfBirth: new Date(register.dateOfBirth)
             }
         })
 
-        if(newShop){
+        if(newUser){
             const { publicKey, privateKey } = this.generateKeyPair();
-            
-            //create token pair
-            const tokens = this.jwtService.createToken({accountId:newShop.id, email: newShop.email, role: 'SHOP'},publicKey, privateKey)
-            if(!tokens) throw new BadRequestException('create tokens error!!!!!!')
+            const tokens = this.jwtService.createToken({accountId:newUser.id, email: newUser.email, role: 'USER'},publicKey, privateKey)
+            if(!tokens)throw new BadGatewayException('create tokens error!!!!!!')
 
-            //create key store
-            const keyStore = await this.upsertKeyStore(newShop.id, publicKey, tokens.refreshToken)
+            const keyStore = await this.upsertKeyStore(newUser.id, publicKey, tokens.refreshToken)
             if(!keyStore) throw new Error('cannot generate keytoken');
 
             return{
-                shop:getInfoData(['id','email',],newShop),
+                shop:getInfoData(['id','email',],newUser),
                 tokens
             }
         }
@@ -186,5 +179,4 @@ export class ShopService {
             code:200,
             metadata:null
         }  
-    }
-}
+    }}

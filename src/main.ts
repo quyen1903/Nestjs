@@ -17,6 +17,11 @@ import { HttpExceptionMiddleware } from './middlewares/http-exception.middlewave
 async function bootstrap() {
     const port = process.env.PORT ?? 3056;
 
+    /*
+        only primary process ( old Nodejs version is isMaster ) can use systemcall fork to create new nodejs process
+        the reason for this, if we not, 
+
+    */
     if (cluster.isPrimary) {
         console.log(`Primary ${process.pid} is running`);
         

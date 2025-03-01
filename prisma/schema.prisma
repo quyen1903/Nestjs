@@ -218,7 +218,7 @@ model CartProduct {
   name      String    @map("cart_product_name")
   price     Float     @map("cart_product_price")
   cart      Cart      @relation(fields: [cartId], references: [id])
-  cartId    String    @map("cart_product_cartId")
+  cartId    String    @unique @map("cart_product_cartId")
 
   @@unique([cartId, productId])
   @@map("cart_products")
