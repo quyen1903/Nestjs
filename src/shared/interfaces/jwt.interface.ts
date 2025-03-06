@@ -1,4 +1,4 @@
-export interface IJWTdecode{
+export interface JWTdecode{
     accountId: string
     email: string,
     role: string,

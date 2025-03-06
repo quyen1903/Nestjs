@@ -1,11 +1,11 @@
 import { Iapikey } from 'src/shared/interfaces/apikey.interface';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
+import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export interface Authentication {
   keyStore: IKeyToken;
-  account: IJWTdecode;
+  account: JWTdecode;
   refreshToken: string;
   apiKey: Iapikey;
   requestId: string;

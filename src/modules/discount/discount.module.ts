@@ -4,11 +4,11 @@ import { DiscountController } from './discount.controller';
 import { AuthModule } from '../auth/auth.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { ProductModule } from '../product/product.module';
-import { PrismaService } from 'src/services/prisma/prisma.service';
-import { Factory } from '../product/services/factory.service';
+import { PrismaModule } from 'src/services/prisma/prisma.module';
 @Module({
-  imports:[ AuthModule, KeyTokenModule, ProductModule ],
+  imports:[ AuthModule, KeyTokenModule, ProductModule, PrismaModule ],
   controllers: [DiscountController],
-  providers: [DiscountService, PrismaService, Factory],
+  providers: [DiscountService],
+  exports: [DiscountService]
 })
 export class DiscountModule {}

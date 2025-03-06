@@ -3,7 +3,7 @@ import { DiscountService } from './discount.service';
 import { CreateDiscountDTO } from './dto/createDiscount.dto';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
-import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
+import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { AuthGuard } from '../auth/auth-jwt.guard';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 
@@ -14,8 +14,7 @@ export class DiscountController {
 
     @Post('')
     @UseGuards(AuthGuard)
-    createDiscountCode(@Body() payload:CreateDiscountDTO, @AuthRequest('account') account:IJWTdecode){
-        console.log("accountId",account.accountId)
+    createDiscountCode(@Body() payload:CreateDiscountDTO, @AuthRequest('account') account:JWTdecode){
         return this.discountService.createDiscountCode(payload, account.accountId)
     }
 
@@ -37,7 +36,7 @@ export class DiscountController {
     @Get('')
     @UseGuards(AuthGuard)
     getAllDiscountCodes(
-        @AuthRequest('account') account: IJWTdecode,
+        @AuthRequest('account') account: JWTdecode,
         @Query('limit') limit : number,
         @Query('page') page: number,
     ){

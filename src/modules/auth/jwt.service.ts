@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { BadRequestException } from '@nestjs/common';
+import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 
 @Injectable()
 export class JwtService {
@@ -33,7 +34,9 @@ export class JwtService {
         }
     }
 
-        verifyToken(token: string, publicKey: string) {
-        return jwt.verify(token, publicKey);
+    verifyToken(token: string, publicKey: string) {
+        const result = jwt.verify(token, publicKey) as JWTdecode
+        console.log("result", result)
+        return result
     }
 }

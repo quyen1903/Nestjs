@@ -8,6 +8,10 @@ export class CartService {
         private readonly prismaService:PrismaService
     ){}
 
+    get getCartMethod(){
+        return this.getCart.bind(this)
+    }
+
     private async getCart(filter:{}){
         return await this.prismaService.cart.findFirst({
             where:filter

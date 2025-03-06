@@ -5,6 +5,9 @@ import { LoginShopDTO } from "./dto/login.dto";
 import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
 import { AuthGuard } from "../auth/auth-jwt.guard";
+import { RoleGuard } from "../auth/auth-role.guard";
+import { Roles } from "../auth/roles.decorator";
+import { Role } from "src/shared/enums/role.enum";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 @Controller('shop')
 @UseGuards(ApiKeyGuard)
@@ -22,7 +25,8 @@ export class ShopController{
     }
 
     @Post('logout')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.Shop)
     logoutShop(@AuthRequest('keyStore') req: IKeyToken){
         return this.shopService.logout(req)
     }

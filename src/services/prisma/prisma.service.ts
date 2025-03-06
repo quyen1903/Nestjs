@@ -94,7 +94,7 @@
 
         async gracefulShutdown(application: INestApplication) {
             this.$on('beforeExit' as never, async () => {
-            await application.close();
+                await application.close();
             });
         } 
     }

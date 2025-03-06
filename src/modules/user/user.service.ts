@@ -5,7 +5,7 @@ import { LoginUserDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { IJWTdecode } from 'src/shared/interfaces/jwt.interface';
+import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { KeyToken } from '@prisma/client';
@@ -61,7 +61,7 @@ export class UserService {
         })
     }
 
-    async handleRefreshToken( keyStore: IKeyToken, account: IJWTdecode, refreshToken: string ): Promise<{
+    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, refreshToken: string ): Promise<{
         tokens:{
             accessToken: string,
             refreshToken: string

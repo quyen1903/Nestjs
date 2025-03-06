@@ -8,6 +8,7 @@ import { UpdateProductDTO } from "../dto/update-product.dto";
 import { ClothingService } from "./clothing.service";
 import { ElectronicService } from "./electronic.service";
 import { FurnitureService } from "./furniture.service";
+import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
 @Injectable()
 export class Factory{
 
@@ -22,12 +23,18 @@ export class Factory{
         this.registerProductType('Furniture', this.furnitureService);
     }
 
-    //getter
+    /*
+
+    */
     get findAllProductMethod() {
         return this.findAllProduct.bind(this);
     }
     get getProductByIdMethod(){
         return this.getProductById.bind(this)
+    }
+
+    get checkProductByServerMethod(){
+        return this.checkProductByServer.bind(this)
     }
 
     private async findAll(where: any, skip:number, take:number): Promise<Product[]>{
@@ -81,10 +88,9 @@ export class Factory{
         })
     }
     
-    private async findUniqueProduct(id: string, unSelect: string[]): Promise<{} | null>{
+    private async findUniqueProduct(id: string): Promise<{} | null>{
         return await this.prismaService.product.findUnique({
             where:{id},
-            select:unGetSelectData(unSelect)
         })
     }
     
@@ -94,6 +100,27 @@ export class Factory{
                 id:productId
             }
         })
+    }
+
+    //check product by plural, we pass many product to this method
+    private async checkProductByServer(products:ItemProductDTO[]):Promise<({
+        price: number;
+        quantity: number;
+        productId: string;
+    } | undefined)[]>
+    {
+        return await Promise.all(products.map(
+            async (products)=>{
+                const foundProduct = await this.getProductById(products.productId)
+                if(foundProduct){
+                    return{
+                        price:foundProduct.productPrice,
+                        quantity:products.quantity,
+                        productId:products.productId
+                    }
+                }
+            }
+        ))
     }
 
     private productRegistry: { [key: string]: ProductService } = {};
@@ -142,7 +169,7 @@ export class Factory{
     }
 
      async findProduct(productId: string) {
-        return await this.findUniqueProduct(productId, ['productVariation']);
+        return await this.findUniqueProduct(productId);
     }
 
 }

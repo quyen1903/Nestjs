@@ -162,7 +162,7 @@ export class DiscountService {
 
         //discount value can not surpass 100%
         if(foundDiscount.discountType === "percentage" && foundDiscount.discountValue > 100) {
-            throw new BadRequestException('sdiscount value can not surpass 100%')
+            throw new BadRequestException('discount value can not surpass 100%')
         }
 
         //check wheather discount is fixed amount

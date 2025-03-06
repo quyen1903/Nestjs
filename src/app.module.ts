@@ -9,6 +9,10 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { CartModule } from './modules/cart/cart.module';
 import { UserModule } from './modules/user/user.module';
 import { KafkaModule } from './services/kafka/kafka.module';
+import { CheckoutModule } from './modules/checkout/checkout.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { MurLockModule } from 'murlock';
+import { REDIS_URL } from './app.config';
 @Module({
   imports: [
     AuthModule,
@@ -20,7 +24,17 @@ import { KafkaModule } from './services/kafka/kafka.module';
     InventoryModule,
     CartModule,
     UserModule,
-    KafkaModule
+    KafkaModule,
+    CheckoutModule,
+    CommentModule,
+    MurLockModule.forRoot({
+      redisOptions: { url:REDIS_URL },
+      wait: 1000,
+      maxAttempts: 3,
+      logLevel: 'log',
+      ignoreUnlockFail: false,
+    }),
+    
   ],
 })
 export class AppModule {}

@@ -35,7 +35,6 @@ export class AuthGuard implements CanActivate {
             if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
 
             request['account'] = decodedUser;
-            request['refreshToken'] = refreshToken;
             request['keyStore'] = keyStore;
 
             return true;

@@ -44,9 +44,12 @@
     "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
     "helmet": "^8.0.0",
+    "ioredis": "^5.5.0",
     "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
+    "murlock": "^4.0.0",
     "pg": "^8.13.3",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

@@ -55,12 +55,12 @@ export const getInfoData = (field: string[],object: object)=>{
 
 //['a','b'] => {a:1,b:1}
 export const getSelectData = (select: string[])=>{
-    return Object.fromEntries(select.map(element => [element,1]))
+    return Object.fromEntries(select.map(element => [element,true]))
 }
 
 //['a','b'] => {a:0,b:0}
 export const unGetSelectData = (select: string[])=>{
-    return Object.fromEntries(select.map(element => [element,0]))
+    return Object.fromEntries(select.map(element => [element,false]))
 }
 /**
  * Record<Keys, Type> 
