@@ -25,6 +25,18 @@
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+In this project, I use multi threading, to avoid race condition, I implementing kafka queue
+Product module I use factory design pattern
+Comment module I use nested set model
+I'm implementing redis distributed lock in cart and checkout module
+This project use soft delete, which means we mark is_active to false, not completely remove data from database
+Dont worry, because I just use half CPU cores, so when you run on local, your pc CPU would not be overwhelm
+Because my laptop lack many disk, (but redundant RAM, that so ridiculous) so I will not implement Docker herre
+please run on local postgresql
+And I also use many many DTO, so please ping me in case you wanna run on postman, i will give you postman's JSON
+Thanks for visit, and please send me a feedback via this email
+quyenng2k@gmail.com
+P/S If you think my project is helpful, dont hesitate to star this project
 
 ## Project setup
 
