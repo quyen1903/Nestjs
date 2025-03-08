@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopModule } from './modules/shop/shop.module';
 import { PrismaModule } from './services/prisma/prisma.module';
@@ -13,6 +14,9 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { MurLockModule } from 'murlock';
 import { REDIS_URL } from './app.config';
+import { DiscordModule } from './services/discord/discord.module';
+import { DiscordService } from './services/discord/discord.service';
+import { DiscordMiddleware } from './middleware/discord.middleware';
 @Module({
   imports: [
     AuthModule,
@@ -34,7 +38,14 @@ import { REDIS_URL } from './app.config';
       logLevel: 'log',
       ignoreUnlockFail: false,
     }),
-    
+    ConfigModule.forRoot(),
+    DiscordModule
   ],
+  providers: [DiscordService],
+
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DiscordMiddleware).forRoutes('*');
+  }
+}

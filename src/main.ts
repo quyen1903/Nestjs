@@ -8,7 +8,8 @@ import os from 'node:os';
 import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.interceptor';
 import { SuccessInterceptor } from './interceptors/response.interceptor';
 import { ValidationCustomPipe } from './pipes/validation-custom.pipe';
-import { HttpExceptionMiddleware } from './middlewares/http-exception.middlewave';
+import { HttpExceptionMiddleware } from './middleware/http-exception.middlewave';
+import { DiscordMiddleware } from './middleware/discord.middleware';
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -58,6 +59,8 @@ async function bootstrap() {
         try {
             // Create NestJS application instance
             const app = await NestFactory.create(AppModule);
+
+
             
             // Configure CORS
             app.enableCors({

@@ -16,7 +16,7 @@ export class RoleGuard implements CanActivate{
             context.getClass(),
         ]);
         if (!requiredRoles || requiredRoles.length === 0) {
-            return true; // Nếu không đặt role, ai cũng có quyền
+            return true; // if we not set role for handler, anyone can access
         }
 
         const request = context.switchToHttp().getRequest();
