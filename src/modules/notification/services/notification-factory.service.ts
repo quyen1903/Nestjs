@@ -1,4 +1,3 @@
-// src/modules/notification/services/notification.factory.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
@@ -50,6 +49,7 @@ export class NotificationFactoryService {
             const notificationThreads = await this.prismaService.notificationThread.findMany({
                 where: { isActive: true }
             });
+            console.log("notificationThreads",notificationThreads)
 
             this.logger.log(
                 `Creating ${notificationData.type} notifications for ${notificationThreads.length} users`

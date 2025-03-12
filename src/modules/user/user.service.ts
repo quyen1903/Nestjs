@@ -83,7 +83,7 @@ export class UserService {
         //2 if user's token is not valid token, force them to relogin, too
         if(keyStore.refreshToken !== refreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
         const foundUser = await this.find(email)
-        if(!foundUser) throw new UnauthorizedException('shop not registed');
+        if(!foundUser) throw new UnauthorizedException('user not registed');
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
         const { publicKey, privateKey } = this.generateKeyPair()
@@ -125,7 +125,7 @@ export class UserService {
         };
     }>{
         const foundUser = await this.find(login.email);
-        if(!foundUser) throw new BadRequestException('Shop not registed');
+        if(!foundUser) throw new BadRequestException('user not registed');
 
         const passwordHashed =await this.hashPassword(login.password, foundUser.salt);
         if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
@@ -170,8 +170,15 @@ export class UserService {
             const keyStore = await this.upsertKeyStore(newUser.id, publicKey, tokens.refreshToken)
             if(!keyStore) throw new Error('cannot generate keytoken');
 
+            const notificationThread = await this.prismaService.notificationThread.create({
+                data:{
+                    userId: newUser.id
+                }
+            })
+
             return{
-                shop:getInfoData(['id','email',],newUser),
+                user:getInfoData(['id','email',],newUser),
+                notificationThread,
                 tokens
             }
         }
@@ -179,4 +186,5 @@ export class UserService {
             code:200,
             metadata:null
         }  
-    }}
+    }
+}

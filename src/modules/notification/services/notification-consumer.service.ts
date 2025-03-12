@@ -1,4 +1,3 @@
-// src/modules/notification/services/notification.consumer.service.ts
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConsumerService } from 'src/services/kafka/services/consumer.service';
 import { NotificationFactoryService } from './notification-factory.service';

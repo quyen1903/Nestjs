@@ -138,13 +138,11 @@ export class CommentService {
         const foundProduct = await this.factory.findProduct(deleted.commentProductId)
         if(!foundProduct) throw new NotFoundException('product not found')
         
-        console.log('foundProduct',foundProduct)
         //1 determine left/right value
         const comment =  await this.prismaService.comment.findUnique({
             where:{id: deleted.id}
         });
 
-        console.log('comment',comment)
         if(!comment) throw new NotFoundException('comment not found');
 
         
@@ -161,7 +159,6 @@ export class CommentService {
                 commentLeft: { gte: leftValue, lte: rightValue}
             }
         })
-        console.log('removed',removed)
 
         //4 update remain left/right value
         await this.prismaService.comment.updateMany({

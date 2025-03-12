@@ -19,7 +19,6 @@ export class ProductController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.Shop)
     createProduct( @Body() createProductDTO: CreateProductDTO, @AuthRequest('account') account: JWTdecode ) {
-        console.log("controller body", createProductDTO, createProductDTO.productAttributes)
         return this.factory.createProduct(createProductDTO.productType, {
             ...createProductDTO, 
             productShopId: account.accountId

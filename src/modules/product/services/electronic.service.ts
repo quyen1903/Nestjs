@@ -10,8 +10,6 @@ export class ElectronicService extends ProductService {
 
     async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise<Product & Electronic>{
         const product = await super.createProduct(payload);
-        console.log('payload',payload);
-        console.log("payloadAttribute",payload.productAttributes)
 
         const newElectronic = await this.prismaService.electronic.create({
             data: {
