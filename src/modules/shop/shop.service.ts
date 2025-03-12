@@ -11,12 +11,14 @@ import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { KeyToken } from '@prisma/client';
 import { RefreshTokenUsed } from '@prisma/client';
+import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class ShopService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly keytokenService: KeyTokenService
+        private readonly keytokenService: KeyTokenService,
+        private readonly producerService: ProducerService
     ) {}
 
     private hashPassword(password:string, salt:string):Promise<string> {
@@ -139,6 +141,13 @@ export class ShopService {
         //create new keytoken
         const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, tokens.refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
+
+        await this.producerService.produce({
+            topic: 'login',
+            messages: [{
+                value: `${foundShop.name} has login to our system`
+            }]
+        })
 
         return{
             shop:getInfoData(['id','email'],foundShop),

@@ -7,6 +7,8 @@ import {
     IsObject,
     IsOptional
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { PartialType } from '@nestjs/mapped-types';
 import { ClothingDTO } from './product/clothing.products';
 import { ElectronicDTO } from './product/electronic.products';
 import { FurnitureDTO } from './product/furniture.products';
@@ -15,6 +17,23 @@ enum ProductType {
     CLOTHING = 'Clothing',
     ELECTRONIC = 'Electronic',
     FURNITURE = 'Furniture'
+}
+
+class PartialClothingDTO extends PartialType(ClothingDTO) {}
+class PartialElectronicDTO extends PartialType(ElectronicDTO) {}
+class PartialFurnitureDTO extends PartialType(FurnitureDTO) {}
+
+function resolveProductAttributes(productType: ProductType) {
+    switch (productType) {
+        case ProductType.CLOTHING:
+            return PartialClothingDTO;
+        case ProductType.ELECTRONIC:
+            return PartialElectronicDTO;
+        case ProductType.FURNITURE:
+            return PartialFurnitureDTO;
+        default:
+            return Object;
+    }
 }
 
 export class UpdateProductDTO {
@@ -42,8 +61,9 @@ export class UpdateProductDTO {
     @IsEnum(ProductType)
     productType: ProductType;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsObject()
-    @ValidateNested() // To recursively validate nested objects
-    productAttributes?: Partial<ClothingDTO | ElectronicDTO | FurnitureDTO>;
+    @ValidateNested()
+    @Type((obj) => resolveProductAttributes(obj?.object.productType))
+    productAttributes?: PartialClothingDTO | PartialElectronicDTO | PartialFurnitureDTO;
 }

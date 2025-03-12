@@ -17,6 +17,7 @@ import { REDIS_URL } from './app.config';
 import { DiscordModule } from './services/discord/discord.module';
 import { DiscordService } from './services/discord/discord.service';
 import { DiscordMiddleware } from './middleware/discord.middleware';
+import { NotificationModule } from './modules/notification/notification.module';
 @Module({
   imports: [
     AuthModule,
@@ -39,7 +40,8 @@ import { DiscordMiddleware } from './middleware/discord.middleware';
       ignoreUnlockFail: false,
     }),
     ConfigModule.forRoot(),
-    DiscordModule
+    DiscordModule,
+    NotificationModule,
   ],
   providers: [DiscordService],
 

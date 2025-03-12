@@ -20,6 +20,8 @@ model Shop {
   updatedAt BigInt     @default(0) @map("updated_at")
   discount  Discount[]
   products  Product[]
+  notification  Notification[]
+
 
   @@map("shops")
 }
@@ -225,45 +227,81 @@ model Order {
 }
 
 model Comment {
-  id               String  @id @unique @default(uuid())
-  commentProductId String  @map("comment_product")
-  commentUserId    String  @map("comment_user")
-  commentContent   String  @map("comment_content")
-  commentLeft      Int     @default(0) @map("comment_left")
-  commentRight     Int     @default(0) @map("comment_right")
-  commentParentId  String?  @map("comment_parent_id")
-  
-  isDeleted        Boolean @default(false) @map("is_deleted")
-  isActive         Boolean @default(true) @map("is_active")
-  createdAt        BigInt  @default(0) @map("created_at")
-  updatedAt        BigInt  @default(0) @map("updated_at")
-
-  commentProduct   Product @relation(fields: [commentProductId], references: [id])
-  commentUser      User    @relation(fields: [commentUserId], references: [id])
-
-  commentParent   Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
-  childComments   Comment[] @relation("ParentChild")
+  id               String    @id @unique @default(uuid())
+  commentProductId String    @map("comment_product")
+  commentUserId    String    @map("comment_user")
+  commentContent   String    @map("comment_content")
+  commentLeft      Int       @default(0) @map("comment_left")
+  commentRight     Int       @default(0) @map("comment_right")
+  commentParentId  String?   @map("comment_parent_id")
+  isDeleted        Boolean   @default(false) @map("is_deleted")
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        BigInt    @default(0) @map("created_at")
+  updatedAt        BigInt    @default(0) @map("updated_at")
+  commentParent    Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
+  childComments    Comment[] @relation("ParentChild")
+  commentProduct   Product   @relation(fields: [commentProductId], references: [id])
+  commentUser      User      @relation(fields: [commentUserId], references: [id])
 
   @@map("comments")
 }
 
+model NotificationThread {
+  id             String         @id @default(uuid())
+  userId         String         @unique @map("noti_thread_user_id")
+  user           User           @relation(fields: [userId], references: [id])
+  notifications  Notification[]
+
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   BigInt    @default(0) @map("created_at")
+  updatedAt   BigInt    @default(0) @map("updated_at")
+
+  @@map("notification_threads")
+}
+
+model Notification {
+  id            String              @id @unique @default(uuid())
+  type          NotificationType    @map("noti_type")
+  sender        Shop                @relation(fields: [senderId], references: [id])
+  senderId      String              @map("noti_sender_id")
+  thread        NotificationThread  @relation(fields: [threadId], references: [id])
+  threadId      String              @map("noti_thread_id")
+  content       String              @map("noti_content")
+  option        Json                @map("noti_option")
+  status        String              @default("unread") @map("notification_status") 
+
+  productId     String?   @map("noti_product_id")
+  discountId    String?   @map("noti_discount_id")
+  productName   String?   @map("noti_product_name")
+  discountName  String?   @map("noti_discount_name")
+
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   BigInt    @default(0) @map("created_at")
+  updatedAt   BigInt    @default(0) @map("updated_at")
+
+  @@map("notifications")
+}
+
+
 model User {
-  id          String   @id @unique @default(uuid())
-  name        String   @map("user_name")
-  email       String   @unique @map("user_email")
-  password    String   @map("user_password")
-  salt        String   @map("user_salt")
-  phone       String   @unique @map("user_phone")
-  sex         Sex      @map("user_sex")
-  avatar      String   @map("user_avatar")
-  dateOfBirth DateTime @map("user_date_of_birth")
-  status      Status   @default(ACTIVE) @map("user_status")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   BigInt   @default(0) @map("created_at")
-  updatedAt   BigInt   @default(0) @map("updated_at")
+  id          String    @id @unique @default(uuid())
+  name        String    @map("user_name")
+  email       String    @unique @map("user_email")
+  password    String    @map("user_password")
+  salt        String    @map("user_salt")
+  phone       String    @unique @map("user_phone")
+  sex         Sex       @map("user_sex")
+  avatar      String    @map("user_avatar")
+  dateOfBirth DateTime  @map("user_date_of_birth")
+  status      Status    @default(ACTIVE) @map("user_status")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   BigInt    @default(0) @map("created_at")
+  updatedAt   BigInt    @default(0) @map("updated_at")
   cart        Cart?
   comment     Comment[]
   order       Order?
+
+  notificationThread NotificationThread?
 
   @@map("users")
 }
@@ -346,6 +384,11 @@ enum OrderStatus {
   SHIPPED
   CANCELLED
   DELIVERED
+}
+
+enum NotificationType {
+  PRODUCT
+  DISCOUNT
 }
 
 enum Sex {

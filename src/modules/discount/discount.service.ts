@@ -7,11 +7,13 @@ import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 import { Factory } from '../product/services/factory.service';
 import { getSelectData } from 'src/shared/utils';
 import { Discount, Product } from '@prisma/client';
+import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class DiscountService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly factory: Factory
+        private readonly factory: Factory,
+        private readonly producerService: ProducerService
     ){}
     
     private async checkDiscountExists(filter: {}): Promise<Discount | null>{
@@ -59,6 +61,28 @@ export class DiscountService {
                 discountShopId: shopId
             }
         })
+
+        if(newDiscount){
+            const topics = this.producerService.getTopics()
+            const shop = await this.prismaService.shop.findUnique({
+                where:{
+                    id: newDiscount.discountShopId
+                }
+            })
+            await this.producerService.produce({
+                topic: topics.DISCOUNT_CREATED,
+                messages:[{
+                    value: JSON.stringify({
+                        discountId: newDiscount.id,
+                        discountName: newDiscount.discountName,
+                        discountValue: newDiscount.discountValue,
+                        discountType: newDiscount.discountType,
+                        shopId: newDiscount.discountShopId,
+                        shopName: shop?.id
+                    })
+                }]
+            })
+        }
 
         return newDiscount
     }

@@ -6,6 +6,7 @@ import {
     ValidateNested,
     IsObject,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ClothingDTO } from './product/clothing.products';
 import { ElectronicDTO } from './product/electronic.products';
 import { FurnitureDTO } from './product/furniture.products';
@@ -15,6 +16,18 @@ enum ProductType {
     FURNITURE = 'Furniture'
 }
 
+function resolveProductAttributes(productType: ProductType) {
+    switch (productType) {
+        case ProductType.CLOTHING:
+            return ClothingDTO;
+        case ProductType.ELECTRONIC:
+            return ElectronicDTO;
+        case ProductType.FURNITURE:
+            return FurnitureDTO;
+        default:
+            return Object;
+    }
+}
 
 export class CreateProductDTO {
     @IsNotEmpty()
@@ -44,5 +57,6 @@ export class CreateProductDTO {
     @IsNotEmpty()
     @IsObject()
     @ValidateNested() // To recursively validate nested objects
+    @Type((obj) => resolveProductAttributes(obj!.object.productType))
     productAttributes: ClothingDTO | ElectronicDTO | FurnitureDTO;
 }

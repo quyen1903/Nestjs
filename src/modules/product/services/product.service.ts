@@ -1,20 +1,24 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { ProductType } from "@prisma/client";
 import { CreateProductDTO } from "../dto/create-product.dto";
 import { Product } from "@prisma/client";
-import { Clothing } from "@prisma/client";
-import { Electronic } from "@prisma/client";
-import { Furniture } from "@prisma/client";
-import { removeUndefinedObject } from "src/shared/utils";
-import { BadRequestException } from "@nestjs/common";
+import { ProducerService } from "src/services/kafka/services/producer.service";
+
 @Injectable()
 export class ProductService {
-    constructor( protected readonly prismaService: PrismaService){}
+    constructor( 
+        protected readonly prismaService: PrismaService,
+        private readonly producerService: ProducerService
+    ){}
 
     // Create main product and return its ID
+    /**
+     * 
+     * create product is producer, it publish event to Kafka
+    */
     async createProduct(payload: CreateProductDTO & {productShopId: string}): Promise<Product> {
-        const result = await this.prismaService.product.create({
+        const product = await this.prismaService.product.create({
             data: {
                 productDescription: payload.productDescription,
                 productName: payload.productName,
@@ -25,15 +29,37 @@ export class ProductService {
                 productType: payload.productType as ProductType,
             }
         });
-        // if(newProduct){
-        //     await insertInventory({
-        //         productId: newProduct.id,
-        //         stock: this.productQuantity,
-        //         location: "unknow"
-        //     })
-        // }
+        if(product){
+            const shop = await this.prismaService.shop.findUnique({
+                where:{
+                    id: product.productShopId
+                }
+            })
+            await this.prismaService.inventory.create({
+                data:{
+                    inventoryProductId: product.id,
+                    inventoryStock: product.productQuantity,
+                    inventoryLocation: 'unknow',
+                }
+            })
+            const topics = this.producerService.getTopics()
 
-        return result 
+            await this.producerService.produce({
+                topic: topics.PRODUCT_CREATED,
+                messages:[
+                    {
+                        value:JSON.stringify({
+                            productId: product.id,
+                            productName: product.productName,
+                            shopId: product.productShopId,
+                            shopName: shop?.name
+                        })
+                    }
+                ]
+            })
+        }
+
+        return product 
     }
 
     async updateProduct(productId: string, payload: any): Promise<Product>{

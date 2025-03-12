@@ -1,25 +1,26 @@
 // kafka.module.ts
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-
+import { ProducerService } from './services/producer.service';
+import { ConsumerService } from './services/consumer.service';
+import { TestConsumer } from './consumer.spec.kafka';
 @Module({
-    imports: [
-        ClientsModule.register([
-        {
-            name: 'KAFKA_SERVICE',
-            transport: Transport.KAFKA,
-            options: {
-            client: {
-                clientId: 'nestjs-app',
-                brokers: ['localhost:9092'],
-            },
-            consumer: {
-                groupId: 'nestjs-consumer',
-            },
-            },
-        },
-        ]),
-    ],
-    exports: [ClientsModule],
+    // imports: [
+    //     ClientsModule.register([
+    //     {
+    //         name: 'KAFKA_SERVICE',
+    //         transport: Transport.KAFKA,
+    //         options: {
+    //         client: {
+    //             brokers: ['localhost:9092'],
+    //         },
+    //         consumer: {
+    //             groupId: 'notifications-consumer',
+    //         },
+    //         },
+    //     },
+    //     ]),
+    // ],
+    providers:[ProducerService, ConsumerService, TestConsumer],
+    exports: [ProducerService, ConsumerService],
 })
 export class KafkaModule {}
