@@ -18,6 +18,7 @@ import { DiscordModule } from './services/discord/discord.module';
 import { DiscordService } from './services/discord/discord.service';
 import { DiscordMiddleware } from './middleware/discord.middleware';
 import { NotificationModule } from './modules/notification/notification.module';
+import { EmailModule } from './services/email/email.module';
 @Module({
   imports: [
     AuthModule,
@@ -42,6 +43,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     ConfigModule.forRoot(),
     DiscordModule,
     NotificationModule,
+    EmailModule,
   ],
   providers: [DiscordService],
 

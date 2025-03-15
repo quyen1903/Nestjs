@@ -297,6 +297,8 @@ model User {
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   BigInt    @default(0) @map("created_at")
   updatedAt   BigInt    @default(0) @map("updated_at")
+
+  passwordReset PasswordReset[]
   cart        Cart?
   comment     Comment[]
   order       Order?
@@ -304,6 +306,20 @@ model User {
   notificationThread NotificationThread?
 
   @@map("users")
+}
+
+model PasswordReset {
+  id        String   @id @unique @default(uuid())
+  userId    String   @map("password_reset_userId")
+  token     String   @unique  @map("password_reset_token")
+  expiresAt DateTime @map("password_reset_expires_at")
+  isUsed    Boolean  @default(false) @map("password_reset_is_used")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("password_resets")
 }
 
 model SdProduct {

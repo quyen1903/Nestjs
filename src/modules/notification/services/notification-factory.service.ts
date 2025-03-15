@@ -49,7 +49,6 @@ export class NotificationFactoryService {
             const notificationThreads = await this.prismaService.notificationThread.findMany({
                 where: { isActive: true }
             });
-            console.log("notificationThreads",notificationThreads)
 
             this.logger.log(
                 `Creating ${notificationData.type} notifications for ${notificationThreads.length} users`

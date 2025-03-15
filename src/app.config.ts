@@ -16,5 +16,9 @@ export const {
     REDIS_PORT,
     REDIS_URL,
     TOKEN_DISCORD,
-    CHANNELID_DISCORD
+    CHANNELID_DISCORD,
+    MAIL_HOST,
+    MAIL_USER,
+    MAIL_PASSWORD,
+    MAIL_FROM
 } = process.env;

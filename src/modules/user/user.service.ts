@@ -10,13 +10,17 @@ import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { KeyToken } from '@prisma/client';
 import { RefreshTokenUsed } from '@prisma/client';
-
+import { EmailService } from 'src/services/email/email.service';
+import { ForgotPasswordDTO } from './dto/forgot-password.dto';
+import { randomBytes } from 'node:crypto';
+import { ResetPasswordDTO } from './dto/reset-password.dto';
 @Injectable()
 export class UserService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly keytokenService: KeyTokenService
+        private readonly keytokenService: KeyTokenService,
+        private readonly emailService: EmailService,
     ) {}
 
     private hashPassword(password:string, salt:string):Promise<string> {
@@ -186,5 +190,118 @@ export class UserService {
             code:200,
             metadata:null
         }  
+    }
+
+    async forgotPassword(forgotPasswordDto: ForgotPasswordDTO): Promise<{ message: string }> {
+        const { email } = forgotPasswordDto;
+        
+        // Find the user by email
+        const user = await this.find(email);
+        if (!user) {
+          // For security reasons, we still return success even if the email doesn't exist
+          return { message: 'If your email is registered with us, you will receive a password reset link' };
+        }
+        const resetToken = randomBytes(32).toString('hex');
+        
+        // Set token expiration (1 hour from now)
+        const expiresAt = new Date();
+        console.log('expiresAt',expiresAt)
+        expiresAt.setHours(expiresAt.getHours() + 1);
+        
+        await this.prismaService.passwordReset.create({
+            data: {
+                userId: user.id,
+                token: resetToken,
+                expiresAt,
+                createdAt: BigInt(Date.now()),
+                updatedAt: BigInt(Date.now())
+            }
+        });
+    
+        const emailSent = await this.emailService.sendPasswordResetEmail(email, resetToken);        
+        if (!emailSent) {
+          throw new BadRequestException('Failed to send reset email');
+        }
+    
+        return { message: 'If your email is registered with us, you will receive a password reset link' };
+    }
+
+    async resetPassword(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
+        const { token, password } = resetPasswordDto;
+        
+        /*
+            "id": "uuid-123",
+            "userId": "uuid-456",
+            "token": "some-random-token",
+            "expiresAt": "2025-01-01T00:00:00.000Z",
+            "isUsed": false,
+            "isActive": true,
+            "createdAt": 1700000000,
+            "updatedAt": 1700000000,
+            "user": {
+                "id": "uuid-456",
+                "name": "John Doe",
+                "email": "john@example.com",
+                "phone": "123456789",
+                "status": "ACTIVE",
+                "isActive": true,
+                "avatar": "profile.jpg"
+            }
+        */
+        const passwordReset = await this.prismaService.passwordReset.findFirst({
+            where: {
+                token,
+                isUsed: false,
+                expiresAt: {
+                    gt: new Date()
+                }
+            },
+            include: {
+                user: true
+            }
+        });
+    
+        if (!passwordReset) {
+          throw new BadRequestException('Invalid or expired token');
+        }
+    
+        // Update the token as used
+        await this.prismaService.passwordReset.update({
+            where: { id: passwordReset.id },
+            data: {
+                isUsed: true,
+                updatedAt: BigInt(Date.now())
+            }
+        });
+    
+        // Hash the new password and update the user
+        const salt = randomBytes(32).toString('hex');
+        const passwordHashed = await this.hashPassword(password, salt);
+    
+        await this.prismaService.user.update({
+            where: { id: passwordReset.userId },
+            data: {
+                password: passwordHashed,
+                salt,
+                updatedAt: BigInt(Date.now())
+            }
+        });
+    
+        return { message: 'Password reset successful' };
+    }
+    
+    async validatePasswordResetToken(token: string): Promise<{ valid: boolean }> {
+
+        const passwordReset = await this.prismaService.passwordReset.findFirst({
+            where: {
+                token,
+                isUsed: false,
+                expiresAt: {
+                    gt: new Date()
+                }
+            }
+        });
+        
+        return { valid: !!passwordReset };
     }
 }
