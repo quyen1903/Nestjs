@@ -88,13 +88,13 @@ export class Factory{
         })
     }
     
-    private async findUniqueProduct(id: string): Promise<{} | null>{
+    private async findUniqueProduct(id: string): Promise<{}>{
         return await this.prismaService.product.findUnique({
             where:{id},
         })
     }
     
-    private async getProductById (productId: string): Promise<Product | null>{
+    private async getProductById (productId: string): Promise<Product>{
         return await this.prismaService.product.findUnique({
             where: {
                 id:productId
@@ -107,7 +107,7 @@ export class Factory{
         price: number;
         quantity: number;
         productId: string;
-    } | undefined)[]>
+    } )[]>
     {
         return await Promise.all(products.map(
             async (products)=>{

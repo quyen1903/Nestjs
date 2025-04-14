@@ -17,10 +17,10 @@ export class ProducerService implements OnModuleInit, OnApplicationShutdown{
         transactionTimeout: 30000
     });
     private readonly admin: Admin = this.kafka.admin();
- // Add more topics as application grows
+    // Add more topics as application grows
     private readonly applicationTopics = {
         PRODUCT_CREATED: 'product-created',
-        DISCOUNT_CREATED: 'discount-created',   
+        DISCOUNT_CREATED: 'discount-created',
     };
 
     async onModuleInit() {

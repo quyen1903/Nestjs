@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Get, Param } from "@nestjs/common";
 import { ShopService } from "./shop.service";
 import { RegisterShopDTO } from "./dto/register.dto";
 import { LoginShopDTO } from "./dto/login.dto";
@@ -37,4 +37,8 @@ export class ShopController{
         return this.shopService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     }
 
+    @Get(':id')
+    getShopInfo(@Param('id') id: string){
+        return this.shopService.getShopInfo(id)
+    }
 }

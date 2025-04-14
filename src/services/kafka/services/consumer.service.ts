@@ -1,6 +1,5 @@
 import { Injectable, OnApplicationShutdown, Logger } from "@nestjs/common";
 import { Consumer, ConsumerRunConfig, ConsumerSubscribeTopics, Kafka } from "kafkajs";
-
 @Injectable()
 export class ConsumerService implements OnApplicationShutdown{
     private readonly logger = new Logger(ConsumerService.name);
@@ -41,7 +40,7 @@ export class ConsumerService implements OnApplicationShutdown{
                 ...config,
                 autoCommit: true,
                 autoCommitInterval: 5000, // Commit offsets every 5 seconds
-                partitionsConsumedConcurrently: 3 // Process multiple partitions in parallel
+                partitionsConsumedConcurrently: 3, // Process multiple partitions in parallel
             });
             
             this.consumers.push(consumer);

@@ -145,32 +145,23 @@ export class CartService {
             }
         }
     }
-
+    
+    //delete certain product in carts
     async deleteUserCart(userId:string, productId: string){
-        //delete certain product in carts
         const cart = await this.getCart({userId})
 
-        if (!cart) {
-            throw new Error("Cart not found for user");
-        }
-        await this.prismaService.cart.update({
+        if (!cart) throw new Error("Cart not found for user");
+
+        const result = await this.prismaService.cart.update({
             where:{
                 userId
             },
             data:{  
                 countProduct: cart.countProduct -= 1
             }
-        })
-        const deleteCart = await this.prismaService.cartProduct.delete({
-            where: {
-                cartId_productId: {
-                    cartId: cart.id,
-                    productId: productId,
-                },
-            },
-          })
+        });
           
-        return deleteCart          
+        return result;
     }
 
     async getListUserCart(userId: string){
@@ -182,5 +173,24 @@ export class CartService {
             }
         })
         
+    }
+
+    async clearCart(cartId: string) {
+        // Delete all cart products
+        await this.prismaService.cartProduct.deleteMany({
+            where: {
+                cartId
+            }
+        });
+
+        // Reset cart count
+        await this.prismaService.cart.update({
+            where: {
+                id: cartId
+            },
+            data: {
+                countProduct: 0
+            }
+        });
     }
 }

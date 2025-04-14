@@ -8,8 +8,7 @@ import os from 'node:os';
 import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.interceptor';
 import { SuccessInterceptor } from './interceptors/response.interceptor';
 import { ValidationCustomPipe } from './pipes/validation-custom.pipe';
-import { HttpExceptionMiddleware } from './middleware/http-exception.middlewave';
-import { DiscordMiddleware } from './middleware/discord.middleware';
+import { HttpExceptionFilter } from './exception-filter/http.exception-filter';
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -31,14 +30,14 @@ async function bootstrap() {
         const haflCpu = cpuCores/2
         
         // Fork workers
-        for (let i = 0; i < haflCpu; i++) {
+        for (let i = 0; i < 1; i++) {
             cluster.fork();
         }
 
         // Handle worker crashes and exits
         cluster.on('exit', (worker, code, signal) => {
             console.log(`Worker ${worker.process.pid} died with code: ${code} and signal: ${signal}`);
-            ('Starting a new worker...');
+            console.log('Starting a new worker...');
             cluster.fork();
         });
 
@@ -59,8 +58,6 @@ async function bootstrap() {
         try {
             // Create NestJS application instance
             const app = await NestFactory.create(AppModule);
-
-
             
             // Configure CORS
             app.enableCors({
@@ -89,7 +86,7 @@ async function bootstrap() {
             app.useGlobalInterceptors(new PrismaExceptionInterceptor());
             app.useGlobalInterceptors(new SuccessInterceptor())
             app.useGlobalPipes(ValidationCustomPipe.compactVersion());
-            app.useGlobalFilters(new HttpExceptionMiddleware());
+            app.useGlobalFilters(new HttpExceptionFilter());
 
             // Start listening
             await app.listen(port);

@@ -63,6 +63,22 @@ export class ShopService {
         })
     }
 
+    async getShopInfo(id: string){
+        console.log('shopId',id)
+        return await this.prismaService.shop.findUnique({
+            where:{
+                id
+            },
+            select:{
+                id: true,
+                name: true,
+                isActive: true,
+                createdAt:  true,
+                updatedAt: true
+            }
+        })
+    }
+
     async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, refreshToken: string ): Promise<{
         tokens:{
             accessToken: string,

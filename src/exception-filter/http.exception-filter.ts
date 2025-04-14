@@ -2,8 +2,8 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { Response } from 'express';
 import { NODE_ENV } from 'src/app.config';
 @Catch(HttpException)
-export class HttpExceptionMiddleware implements ExceptionFilter {
-    private readonly logger = new Logger(HttpExceptionMiddleware.name);
+export class HttpExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(HttpExceptionFilter.name);
 
     catch(exception: HttpException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();

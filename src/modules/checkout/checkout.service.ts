@@ -5,25 +5,30 @@ import { DiscountService } from '../discount/discount.service';
 import { CheckoutDTO, ItemProductDTO, ShopOrderIdDTO } from './dto/checkout.dto';
 import { Factory } from '../product/services/factory.service';
 import { ItemCheckout } from './interface';
+import { Cart } from '@prisma/client';
+import Redis from 'ioredis';
 
 @Injectable()
 export class CheckoutService {
+    private redis: Redis;
+
     constructor(
         private readonly prismaService:PrismaService,
         private readonly cartService:CartService,
         private readonly discountService:DiscountService, 
         private readonly factory: Factory
-    ){}
+    ){
+        this.redis = new Redis('redis://localhost:6379');
+    }
 
     async checkoutReview({ cartId, userId, shopOrderIds}: CheckoutDTO){
         //check cart id existed?
-        const cart = await this.cartService.getCartMethod({id: cartId});
+        const cart: Cart = await this.cartService.getCartMethod({id: cartId});
         if(!cart) throw new BadRequestException('Cart does not existed!!');
 
         /**
          * user can buy many product from many shop
          * checkout will return array of product and price
-         *  
          */
         
         const shopOrderIdsIsNew: ItemCheckout[] = [];
@@ -59,7 +64,7 @@ export class CheckoutService {
             /**
              * total money before processing
             */
-            checkoutOrder.totalPrice =+ checkoutPrice
+            checkoutOrder.totalPrice += checkoutPrice
 
             //push to new shop_orders_ids_new
             const itemCheckout = {
@@ -73,7 +78,7 @@ export class CheckoutService {
             //if shop_discounts > 0, check wheather valid
             let discount = 0;
             if (shopDiscounts.length > 0){
-                for(let i = 0; i<=shopDiscounts.length; i++){
+                for(let i = 0; i<shopDiscounts.length; i++){
                     const result = await this.discountService.getDiscountAmount({
                         discountCode:shopDiscounts[0].codeId,
                         discountUserId:userId,
@@ -102,44 +107,68 @@ export class CheckoutService {
         }
     }
 
-    // async orderByUser( 
-    //     shopOrderIds: ShopOrderIdDTO[],
-    //     cartId: string,
-    //     userId:string,
-    //     userAddress: object,
-    //     userPayment: object
-    // ){
-    //     const {shopOrderIdsIsNew, checkoutOrder} = await this.checkoutReview({cartId, userId, shopOrderIds});
-    //     const products = shopOrderIdsIsNew.flatMap(order => order.itemProducts);
+    async orderByUser( 
+        shopOrderIds: ShopOrderIdDTO[],
+        cartId: string,
+        userId:string,
+        userAddress: object,
+        userPayment: object
+    ){
+        const {shopOrderIdsIsNew, checkoutOrder} = await this.checkoutReview({cartId, userId, shopOrderIds});
+        const products = shopOrderIdsIsNew.flatMap(order => order.itemProducts);
 
-    //     console.log(`[1]`, products)
-    //     const accquireProduct: any[] = []
-    //     for (let i = 0; i< products.length; i++){
-    //         const { productId, quantity } = products[i];
-    //         const keyLock = await acquireLock(productId, quantity, cartId);
-    //         accquireProduct.push( keyLock ? true : false)
-    //         if(keyLock){
-    //             await releaseLock(keyLock)
-    //         }
-    //     }
+        // Acquire locks for all products
+        const locks: string[] = [];
+        try {
+            for (const product of products) {
+                const { productId, quantity } = product;
+                const lockKey = `product:${productId}:${cartId}`;
+                const acquired = await this.redis.set(lockKey, '1', 'PX', 10000, 'NX');
+                if (!acquired) throw new BadRequestException('Product is currently being processed by another order');
+                locks.push(lockKey);
+            }
 
-    //     if(accquireProduct.includes(false)){
-    //         throw new BadRequestException('some product has been updated')
-    //     }
+            // Create the order
+            const newOrder = await this.prismaService.order.create({
+                data: {
+                    orderUserId: userId,
+                    orderCheckout: checkoutOrder,
+                    orderShipping: userAddress,
+                    orderPayment: userPayment,
+                    orderProduct: shopOrderIdsIsNew as any // Type assertion needed due to Prisma's type system
+                }
+            });
 
-    //     const newOrder = await this.prismaService.order.create({
-    //         data:{
-    //             orderUserId: userId,
-    //             orderCheckout: checkoutOrder,
-    //             orderShipping:userAddress,
-    //             orderPayment:userPayment,
-    //             orderProduct:shopOrderIdsIsNew
-    //         }
-    //     })
+            // Clear the cart after successful order
+            if (newOrder) {
+                await this.cartService.clearCart(cartId);
+            }
 
-    //     //if insert success, remove product inside cart
-    //     if(newOrder) 
-    //     return newOrder
-    // }
+            return newOrder;
+        } catch (error) {
+            throw error;
+        } finally {
+            // Release all locks
+            for (const lockKey of locks) {
+                await this.redis.del(lockKey);
+            }
+        }
+    }
+
+    async getOrdersByUser(){
+
+    }
+
+    async getOneOrdersByUser(){
+        
+    }
+
+    async cancelOrderByUser(){
+        
+    }
+
+    async updateOrdersByUser(){
+        
+    }
         
 }

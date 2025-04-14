@@ -28,7 +28,6 @@ export class NotificationConsumerService implements OnModuleInit {
                                 this.logger.warn('Received empty message');
                                 return;
                             }
-                            
                             const productData = JSON.parse(rawMessage);
                             await this.notificationFactory.createProductNotification(productData);
                         } catch (error) {
