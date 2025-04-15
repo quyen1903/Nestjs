@@ -9,19 +9,19 @@ datasource db {
 }
 
 model Shop {
-  id            String     @id @unique @default(uuid())
-  name          String     @map("shop_name")
-  email         String     @unique @map("shop_email")
-  password      String     @map("shop_password")
-  salt          String     @map("shop_salt")
-  roles         String     @map("shop_role")
-  isActive      Boolean    @default(true) @map("is_active")
-  createdAt     BigInt     @default(0) @map("created_at")
-  updatedAt     BigInt     @default(0) @map("updated_at")
-  discount      Discount[]
-  products      Product[]
-  notification  Notification[]
-  messages      Message[]  @relation("ShopMessages")
+  id           String         @id @unique @default(uuid())
+  name         String         @map("shop_name")
+  email        String         @unique @map("shop_email")
+  password     String         @map("shop_password")
+  salt         String         @map("shop_salt")
+  roles        String         @map("shop_role")
+  isActive     Boolean        @default(true) @map("is_active")
+  createdAt    BigInt         @default(0) @map("created_at")
+  updatedAt    BigInt         @default(0) @map("updated_at")
+  discount     Discount[]
+  products     Product[]
+  notification Notification[]
+  messages     Message[]      @relation("ShopMessages")
 
   @@map("shops")
 }
@@ -78,23 +78,22 @@ model Product {
   productQuantity       Int         @map("product_quantity")
   productType           ProductType @map("product_type")
   productRatingsAverage Float       @default(4.5) @map("product_ratingsAverage")
-  productVariation      String[]    @default([])  @map("product_variation")
-  isDraft               Boolean     @default(true)  @map("product_is_draft")
+  productVariation      String[]    @default([]) @map("product_variation")
+  isDraft               Boolean     @default(true) @map("product_is_draft")
   isPublished           Boolean     @default(false) @map("product_is_published")
 
-  isActive              Boolean     @default(true) @map("is_active")
-  createdAt             BigInt      @default(0) @map("created_at")
-  updatedAt             BigInt      @default(0) @map("updated_at")
+  isActive  Boolean @default(true) @map("is_active")
+  createdAt BigInt  @default(0) @map("created_at")
+  updatedAt BigInt  @default(0) @map("updated_at")
 
-  productShopId         String      @map("product_shop")
-  productShop           Shop        @relation(fields: [productShopId], references: [id])
+  productShopId String @map("product_shop")
+  productShop   Shop   @relation(fields: [productShopId], references: [id])
 
-  clothing              Clothing?
-  comment               Comment[]
-  electronic            Electronic?
-  furniture             Furniture?
-  inventory             Inventory?
-
+  clothing   Clothing?
+  comment    Comment[]
+  electronic Electronic?
+  furniture  Furniture?
+  inventory  Inventory?
 
   @@index([productName, productDescription])
   @@map("products")
@@ -151,22 +150,10 @@ model Inventory {
   createdAt             BigInt  @default(0) @map("created_at")
   updatedAt             BigInt  @default(0) @map("updated_at")
 
-  inventoryProductId    String  @unique @map("inventory_product_id")
-  inventoryProduct      Product @relation(fields: [inventoryProductId], references: [id])
+  inventoryProductId String  @unique @map("inventory_product_id")
+  inventoryProduct   Product @relation(fields: [inventoryProductId], references: [id])
 
-  inventoryResevations   ReservationInventory[]
   @@map("inventories")
-}
-
-model ReservationInventory {
-  id          String    @id @unique @default(uuid())
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
-  inventoryId String    @map("reserv_invent")
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   BigInt    @default(0) @map("created_at")
-  updatedAt   BigInt    @default(0) @map("updated_at")
-
-  @@map("reservation_inventories")
 }
 
 model Discount {
@@ -238,8 +225,8 @@ model Order {
   updatedAt           BigInt      @default(0) @map("updated_at")
   orderShipping       Json        @default("{}") @map("order_shipping")
 
-  orderUserId         String      @unique @map("order_userId")
-  orderUser           User        @relation(fields: [orderUserId], references: [id])
+  orderUserId String @unique @map("order_userId")
+  orderUser   User   @relation(fields: [orderUserId], references: [id])
 
   @@map("orders")
 }
@@ -265,61 +252,61 @@ model Comment {
 }
 
 model NotificationThread {
-  id             String         @id @default(uuid())
-  userId         String         @unique @map("noti_thread_user_id")
-  user           User           @relation(fields: [userId], references: [id])
-  notifications  Notification[]
+  id            String         @id @default(uuid())
+  userId        String         @unique @map("noti_thread_user_id")
+  user          User           @relation(fields: [userId], references: [id])
+  notifications Notification[]
 
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   BigInt    @default(0) @map("created_at")
-  updatedAt   BigInt    @default(0) @map("updated_at")
+  isActive  Boolean @default(true) @map("is_active")
+  createdAt BigInt  @default(0) @map("created_at")
+  updatedAt BigInt  @default(0) @map("updated_at")
 
   @@map("notification_threads")
 }
 
 model Notification {
-  id            String              @id @unique @default(uuid())
-  type          NotificationType    @map("noti_type")
-  sender        Shop                @relation(fields: [senderId], references: [id])
-  senderId      String              @map("noti_sender_id")
-  thread        NotificationThread  @relation(fields: [threadId], references: [id])
-  threadId      String              @map("noti_thread_id")
-  content       String              @map("noti_content")
-  option        Json                @map("noti_option")
-  status        String              @default("unread") @map("notification_status") 
+  id       String             @id @unique @default(uuid())
+  type     NotificationType   @map("noti_type")
+  sender   Shop               @relation(fields: [senderId], references: [id])
+  senderId String             @map("noti_sender_id")
+  thread   NotificationThread @relation(fields: [threadId], references: [id])
+  threadId String             @map("noti_thread_id")
+  content  String             @map("noti_content")
+  option   Json               @map("noti_option")
+  status   String             @default("unread") @map("notification_status")
 
-  productId     String?   @map("noti_product_id")
-  discountId    String?   @map("noti_discount_id")
+  productId  String? @map("noti_product_id")
+  discountId String? @map("noti_discount_id")
 
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   BigInt    @default(0) @map("created_at")
-  updatedAt   BigInt    @default(0) @map("updated_at")
+  isActive  Boolean @default(true) @map("is_active")
+  createdAt BigInt  @default(0) @map("created_at")
+  updatedAt BigInt  @default(0) @map("updated_at")
 
   @@map("notifications")
 }
 
 model User {
-  id          String    @id @unique @default(uuid())
-  name        String    @map("user_name")
-  email       String    @unique @map("user_email")
-  password    String    @map("user_password")
-  salt        String    @map("user_salt")
-  phone       String    @unique @map("user_phone")
-  sex         Sex       @map("user_sex")
-  avatar      String    @map("user_avatar")
-  dateOfBirth DateTime  @map("user_date_of_birth")
-  status      Status    @default(ACTIVE) @map("user_status")
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   BigInt    @default(0) @map("created_at")
-  updatedAt   BigInt    @default(0) @map("updated_at")
+  id          String   @id @unique @default(uuid())
+  name        String   @map("user_name")
+  email       String   @unique @map("user_email")
+  password    String   @map("user_password")
+  salt        String   @map("user_salt")
+  phone       String   @unique @map("user_phone")
+  sex         Sex      @map("user_sex")
+  avatar      String   @map("user_avatar")
+  dateOfBirth DateTime @map("user_date_of_birth")
+  status      Status   @default(ACTIVE) @map("user_status")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   BigInt   @default(0) @map("created_at")
+  updatedAt   BigInt   @default(0) @map("updated_at")
 
-  passwordReset       PasswordReset[]
-  cart                Cart?
-  comment             Comment[]
-  order               Order?
-  messages   Message[]  @relation("UserMessages")
+  passwordReset PasswordReset[]
+  cart          Cart?
+  comment       Comment[]
+  order         Order?
+  messages      Message[]       @relation("UserMessages")
 
-  notificationThread  NotificationThread?
+  notificationThread NotificationThread?
 
   @@map("users")
 }
@@ -327,7 +314,7 @@ model User {
 model PasswordReset {
   id        String   @id @unique @default(uuid())
   userId    String   @map("password_reset_userId")
-  token     String   @unique  @map("password_reset_token")
+  token     String   @unique @map("password_reset_token")
   expiresAt DateTime @map("password_reset_expires_at")
   isUsed    Boolean  @default(false) @map("password_reset_is_used")
   isActive  Boolean  @default(true) @map("is_active")
@@ -339,16 +326,16 @@ model PasswordReset {
 }
 
 model SdProduct {
-  id         String  @id @unique @default(uuid())
+  id                String  @id @unique @default(uuid())
   isActive          Boolean @default(true) @map("is_active")
   createdAt         BigInt  @default(0) @map("created_at")
   updatedAt         BigInt  @default(0) @map("updated_at")
-  productName       String  @default("") @map("sd_product_name")//0: out of stock, 1: in stock
+  productName       String  @default("") @map("sd_product_name") //0: out of stock, 1: in stock
   productDesc       String  @default("") @map("sd_product_desc")
   productStatus     Int     @map("sd_product_status")
   productAttributes Json    @map("sd_product_attributes")
   productShopId     String  @map("sd_product_shop_id")
-  sort              Int     @map("sort")//if shop pays money for us, we should give them priority
+  sort              Int     @map("sort") //if shop pays money for us, we should give them priority
   productId         String  @map("product_id")
 
   @@map("sd_product")
@@ -361,33 +348,32 @@ model SKU {
   skuDescription String   @map("sku_description")
   skuType        Int      @map("sku_type")
   skuStatus      Int      @map("sku_status")
-  skuSort        Int      @map("sku_sort")//priority sort
+  skuSort        Int      @map("sku_sort") //priority sort
   skuStock       Int      @default(0) @map("sku_stock")
   skuPrice       Float    @map("sku_price")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-  isActive       Boolean @default(true) @map("is_active")
+  isActive       Boolean  @default(true) @map("is_active")
 
   @@map("sku")
 }
 
 model Message {
-  id         String       @id @default(uuid())
-  content    String       @db.Text  @map("content")
-  senderId   String       @map("sender_id")
-  receiverId String       @map("receiver_id")
-  type       MessageType  @map("message_type")
-  isRead     Boolean      @default(false) @map("is_read")
-  createdAt  DateTime     @default(now()) @map("created_at")
-  updatedAt  DateTime     @updatedAt  @map("updated_at")
-  isActive   Boolean      @default(true) @map("is_active")
+  id         String      @id @default(uuid())
+  content    String      @map("content") @db.Text
+  senderId   String      @map("sender_id")
+  receiverId String      @map("receiver_id")
+  type       MessageType @map("message_type")
+  isRead     Boolean     @default(false) @map("is_read")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  isActive   Boolean     @default(true) @map("is_active")
 
   // Define relations based on the type field
-  shop      Shop?    @relation(fields: [receiverId], references: [id], name: "ShopMessages")
-  user      User?    @relation(fields: [senderId], references: [id], name: "UserMessages")
+  shop Shop? @relation(fields: [receiverId], references: [id], name: "ShopMessages")
+  user User? @relation(fields: [senderId], references: [id], name: "UserMessages")
 
   @@map("messages")
-
 }
 
 // enum AccountLoginRequestStatus {

@@ -20,9 +20,7 @@ import { DiscordMiddleware } from './middleware/discord.middleware';
 import { NotificationModule } from './modules/notification/notification.module';
 import { EmailModule } from './services/email/email.module';
 import { AppController } from './app.controller';
-import { ChatModule } from './modules/chat/chat.module';
 import { PaymentModule } from './modules/payment/payment.module';
-import { MurlockModule } from './modules/murlock/murlock.module';
 @Module({
   imports: [
     AuthModule,
@@ -41,9 +39,7 @@ import { MurlockModule } from './modules/murlock/murlock.module';
     DiscordModule,
     NotificationModule,
     EmailModule,
-    ChatModule,
     PaymentModule,
-    MurlockModule,
   ],
   controllers:[AppController],
   providers: [DiscordService],

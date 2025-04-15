@@ -107,53 +107,75 @@ export class CheckoutService {
         }
     }
 
-    async orderByUser( 
+    async orderByUser(
         shopOrderIds: ShopOrderIdDTO[],
         cartId: string,
-        userId:string,
+        userId: string,
         userAddress: object,
         userPayment: object
-    ){
-        const {shopOrderIdsIsNew, checkoutOrder} = await this.checkoutReview({cartId, userId, shopOrderIds});
-        const products = shopOrderIdsIsNew.flatMap(order => order.itemProducts);
-
-        // Acquire locks for all products
-        const locks: string[] = [];
+    ) {
+        const { shopOrderIdsIsNew, checkoutOrder } = await this.checkoutReview({
+            cartId,
+            userId,
+            shopOrderIds
+        });
+    
         try {
-            for (const product of products) {
-                const { productId, quantity } = product;
-                const lockKey = `product:${productId}:${cartId}`;
-                const acquired = await this.redis.set(lockKey, '1', 'PX', 10000, 'NX');
-                if (!acquired) throw new BadRequestException('Product is currently being processed by another order');
-                locks.push(lockKey);
-            }
-
-            // Create the order
-            const newOrder = await this.prismaService.order.create({
-                data: {
-                    orderUserId: userId,
-                    orderCheckout: checkoutOrder,
-                    orderShipping: userAddress,
-                    orderPayment: userPayment,
-                    orderProduct: shopOrderIdsIsNew as any // Type assertion needed due to Prisma's type system
+            const newOrder = await this.prismaService.$transaction(async (tx) => {
+                for (const order of shopOrderIdsIsNew) {
+                    for (const item of order.itemProducts) {
+                        const { productId, quantity } = item;
+    
+                        // Lock row using SELECT FOR UPDATE
+                        const inventory = await tx.$queryRaw<
+                            { id: string, inventoryStock: number }[]
+                        >`
+                            SELECT id, "inventory_stock"
+                            FROM "inventories"
+                            WHERE "inventory_product_id" = ${productId}
+                            FOR UPDATE
+                        `;
+    
+                        if (!inventory || inventory.length === 0) {
+                            throw new BadRequestException(`Inventory not found for product ${productId}`);
+                        }
+    
+                        const { id, inventoryStock } = inventory[0];
+    
+                        if (inventoryStock < quantity) {
+                            throw new BadRequestException(`Not enough stock for product ${productId}`);
+                        }
+    
+                        await tx.inventory.update({
+                            where: { id },
+                            data: {
+                                inventoryStock: { decrement: quantity },
+                                updatedAt: BigInt(Date.now())
+                            }
+                        });
+                    }
                 }
-            });
-
-            // Clear the cart after successful order
-            if (newOrder) {
+    
+                const createdOrder = await tx.order.create({
+                    data: {
+                        orderUserId: userId,
+                        orderCheckout: checkoutOrder,
+                        orderShipping: userAddress,
+                        orderPayment: userPayment,
+                        orderProduct: shopOrderIdsIsNew as any
+                    }
+                });
+    
                 await this.cartService.clearCart(cartId);
-            }
-
+                return createdOrder;
+            });
+    
             return newOrder;
         } catch (error) {
             throw error;
-        } finally {
-            // Release all locks
-            for (const lockKey of locks) {
-                await this.redis.del(lockKey);
-            }
         }
     }
+        
 
     async getOrdersByUser(){
 
