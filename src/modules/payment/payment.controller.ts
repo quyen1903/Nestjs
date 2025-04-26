@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { CreatePaymentDto, RefundPaymentDto } from './dto/payment.dto';
 
-@Controller('payment')
+@Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+    constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
-  }
+    @Post()
+    async createPayment(@Body() createPaymentDto: CreatePaymentDto) {
+        return this.paymentService.createPaymentIntent(createPaymentDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
-  }
+    @Get(':id')
+    async getPayment(@Param('id') id: string) {
+        return this.paymentService.getPaymentIntent(id);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
+    @Post('refund')
+    async refundPayment(@Body() refundDto: RefundPaymentDto) {
+        return this.paymentService.refundPayment(refundDto);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
+    @Post('customers')
+    async createCustomer(@Body() body: { email: string; name?: string; metadata?: Record<string, any> }) {
+        return this.paymentService.createCustomer(body.email, body.name, body.metadata);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
-  }
+    @Post('webhook')
+    async handleWebhook(
+        @Headers('stripe-signature') signature: string,
+        @Req() req: RawBodyRequest<Request>,
+    ) {
+        return this.paymentService.handleWebhookEvent(signature, req.rawBody);
+    }
 }

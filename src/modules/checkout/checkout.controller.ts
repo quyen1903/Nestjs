@@ -10,4 +10,9 @@ export class CheckoutController {
     checkoutReview(@Body() payload: CheckoutDTO){
         return this.checkoutService.checkoutReview(payload)
     }
+
+    // @Post('create_order')
+    // createOrder(@Body() payload){
+    //     return this.checkoutService.createOrderByUser(payload)
+    // }
 }

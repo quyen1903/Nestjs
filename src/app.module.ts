@@ -12,8 +12,6 @@ import { UserModule } from './modules/user/user.module';
 import { KafkaModule } from './services/kafka/kafka.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { CommentModule } from './modules/comment/comment.module';
-import { MurLockModule } from 'murlock';
-import { REDIS_URL } from './app.config';
 import { DiscordModule } from './services/discord/discord.module';
 import { DiscordService } from './services/discord/discord.service';
 import { DiscordMiddleware } from './middleware/discord.middleware';

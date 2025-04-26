@@ -145,15 +145,35 @@ model Inventory {
   id                    String  @id @unique @default(uuid())
   inventoryLocation     String  @default("unKnow") @map("inventory_location")
   inventoryStock        Int     @map("inventory_stock")
-  inventoryReservations Json[]  @map("inventory_reservations")
+
   isActive              Boolean @default(true) @map("is_active")
   createdAt             BigInt  @default(0) @map("created_at")
   updatedAt             BigInt  @default(0) @map("updated_at")
 
-  inventoryProductId String  @unique @map("inventory_product_id")
-  inventoryProduct   Product @relation(fields: [inventoryProductId], references: [id])
+  inventoryProductId    String  @unique @map("inventory_product_id")
+  inventoryProduct      Product @relation(fields: [inventoryProductId], references: [id])
+
+  reservations          ReservationInventory[]
+  orderItem             OrderItem[]
 
   @@map("inventories")
+}
+
+model ReservationInventory {
+  id             String     @id @default(uuid())
+  inventory      Inventory  @relation(fields: [inventoryId], references: [id])
+  inventoryId    String     @map("inventory_id")
+  userId         String     @map("user_id")
+  quantity       Int        @map("quantity") 
+  expiredAt      DateTime   @map("expired_at")
+  isConfirmed    Boolean    @default(false)
+  valid          Boolean    @default(true)
+
+  isActive       Boolean @default(true) @map("is_active")
+  createdAt      BigInt  @default(0) @map("created_at")
+  updatedAt      BigInt  @default(0) @map("updated_at")
+
+  @@map("reservation_inventories")
 }
 
 model Discount {
@@ -214,22 +234,33 @@ model CartProduct {
 }
 
 model Order {
-  id                  String      @id @unique @default(uuid())
-  orderCheckout       Json        @map("order_checkout")
-  orderPayment        Json        @map("order_payment")
-  orderProduct        Json[]      @map("order_product")
-  orderTrackingNumber String      @default("'#0000127032024") @map("order_tracking_number")
-  orderStatus         OrderStatus @default(PENDING) @map("order_status")
-  isActive            Boolean     @default(true) @map("is_active")
-  createdAt           BigInt      @default(0) @map("created_at")
-  updatedAt           BigInt      @default(0) @map("updated_at")
-  orderShipping       Json        @default("{}") @map("order_shipping")
+  id              String    @id @unique @default(uuid())
+  userId          String      @map("user_id")
+  status          OrderStatus @map("status")
+  totalPrice      Float       @map("total_price") 
+  paymentIntentId String?     @map("payment_intent_id")
+  expiredAt       DateTime    @map("expired_at")
 
-  orderUserId String @unique @map("order_userId")
-  orderUser   User   @relation(fields: [orderUserId], references: [id])
+  isActive        Boolean     @default(true) @map("is_active")
+  createdAt       BigInt      @default(0) @map("created_at")
+  updatedAt       BigInt      @default(0) @map("updated_at")
 
-  @@map("orders")
+  // Relations
+  orderItems      OrderItem[]
+  user            User        @relation(fields: [userId], references: [id])
 }
+
+model OrderItem {
+  id           String    @id @default(cuid())
+  order        Order     @relation(fields: [orderId], references: [id])
+  orderId      String
+  inventoryId  String
+  inventory    Inventory @relation(fields: [inventoryId], references: [id])
+  
+  quantity     Int
+  price        Int // lấy từ inventory.price tại thời điểm đặt hàng
+}
+
 
 model Comment {
   id               String    @id @unique @default(uuid())
@@ -303,7 +334,7 @@ model User {
   passwordReset PasswordReset[]
   cart          Cart?
   comment       Comment[]
-  order         Order?
+  order         Order[]
   messages      Message[]       @relation("UserMessages")
 
   notificationThread NotificationThread?
@@ -342,18 +373,19 @@ model SdProduct {
 }
 
 model SKU {
-  id             String   @id @unique @default(uuid())
-  skuNo          String   @default("") @map("sku_no")
-  skuName        String   @map("sku_name")
-  skuDescription String   @map("sku_description")
-  skuType        Int      @map("sku_type")
-  skuStatus      Int      @map("sku_status")
-  skuSort        Int      @map("sku_sort") //priority sort
-  skuStock       Int      @default(0) @map("sku_stock")
-  skuPrice       Float    @map("sku_price")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  isActive       Boolean  @default(true) @map("is_active")
+  id             String     @id @unique @default(uuid())
+  skuNo          String     @default("") @map("sku_no")
+  skuName        String     @map("sku_name")
+  skuDescription String     @map("sku_description")
+  skuType        Int        @map("sku_type")
+  skuStatus      Int        @map("sku_status")
+  skuSort        Int        @map("sku_sort") //priority sort
+  skuStock       Int        @default(0) @map("sku_stock")
+  skuPrice       Float      @map("sku_price")
+
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  isActive       Boolean    @default(true) @map("is_active")
 
   @@map("sku")
 }

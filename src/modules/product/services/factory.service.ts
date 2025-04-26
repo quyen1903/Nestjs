@@ -30,11 +30,11 @@ export class Factory{
         return this.findAllProduct.bind(this);
     }
     get getProductByIdMethod(){
-        return this.getProductById.bind(this)
+        return this.getProductById.bind(this);
     }
 
     get checkProductByServerMethod(){
-        return this.checkProductByServer.bind(this)
+        return this.checkProductByServer.bind(this);
     }
 
     private async findAll(where: any, skip:number, take:number): Promise<Product[]>{

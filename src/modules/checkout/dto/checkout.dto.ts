@@ -4,7 +4,7 @@ import { Type } from "class-transformer";
 export class ItemProductDTO{
     @IsNumber()
     @IsNotEmpty()
-    price: number
+    price: number;
 
     @IsNumber()
     @IsNotEmpty()
@@ -12,21 +12,22 @@ export class ItemProductDTO{
 
     @IsString()
     @IsNotEmpty()
-    productId: string
+    productId: string;
+
 }
 
 export class ShopDiscountDTO{
     @IsString()
     @IsNotEmpty()
-    shopId: string
+    shopId: string;
 
     @IsString()
     @IsNotEmpty()
-    discountId: string
+    discountId: string;
 
     @IsString()
     @IsNotEmpty()
-    codeId: string
+    codeId: string;
 }
 
 export class ShopOrderIdDTO{
@@ -39,10 +40,9 @@ export class ShopOrderIdDTO{
     @Type(()=>ShopDiscountDTO)
     shopDiscounts: ShopDiscountDTO[];
 
-    @IsOptional()
-    @ValidateNested()
+    @ValidateNested({each: true})
     @Type(() => ItemProductDTO)
-    itemProducts:ItemProductDTO
+    itemProducts:ItemProductDTO[];
 
 }
 
@@ -58,5 +58,5 @@ export class CheckoutDTO{
     @IsArray()
     @ValidateNested()
     @Type(() => ShopOrderIdDTO)
-    shopOrderIds:ShopOrderIdDTO[]
+    shopOrderIds:ShopOrderIdDTO[];
 }

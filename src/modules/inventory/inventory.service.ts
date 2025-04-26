@@ -39,7 +39,6 @@ export class InventoryService{
             create:{
                 inventoryStock: stock,
                 inventoryLocation: location,
-                inventoryReservations:[],
                 inventoryProductId: productId
             }
         })

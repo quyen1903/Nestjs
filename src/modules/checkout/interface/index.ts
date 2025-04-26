@@ -1,6 +1,6 @@
 
 import { ShopDiscountDTO, ItemProductDTO } from "../dto/checkout.dto"
-export interface ItemCheckout{
+export interface ShopCheckout{
     shopId: string;
     shopDiscounts: ShopDiscountDTO[];
     priceRaw: number;
