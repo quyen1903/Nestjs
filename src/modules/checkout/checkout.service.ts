@@ -5,7 +5,7 @@ import { DiscountService } from '../discount/discount.service';
 import { CheckoutDTO, ItemProductDTO, ShopOrderIdDTO } from './dto/checkout.dto';
 import { Factory } from '../product/services/factory.service';
 import { ShopCheckout } from './interface';
-import { Cart } from '@prisma/client';
+import { Cart, OrderStatus, OrderItem } from '@prisma/client';
 
 @Injectable()
 export class CheckoutService {
@@ -86,66 +86,104 @@ export class CheckoutService {
         })
 
     }
-
-    async createOrderByUser(
-        shopOrderIds: ShopOrderIdDTO[],
-        cartId: string,
-        userId: string,
-    ) {
-        const { reviewedOrders, checkoutOrder } = await this.checkoutReview({
-            cartId,
-            userId,
-            shopOrderIds
-        });
-
-        try {
-            const newOrder = await this.prismaService.$transaction(async (tx) => {
-                for (const ShopCheckout of reviewedOrders) {
-                    for (const item of ShopCheckout.itemProducts) {
-
-                        const inventory = await tx.inventory.findUnique({
-                            where: { inventoryProductId: item.productId },
-                            select: { id: true },
-                          });
-                      
-                        await tx.reservationInventory.create({
-                            data:{
-                                userId,
-                                inventoryId: inventory.id,
-                                quantity: item.quantity,
-                                expiredAt: new Date(Date.now() + 5 * 60 * 1000),
-                                isConfirmed: false,
-                                valid: true            
-                            }
-                        })
-
-                        await tx.inventory.update({
-                            where: {id: inventory.id},
-                            data:{ inventoryStock: {decrement: item.quantity} }
-                        })
-                    }
-                }
-
-                // const createdOrder = await tx.order.create({
-                //     data: {
-                //         orderUserId: userId,
-                //         orderCheckout: checkoutOrder,   
-                //         orderShipping: userAddress,
-                //         orderPayment: userPayment,
-                //         orderProduct: reviewedOrders as any,
-                //         orderStatus: 'PENDING'
-                //     }
-                // });
-
-                // await this.cartService.clearCart(cartId);
-                // return createdOrder;
+    /*
+        we create order before user actually pay money
+        so once we create order in database, we need to keep track
+        on time miles which order has been create, once it fail after 15 minutes,
+        we cancel  
+    */
+        async createOrderByUser(
+            shopOrderIds: ShopOrderIdDTO[],
+            cartId: string,
+            userId: string,
+        ) {
+            const { reviewedOrders, checkoutOrder } = await this.checkoutReview({
+                cartId,
+                userId,
+                shopOrderIds
             });
-
-            return newOrder;
-        } catch (error) {
-            throw error;
+        
+            try {
+                const newOrder = await this.prismaService.$transaction(async (tx) => {
+                    const orderItemPromises: Promise<OrderItem>[]  = []; // Array to hold all the promises for creating order items
+        
+                    for (const ShopCheckout of reviewedOrders) {
+                        const itemPromises = ShopCheckout.itemProducts.map(async (item) => {
+                            // Lock inventory row for update
+                            const inventory = await tx.inventory.findUnique({
+                                where: { inventoryProductId: item.productId },
+                                select: { id: true, inventoryStock: true },
+                            });
+        
+                            if (!inventory || inventory.inventoryStock < item.quantity) {
+                                throw new BadRequestException(`Not enough stock for product ID ${item.productId}`);
+                            }
+        
+                            // Create reservation inventory
+                            await tx.reservationInventory.create({
+                                data: {
+                                    userId,
+                                    inventoryId: inventory.id,
+                                    quantity: item.quantity,
+                                    expiredAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes expiration
+                                    isConfirmed: false,
+                                    valid: true,
+                                },
+                            });
+        
+                            // Update inventory stock
+                            await tx.inventory.update({
+                                where: { id: inventory.id },
+                                data: { inventoryStock: { decrement: item.quantity } },
+                            });
+        
+                            // Create order item entry
+                            orderItemPromises.push(
+                                tx.orderItem.create({
+                                    data: {
+                                        orderId: "", // This will be set once the order is created
+                                        inventoryId: inventory.id,
+                                        quantity: item.quantity,
+                                        price: item.price, // Assume price is passed from item
+                                    }
+                                })
+                            );
+                        });
+        
+                        // Wait for all itemPromises for this shop to complete
+                        await Promise.all(itemPromises);
+                    }
+        
+                    // Create the order after handling all items
+                    const createdOrder = await tx.order.create({
+                        data: {
+                            userId: userId,
+                            status: OrderStatus.PENDING,
+                            totalDiscount: checkoutOrder.totalDiscount,
+                            shippingFee: checkoutOrder.feeShip,
+                            shippingAddress: 'test', // Replace with real shipping address
+                            paymentInfo: {},
+                            paymentIntentId: null,
+                            totalPrice: checkoutOrder.totalPrice,
+                            expiredAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiration
+                        }
+                    });
+        
+                    // Once order is created, update order items with the correct order ID
+                    await Promise.all(orderItemPromises.map(promise => promise.then(item => item.orderId = createdOrder.id)));
+        
+                    // Clear the cart
+                    await this.cartService.clearCart(cartId);
+        
+                    return createdOrder;
+                });
+        
+                return newOrder;
+            } catch (error) {
+                throw error;
+            }
         }
-    }
+        
 
     async getOrdersByUser() {}
 

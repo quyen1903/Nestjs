@@ -5,10 +5,11 @@
         "type": "node",
         "request": "launch",
         "name": "Debug TypeScript",
-        "program": "${workspaceFolder}/dist/main.js",
+        "program": "${workspaceFolder}/debug-nodejs/main.js",
         "outFiles": ["${workspaceFolder}/dist/**/*.js"],
         "sourceMaps": true,
-        "preLaunchTask": "tsc: build - tsconfig.json"
+        "preLaunchTask": "tsc: build - tsconfig.json",
+        "stopOnEntry": true
       }
     ]
   }

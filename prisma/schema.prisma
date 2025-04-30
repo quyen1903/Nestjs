@@ -234,10 +234,14 @@ model CartProduct {
 }
 
 model Order {
-  id              String    @id @unique @default(uuid())
+  id              String      @id @unique @default(uuid())
   userId          String      @map("user_id")
   status          OrderStatus @map("status")
-  totalPrice      Float       @map("total_price") 
+  totalDiscount   Decimal     @map("total_discount ")
+  shippingFee     Decimal     @map("shipping_fee")
+  shippingAddress String      @map("shipping_street")
+  totalPrice      Decimal     @map("total_price")
+  paymentInfo     Json        @map("payment_info")
   paymentIntentId String?     @map("payment_intent_id")
   expiredAt       DateTime    @map("expired_at")
 
@@ -248,6 +252,8 @@ model Order {
   // Relations
   orderItems      OrderItem[]
   user            User        @relation(fields: [userId], references: [id])
+
+  @@map("orders")
 }
 
 model OrderItem {
@@ -258,7 +264,13 @@ model OrderItem {
   inventory    Inventory @relation(fields: [inventoryId], references: [id])
   
   quantity     Int
-  price        Int // lấy từ inventory.price tại thời điểm đặt hàng
+  price        Int
+
+  isActive        Boolean     @default(true) @map("is_active")
+  createdAt       BigInt      @default(0) @map("created_at")
+  updatedAt       BigInt      @default(0) @map("updated_at")
+
+  @@map("order_items")
 }
 
 

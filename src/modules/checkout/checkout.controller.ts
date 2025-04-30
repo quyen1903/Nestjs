@@ -11,8 +11,8 @@ export class CheckoutController {
         return this.checkoutService.checkoutReview(payload)
     }
 
-    // @Post('create_order')
-    // createOrder(@Body() payload){
-    //     return this.checkoutService.createOrderByUser(payload)
-    // }
+    @Post('create_order')
+    createOrder(@Body() payload: CheckoutDTO){
+        return this.checkoutService.createOrderByUser(payload.shopOrderIds, payload.cartId, payload.userId)
+    }
 }

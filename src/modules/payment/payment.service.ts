@@ -2,11 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { CreatePaymentDto, RefundPaymentDto } from './dto/payment.dto';
-
+import { PrismaService } from 'src/services/prisma/prisma.service';
 @Injectable()
 export class PaymentService {
-    private readonly stripe: Stripe;
-    private readonly logger = new Logger(PaymentService.name);
+
+    constructor(
+        private configService: ConfigService,
+        private readonly stripe: Stripe,
+        private readonly logger = new Logger(PaymentService.name),
+        private readonly prismaService: PrismaService
+    ) {
+        this.stripe = new Stripe(this.configService.get<string>('stripe.secretKey'), {
+            apiVersion: '2025-03-31.basil', // Use the latest API version
+        });
+    }
     
     private handleStripeError(error: unknown, context = 'Stripe Operation') {
         if (error instanceof Stripe.errors.StripeError) {
@@ -19,12 +28,7 @@ export class PaymentService {
       
         throw error; // Re-throw để giữ nguyên behavior
     }
-      
-    constructor(private configService: ConfigService) {
-        this.stripe = new Stripe(this.configService.get<string>('stripe.secretKey'), {
-            apiVersion: '2025-03-31.basil', // Use the latest API version
-        });
-    }
+
 
     /**
      * Create a payment intent
