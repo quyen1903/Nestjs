@@ -6,14 +6,16 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
-import { JwtService } from '../auth/jwt.service';
+// import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
-import { KeyToken } from '@prisma/client';
+import { KeyToken, User, UserAuth, UserProfile, UserSocial } from '@prisma/client';
 import { RefreshTokenUsed } from '@prisma/client';
 import { EmailService } from 'src/services/email/email.service';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { randomBytes } from 'node:crypto';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
+import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class UserService {
     constructor(
@@ -50,10 +52,37 @@ export class UserService {
         return {publicKey, privateKey}
     }
 
-    private find(find: string){
-        return this.prismaService.user.findFirst({
-            where: {email:find},
-        });
+    private createTokenPair(userAuth: UserAuth){
+        const { privateKey } = this.generateKeyPair();
+
+        const payload = {                
+            accountId:userAuth.userId, 
+            username: userAuth.userName,
+            role: 'USER'
+        };
+
+        const options = {
+            privateKey,              
+            algorithm: 'RS256',      
+            expiresIn: '1h',         
+        }
+        
+        const accessToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '1h',         
+            }
+        )
+
+        const refreshToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '6h',         
+            }
+        )
+        return {accessToken, refreshToken}
     }
 
     private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
@@ -63,7 +92,12 @@ export class UserService {
             refreshToken,
             roles: 'USER'
         })
-    }
+    };
+
+    private async find(userName: string){
+        const user =await this.prismaService.userAuth.findUnique({where:{userName}})
+        return user 
+    };
 
     async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, refreshToken: string ): Promise<{
         tokens:{
@@ -147,31 +181,53 @@ export class UserService {
     }
 
     async register(register: RegisterUserDTO) {
-        const userHolder = await this.find(register.email);
+        const userHolder = await this.find(register.name);
         if(userHolder) throw new BadGatewayException('User already existed');
 
-        const salt = crypto.randomBytes(32).toString('hex')
-        const passwordHashed = await this.hashPassword(register.password, salt)
+        const salt = crypto.randomBytes(32).toString('hex');
+        const passwordHashed = await this.hashPassword(register.password, salt);
 
-        const newUser = await this.prismaService.user.create({
-            data:{
-                name: register.name,
-                salt,
-                email: register.email,
-                password:passwordHashed,
-                phone: register.phone,
-                sex: register.sex,
-                avatar: register.avatar,
-                dateOfBirth: new Date(register.dateOfBirth)
-            }
+        /**
+         * we will use transaction to create user
+         * this make sure in our database, user Password-based signup
+         * will have profile, authentication information without missing 
+         * any data
+         */
+
+        let newUser:User, newUserAuth: UserAuth, newUserProfile: UserProfile;
+
+        await this.prismaService.$transaction(async(tx)=>{
+            const user =await tx.user.create({});
+
+            const userAuth = await tx.userAuth.create({
+                data:{
+                    userId: user.id,
+                    password: passwordHashed,
+                    salt,
+                    userName: register.userName
+                }
+            });
+
+            const userProfile = await tx.userProfile.create({
+                data:{
+                    userId: user.id,
+                    name: register.name,
+                    phone: register.phone,
+                    sex: register.sex,
+                    avatar: register.avatar,
+                    dateOfBirth: register.dateOfBirth
+                }
+            });
+
+            newUser = user,newUserAuth = userAuth ,newUserProfile = userProfile;
         })
 
-        if(newUser){
-            const { publicKey, privateKey } = this.generateKeyPair();
-            const tokens = this.jwtService.createToken({accountId:newUser.id, email: newUser.email, role: 'USER'},publicKey, privateKey)
-            if(!tokens)throw new BadGatewayException('create tokens error!!!!!!')
+        if(newUser && newUserProfile && newUserAuth){
+            const { publicKey } = this.generateKeyPair();
+            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth)
+            if(!accessToken && !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
 
-            const keyStore = await this.upsertKeyStore(newUser.id, publicKey, tokens.refreshToken)
+            const keyStore = await this.upsertKeyStore(newUser.id, publicKey, refreshToken)
             if(!keyStore) throw new Error('cannot generate keytoken');
 
             const notificationThread = await this.prismaService.notificationThread.create({
@@ -183,7 +239,8 @@ export class UserService {
             return{
                 user:getInfoData(['id','email',],newUser),
                 notificationThread,
-                tokens
+                accessToken,
+                refreshToken
             }
         }
         return {
@@ -229,25 +286,6 @@ export class UserService {
     async resetPassword(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
         const { token, password } = resetPasswordDto;
         
-        /*
-            "id": "uuid-123",
-            "userId": "uuid-456",
-            "token": "some-random-token",
-            "expiresAt": "2025-01-01T00:00:00.000Z",
-            "isUsed": false,
-            "isActive": true,
-            "createdAt": 1700000000,
-            "updatedAt": 1700000000,
-            "user": {
-                "id": "uuid-456",
-                "name": "John Doe",
-                "email": "john@example.com",
-                "phone": "123456789",
-                "status": "ACTIVE",
-                "isActive": true,
-                "avatar": "profile.jpg"
-            }
-        */
         const passwordReset = await this.prismaService.passwordReset.findFirst({
             where: {
                 token,

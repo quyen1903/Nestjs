@@ -1,3 +1,32 @@
-import { User } from "@prisma/client";
+import { Sex } from "@prisma/client";
+import { PasswordValidator } from "src/shared/validators/password.validator";
+import { IsEmail, IsOptional, IsPhoneNumber, IsString, IsNotEmpty } from "class-validator";
+export class RegisterUserDTO{
 
-export type RegisterUserDTO = Pick<User, 'name' | 'email' | 'password' | 'avatar' |'dateOfBirth' | 'phone' | 'sex' >;
+    @IsNotEmpty()
+    @IsString()
+    userName: string;
+
+    @IsNotEmpty()
+    @IsString()
+    name: string;
+
+    @IsNotEmpty()
+    @PasswordValidator()
+    password: string;
+
+    @IsOptional()
+    @IsString()
+    avatar: string;
+
+    @IsNotEmpty()
+    @IsString()
+    dateOfBirth: string;
+
+    @IsPhoneNumber()
+    @IsString()
+    phone: string;
+
+    @IsNotEmpty()
+    sex: Sex;
+}

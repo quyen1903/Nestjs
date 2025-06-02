@@ -329,29 +329,65 @@ model Notification {
 }
 
 model User {
-  id          String   @id @unique @default(uuid())
-  name        String   @map("user_name")
-  email       String   @unique @map("user_email")
-  password    String   @map("user_password")
-  salt        String   @map("user_salt")
-  phone       String   @unique @map("user_phone")
-  sex         Sex      @map("user_sex")
-  avatar      String   @map("user_avatar")
-  dateOfBirth DateTime @map("user_date_of_birth")
-  status      Status   @default(ACTIVE) @map("user_status")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   BigInt   @default(0) @map("created_at")
-  updatedAt   BigInt   @default(0) @map("updated_at")
+  id                String   @id @unique @default(uuid())
+  auth              UserAuth?
+  profile           UserProfile?
+  social            UserSocial[]
 
-  passwordReset PasswordReset[]
-  cart          Cart?
-  comment       Comment[]
-  order         Order[]
-  messages      Message[]       @relation("UserMessages")
-
-  notificationThread NotificationThread?
+  // Relations
+  passwordReset       PasswordReset[]
+  cart                Cart?
+  comment             Comment[]
+  order               Order[]
+  messages            Message[]         @relation("UserMessages")
+  notificationThread  NotificationThread?
 
   @@map("users")
+}
+
+
+model UserAuth {
+  userId     String   @id
+  userName   String   @unique
+  password   String
+  salt       String
+  status     Status   @default(ACTIVE)
+  isActive   Boolean  @default(true)
+  createdAt  BigInt   @default(0)
+  updatedAt  BigInt   @default(0)
+
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+
+model UserProfile {
+  userId       String   @id
+  name         String
+  phone        String   @unique
+  sex          Sex
+  avatar       String
+  dateOfBirth  DateTime
+
+  isActive   Boolean  @default(true)
+  createdAt  BigInt   @default(0)
+  updatedAt  BigInt   @default(0)
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model UserSocial {
+  id        String   @id @default(uuid())
+  provider  String   // 'google', 'facebook'
+  providerId String  // ID của user bên Google/Facebook
+  email     String   @unique
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id])
+
+  isActive   Boolean  @default(true)
+  createdAt  BigInt   @default(0)
+  updatedAt  BigInt   @default(0)
+
+  @@unique([userId, provider])
+
 }
 
 model PasswordReset {
