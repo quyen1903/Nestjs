@@ -155,7 +155,7 @@ export class UserService {
         return await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
-    async login(login: LoginUserDTO): Promise<{
+    async loginManual(login: LoginUserDTO): Promise<{
         user: object;
         tokens: {
             accessToken: string;
@@ -180,7 +180,7 @@ export class UserService {
         }
     }
 
-    async register(register: RegisterUserDTO) {
+    async registerManual(register: RegisterUserDTO) {
         const userHolder = await this.find(register.name);
         if(userHolder) throw new BadGatewayException('User already existed');
 
@@ -283,7 +283,7 @@ export class UserService {
         return { message: 'If your email is registered with us, you will receive a password reset link' };
     }
 
-    async resetPassword(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
+    async resetPasswordManual(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
         const { token, password } = resetPasswordDto;
         
         const passwordReset = await this.prismaService.passwordReset.findFirst({

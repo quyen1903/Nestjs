@@ -15,12 +15,12 @@ export class ShopController{
 
     @Post('register')
     registerUser(@Body() body: RegisterUserDTO){
-        return this.userService.register(body)
+        return this.userService.registerManual(body)
     }
 
     @Post('login')
     loginUser(@Body() body: LoginUserDTO){
-        return this.userService.login(body)
+        return this.userService.loginManual(body)
     }
 
     @Post('logout')
@@ -42,7 +42,7 @@ export class ShopController{
   
     @Post('reset-password')
     async resetPassword(@Body() resetPasswordDto: ResetPasswordDTO) {
-      return this.userService.resetPassword(resetPasswordDto);
+      return this.userService.resetPasswordManual(resetPasswordDto);
     }
   
     @Get('validate-reset-token')
