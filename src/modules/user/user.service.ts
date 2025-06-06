@@ -6,7 +6,6 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
-// import { JwtService } from '../auth/jwt.service';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { KeyToken, User, UserAuth, UserProfile, UserSocial } from '@prisma/client';
 import { RefreshTokenUsed } from '@prisma/client';
@@ -157,10 +156,8 @@ export class UserService {
 
     async loginManual(login: LoginUserDTO): Promise<{
         user: object;
-        tokens: {
-            accessToken: string;
-            refreshToken: string;
-        };
+        accessToken: string;
+        refreshToken: string;
     }>{
         const foundUser = await this.find(login.email);
         if(!foundUser) throw new BadRequestException('user not registed');
@@ -169,14 +166,15 @@ export class UserService {
         if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
 
         const { publicKey, privateKey } = this.generateKeyPair();
-        const tokens = this.jwtService.createToken({accountId: foundUser.id,email: login.email, role: 'USER'}, publicKey, privateKey);
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser)
 
-        const keyStore = await this.upsertKeyStore(foundUser.id, publicKey, tokens.refreshToken)
+        const keyStore = await this.upsertKeyStore(foundUser.userId, publicKey, refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         return{
             user:getInfoData(['id','email'],foundUser),
-            tokens
+            accessToken, 
+            refreshToken
         }
     }
 
@@ -276,9 +274,8 @@ export class UserService {
         });
     
         const emailSent = await this.emailService.sendPasswordResetEmail(email, resetToken);        
-        if (!emailSent) {
-          throw new BadRequestException('Failed to send reset email');
-        }
+        if (!emailSent) throw new BadRequestException('Failed to send reset email');
+        
     
         return { message: 'If your email is registered with us, you will receive a password reset link' };
     }
