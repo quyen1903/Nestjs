@@ -7,7 +7,7 @@ import {
     BadRequestException, 
     InternalServerErrorException 
 } from '@nestjs/common';
-import { JwtService } from './jwt.service';
+import { JwtService } from '@nestjs/jwt';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
         // Check Refresh Token
         const refreshToken = request.headers['x-rtoken-id'] as string;
         if (refreshToken) {
-            const decodedUser = this.jwtService.verifyToken(refreshToken, keyStore.publicKey);
+            const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
             if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
 
             request['account'] = decodedUser;
@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
         if (!accessToken) throw new UnauthorizedException('Invalid Request');
 
         try {
-            const decodedUser = this.jwtService.verifyToken(accessToken, keyStore.publicKey);
+            const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
             if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
             request['account'] = decodedUser;
             request['keyStore'] = keyStore;

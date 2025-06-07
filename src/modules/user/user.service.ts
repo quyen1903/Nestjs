@@ -14,6 +14,7 @@ import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { randomBytes } from 'node:crypto';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
 import { JwtService } from '@nestjs/jwt';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -22,49 +23,17 @@ export class UserService {
         private readonly prismaService: PrismaService,
         private readonly keytokenService: KeyTokenService,
         private readonly emailService: EmailService,
-    ) {}
+        private readonly authService: AuthService
+    ) {};
 
-    private hashPassword(password:string, salt:string):Promise<string> {
-        return new Promise((resolve, reject) => {
-            crypto.pbkdf2(password, salt, 100,64,'sha512', (err, key) => {
-                if (err) return  reject(err)
-                resolve(key.toString('hex'));
-            })
-        });
-    }
-
-    private generateKeyPair(): {
-        publicKey: string;
-        privateKey: string;
-    }{
-        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',{
-            modulusLength:4096,
-            publicKeyEncoding:{
-                type:'pkcs1',
-                format:'pem'
-            },
-            privateKeyEncoding:{
-                type:'pkcs1',
-                format:'pem'
-            }
-        })
-        return {publicKey, privateKey}
-    }
-
-    private createTokenPair(userAuth: UserAuth){
-        const { privateKey } = this.generateKeyPair();
+    private createTokenPair(userId: string, userName: string){
+        const { privateKey } = this.authService.generateKeyPair();
 
         const payload = {                
-            accountId:userAuth.userId, 
-            username: userAuth.userName,
+            accountId:userId, 
+            username: userName,
             role: 'USER'
         };
-
-        const options = {
-            privateKey,              
-            algorithm: 'RS256',      
-            expiresIn: '1h',         
-        }
         
         const accessToken = this.jwtService.sign(payload,  
             {
@@ -98,33 +67,32 @@ export class UserService {
         return user 
     };
 
-    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, refreshToken: string ): Promise<{
-        tokens:{
-            accessToken: string,
-            refreshToken: string
-        };
+    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, storedRefreshToken: string ): Promise<{
+        accessToken: string,
+        refreshToken: string
         update: KeyToken;
         createUsedToken: RefreshTokenUsed; 
     }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-        const {accountId, email} = account;
+        const {accountId, username} = account;
 
         const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
             where:{
-                token: refreshToken
+                token: storedRefreshToken
             }
         })
 
         if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
 
         //2 if user's token is not valid token, force them to relogin, too
-        if(keyStore.refreshToken !== refreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-        const foundUser = await this.find(email)
+        if(keyStore.refreshToken !== storedRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
+        const foundUser = await this.find(username)
         if(!foundUser) throw new UnauthorizedException('user not registed');
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
-        const { publicKey, privateKey } = this.generateKeyPair()
-        const tokens = this.jwtService.createToken({accountId: accountId,email, role: 'USER'},publicKey,privateKey)
+        const { publicKey, privateKey } = this.authService.generateKeyPair()
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName)
+
 
         const update = await this.prismaService.keyToken.update({
             where:{
@@ -132,7 +100,7 @@ export class UserService {
             },
             data:{
                 publicKey,
-                refreshToken: tokens.refreshToken
+                refreshToken: refreshToken
             }
         })
 
@@ -144,7 +112,8 @@ export class UserService {
         })
 
         return {
-            tokens,
+            accessToken,
+            refreshToken,
             update,
             createUsedToken
         }
@@ -162,11 +131,11 @@ export class UserService {
         const foundUser = await this.find(login.email);
         if(!foundUser) throw new BadRequestException('user not registed');
 
-        const passwordHashed =await this.hashPassword(login.password, foundUser.salt);
+        const passwordHashed =await this.authService.hashPassword(login.password, foundUser.salt);
         if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
 
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser)
+        const { publicKey, privateKey } = this.authService.generateKeyPair();
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName)
 
         const keyStore = await this.upsertKeyStore(foundUser.userId, publicKey, refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
@@ -183,7 +152,7 @@ export class UserService {
         if(userHolder) throw new BadGatewayException('User already existed');
 
         const salt = crypto.randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(register.password, salt);
+        const passwordHashed = await this.authService.hashPassword(register.password, salt);
 
         /**
          * we will use transaction to create user
@@ -221,8 +190,8 @@ export class UserService {
         })
 
         if(newUser && newUserProfile && newUserAuth){
-            const { publicKey } = this.generateKeyPair();
-            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth)
+            const { publicKey } = this.authService.generateKeyPair();
+            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName)
             if(!accessToken && !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
 
             const keyStore = await this.upsertKeyStore(newUser.id, publicKey, refreshToken)
@@ -265,7 +234,7 @@ export class UserService {
         
         await this.prismaService.passwordReset.create({
             data: {
-                userId: user.id,
+                userId: user.userId,
                 token: resetToken,
                 expiresAt,
                 createdAt: BigInt(Date.now()),
@@ -311,10 +280,10 @@ export class UserService {
     
         // Hash the new password and update the user
         const salt = randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(password, salt);
+        const passwordHashed = await this.authService.hashPassword(password, salt);
     
-        await this.prismaService.user.update({
-            where: { id: passwordReset.userId },
+        await this.prismaService.userAuth.update({
+            where: { userId: passwordReset.userId },
             data: {
                 password: passwordHashed,
                 salt,

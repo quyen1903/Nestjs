@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Shop {
-  id           String         @id @unique @default(uuid())
+  id           String         @id @default(uuid())
   name         String         @map("shop_name")
   email        String         @unique @map("shop_email")
   password     String         @map("shop_password")
@@ -26,8 +26,8 @@ model Shop {
   @@map("shops")
 }
 
-model KeyToken {
-  id               String             @id @unique @default(uuid())
+model ShopKeyToken {
+  id               String             @id @default(uuid())
   accountId        String             @unique @map("account_id")
   publicKey        String             @map("public_key")
   refreshToken     String             @map("refresh_token")
@@ -35,13 +35,13 @@ model KeyToken {
   isActive         Boolean            @default(true) @map("is_active")
   createdAt        BigInt             @default(0) @map("created_at")
   updatedAt        BigInt             @default(0) @map("updated_at")
-  refreshtokenused RefreshTokenUsed[]
+  refreshtokenused ShopRefreshTokenUsed[]
 
-  @@map("key_tokens")
+  @@map("shop_key_tokens")
 }
 
-model RefreshTokenUsed {
-  id         String   @id @unique @default(uuid())
+model ShopRefreshTokenUsed {
+  id         String   @id @default(uuid())
   token      String   @map("refresh_token")
   usedAt     DateTime @default(now()) @map("used_at")
   userAgent  String?  @map("user_agent")
@@ -50,14 +50,14 @@ model RefreshTokenUsed {
   createdAt  BigInt   @default(0) @map("created_at")
   isActive   Boolean  @default(true) @map("is_active")
   updatedAt  BigInt   @default(0) @map("updated_at")
-  keyToken   KeyToken @relation(fields: [keyTokenId], references: [id])
+  keyToken   ShopKeyToken @relation(fields: [keyTokenId], references: [id])
 
   @@index([token])
-  @@map("refresh_tokens_used")
+  @@map("shop_refresh_tokens_used")
 }
 
 model APIkey {
-  id         String   @id @unique @default(uuid())
+  id         String   @id @default(uuid())
   key        String
   status     Boolean
   permission String[]
@@ -69,7 +69,7 @@ model APIkey {
 }
 
 model Product {
-  id                    String      @id @unique @default(uuid())
+  id                    String      @id @default(uuid())
   productName           String      @map("product_name")
   productThumb          String      @map("product_thumb")
   productDescription    String?     @map("product_description")
@@ -100,7 +100,7 @@ model Product {
 }
 
 model Clothing {
-  id        String  @id @unique @default(uuid())
+  id        String  @id @default(uuid())
   brand     String  @map("clothing_brand")
   size      String  @map("clothing_size")
   material  String  @map("clothing_material")
@@ -114,7 +114,7 @@ model Clothing {
 }
 
 model Electronic {
-  id           String  @id @unique @default(uuid())
+  id           String  @id @default(uuid())
   manufacturer String  @map("electronic_manufacturer")
   model        String  @map("electronic_model")
   color        String  @map("electronic_color")
@@ -128,7 +128,7 @@ model Electronic {
 }
 
 model Furniture {
-  id        String  @id @unique @default(uuid())
+  id        String  @id @default(uuid())
   brand     String  @map("furniture_brand")
   size      String  @map("furniture_size")
   material  String  @map("furniture_material")
@@ -142,7 +142,7 @@ model Furniture {
 }
 
 model Inventory {
-  id                    String  @id @unique @default(uuid())
+  id                    String  @id @default(uuid())
   inventoryLocation     String  @default("unKnow") @map("inventory_location")
   inventoryStock        Int     @map("inventory_stock")
 
@@ -177,7 +177,7 @@ model ReservationInventory {
 }
 
 model Discount {
-  id                     String            @id @unique @default(uuid())
+  id                     String            @id @default(uuid())
   discountName           String            @map("discount_name")
   discountDescription    String            @map("discount_description")
   discountType           String            @default("fixed_amount") @map("discount_type")
@@ -203,7 +203,7 @@ model Discount {
 }
 
 model Cart {
-  id           String        @id @unique @default(uuid())
+  id           String        @id @default(uuid())
   state        CartState     @default(ACTIVE) @map("cart_state")
   countProduct Int           @default(0) @map("cart_count_product")
   userId       String        @unique @map("cart_userId")
@@ -217,7 +217,7 @@ model Cart {
 }
 
 model CartProduct {
-  id        String  @id @unique @default(uuid())
+  id        String  @id @default(uuid())
   productId String  @map("cart_product_productId")
   shopId    String  @map("cart_product_shopId")
   quantity  Int     @map("cart_product_quantity")
@@ -234,7 +234,7 @@ model CartProduct {
 }
 
 model Order {
-  id              String      @id @unique @default(uuid())
+  id              String      @id @default(uuid())
   userId          String      @map("user_id")
   status          OrderStatus @map("status")
   totalDiscount   Decimal     @map("total_discount ")
@@ -275,7 +275,7 @@ model OrderItem {
 
 
 model Comment {
-  id               String    @id @unique @default(uuid())
+  id               String    @id @default(uuid())
   commentProductId String    @map("comment_product")
   commentUserId    String    @map("comment_user")
   commentContent   String    @map("comment_content")
@@ -308,7 +308,7 @@ model NotificationThread {
 }
 
 model Notification {
-  id       String             @id @unique @default(uuid())
+  id       String             @id @default(uuid())
   type     NotificationType   @map("noti_type")
   sender   Shop               @relation(fields: [senderId], references: [id])
   senderId String             @map("noti_sender_id")
@@ -329,7 +329,7 @@ model Notification {
 }
 
 model User {
-  id                String   @id @unique @default(uuid())
+  id                String   @id @default(uuid())
   auth              UserAuth?
   profile           UserProfile?
   social            UserSocial[]
@@ -371,14 +371,14 @@ model UserProfile {
   isActive   Boolean  @default(true)
   createdAt  BigInt   @default(0)
   updatedAt  BigInt   @default(0)
-  user         User    @relation(fields: [userId], references: [id])
+  user         User   @relation(fields: [userId], references: [id])
 }
 
 model UserSocial {
   id        String   @id @default(uuid())
   provider  String   // 'google', 'facebook'
   providerId String  // ID của user bên Google/Facebook
-  email     String   @unique
+  email     String
   userId    String   
   user      User     @relation(fields: [userId], references: [id])
 
@@ -391,7 +391,7 @@ model UserSocial {
 }
 
 model PasswordReset {
-  id        String   @id @unique @default(uuid())
+  id        String   @id @default(uuid())
   userId    String   @map("password_reset_userId")
   token     String   @unique @map("password_reset_token")
   expiresAt DateTime @map("password_reset_expires_at")
@@ -404,8 +404,38 @@ model PasswordReset {
   @@map("password_resets")
 }
 
+model UserKeyToken {
+  id               String             @id @default(uuid())
+  accountId        String             @unique @map("account_id")
+  publicKey        String             @map("public_key")
+  refreshToken     String             @map("refresh_token")
+  roles            AccountRole        @map("roles")
+  isActive         Boolean            @default(true) @map("is_active")
+  createdAt        BigInt             @default(0) @map("created_at")
+  updatedAt        BigInt             @default(0) @map("updated_at")
+  refreshtokenused UserRefreshTokenUsed[]
+
+  @@map("user_key_tokens")
+}
+
+model UserRefreshTokenUsed {
+  id         String   @id @default(uuid())
+  token      String   @map("refresh_token")
+  usedAt     DateTime @default(now()) @map("used_at")
+  userAgent  String?  @map("user_agent")
+  ipAddress  String?  @map("ip_address")
+  keyTokenId String   @map("refresh_token_use")
+  createdAt  BigInt   @default(0) @map("created_at")
+  isActive   Boolean  @default(true) @map("is_active")
+  updatedAt  BigInt   @default(0) @map("updated_at")
+  keyToken   UserKeyToken @relation(fields: [keyTokenId], references: [id])
+
+  @@index([token])
+  @@map("user_refresh_tokens_used")
+}
+
 model SdProduct {
-  id                String  @id @unique @default(uuid())
+  id                String  @id @default(uuid())
   isActive          Boolean @default(true) @map("is_active")
   createdAt         BigInt  @default(0) @map("created_at")
   updatedAt         BigInt  @default(0) @map("updated_at")
@@ -421,7 +451,7 @@ model SdProduct {
 }
 
 model SKU {
-  id             String     @id @unique @default(uuid())
+  id             String     @id @default(uuid())
   skuNo          String     @default("") @map("sku_no")
   skuName        String     @map("sku_name")
   skuDescription String     @map("sku_description")

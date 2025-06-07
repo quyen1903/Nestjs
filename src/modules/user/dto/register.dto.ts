@@ -1,6 +1,6 @@
 import { Sex } from "@prisma/client";
 import { PasswordValidator } from "src/shared/validators/password.validator";
-import { IsEmail, IsOptional, IsPhoneNumber, IsString, IsNotEmpty } from "class-validator";
+import { IsOptional, IsPhoneNumber, IsString, IsNotEmpty } from "class-validator";
 export class RegisterUserDTO{
 
     @IsNotEmpty()
@@ -25,6 +25,7 @@ export class RegisterUserDTO{
 
     @IsPhoneNumber()
     @IsString()
+    @IsOptional()
     phone: string;
 
     @IsNotEmpty()

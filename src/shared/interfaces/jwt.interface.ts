@@ -1,6 +1,6 @@
 export interface JWTdecode{
     accountId: string
-    email: string,
+    username: string,
     role: string,
     iat: number,
     exp: number
