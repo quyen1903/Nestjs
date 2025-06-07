@@ -3,7 +3,9 @@ import {
     ExecutionContext, 
     Injectable, 
     UnauthorizedException, 
+    ForbiddenException, 
     BadRequestException, 
+    InternalServerErrorException 
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { KeyTokenService } from '../keytoken/keytoken.service';
