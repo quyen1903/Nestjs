@@ -3,10 +3,12 @@ import { PrismaModule } from 'src/services/prisma/prisma.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { ShopAuthModule } from './shop-auth/shop-auth.module';
 import { UserAuthModule } from './user-auth/user-auth.module';
+import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-    imports:[PrismaModule, KeyTokenModule, ShopAuthModule, UserAuthModule],
-    providers:[],
-    exports:[]
+    imports:[JwtModule, PrismaModule, KeyTokenModule, ShopAuthModule, UserAuthModule],
+    providers:[AuthService],
+    exports: [ShopAuthModule, UserAuthModule]
 })
 export class AuthModule {}

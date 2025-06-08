@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
 import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
@@ -7,20 +8,57 @@ import { RoleShop } from 'src/shared/enums/shop.enum';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
-import { JwtService } from '../auth/jwt.service';
-import { KeyTokenService } from '../keytoken/keytoken.service';
-import { KeyToken } from '@prisma/client';
-import { RefreshTokenUsed } from '@prisma/client';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
+import { ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
+import { ShopKeyTokenService } from '../auth/shop-auth/shop-auth.keytoken';
 @Injectable()
 export class ShopService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly keytokenService: KeyTokenService,
-        private readonly producerService: ProducerService
-    ) {}
+        private readonly shopKeyTokenService: ShopKeyTokenService,
+        private readonly producerService: ProducerService,
+        
+    ) {};
 
+    /**
+     * 
+     * @param userId 
+     * @param userName 
+     * @param privateKey 
+     * @returns accesstoken to authorize, refreshtoken to get new accesstoken 
+     */
+    private createTokenPair(shopId: string, permissions: string[], privateKey: string){
+        const payload = {                
+            sub: shopId,
+            role: 'shop',
+            permissions,
+        };
+        
+        const accessToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '1h',         
+            }
+        )
+
+        const refreshToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '6h',         
+            }
+        )
+        return {accessToken, refreshToken}
+    };
+
+    /**
+     * 
+     * @param password original password
+     * @param salt random string
+     * @returns hashed password, which had been add salt to hash, almost impossible to brute force
+     */
     private hashPassword(password:string, salt:string):Promise<string> {
         return new Promise((resolve, reject) => {
             crypto.pbkdf2(password, salt, 100,64,'sha512', (err, key) => {
@@ -28,8 +66,18 @@ export class ShopService {
                 resolve(key.toString('hex'));
             })
         });
-    }
+    };
 
+    /**
+     * 
+     * @returns return public key and private key
+     * in cryptography
+     * public key are use for decrypt and to authorize jwt (this is our use case)
+     * private key are use for encrypt and to create jwt (this is our use case)
+     * public key are store in database, we drop private key
+     * 
+     * in both user case, anybody can see public key, it's ok. But dont let any one know your private key
+     */
     private generateKeyPair(): {
         publicKey: string;
         privateKey: string;
@@ -46,22 +94,36 @@ export class ShopService {
             }
         })
         return {publicKey, privateKey}
-    }
+    };
 
+    /**
+     * use case: find shop in database
+     * purpose: check shop existed or not, or retrieve information about shop
+     * @param find 
+     * @returns 
+     */
     private async find(find: string){
         return this.prismaService.shop.findFirst({
             where: {email:find},
         });
-    }
+    };
 
+    /**
+     * deprecated,now need to fix this method
+     * purpose: to upsert (create or update)
+     * @param accountId 
+     * @param publicKey 
+     * @param refreshToken 
+     * @returns 
+     */
     private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.keytokenService.createKeyToken({
+        return await this.shopKeyTokenService.createKeyToken({
             accountId,
             publicKey,
             refreshToken,
             roles: 'SHOP'
         })
-    }
+    };
 
     async getShopInfo(id: string){
         console.log('shopId',id)
@@ -77,47 +139,52 @@ export class ShopService {
                 updatedAt: true
             }
         })
-    }
+    };
 
-    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, refreshToken: string ): Promise<{
-        tokens:{
-            accessToken: string,
-            refreshToken: string
-        };
-        update: KeyToken;
-        createUsedToken: RefreshTokenUsed; 
+    /**
+     * use refreshtoken to get new token pair
+     * @param keyStore 
+     * @param account 
+     * @param refreshToken 
+     * @returns new token pair
+     */
+    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, userRefreshToken: string ): Promise<{
+        accessToken: string,
+        refreshToken: string
+        update: ShopKeyToken;
+        createUsedToken: ShopRefreshTokenUsed; 
     }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-        const {accountId, email} = account;
+        const {accountId, username} = account;
 
-        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
+        const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
             where:{
-                token: refreshToken
+                token: userRefreshToken
             }
         })
 
         if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
 
         //2 if user's token is not valid token, force them to relogin, too
-        if(keyStore.refreshToken !== refreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-        const foundShop = await this.find(email)
+        if(keyStore.refreshToken !== userRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
+        const foundShop = await this.find(username)
         if(!foundShop) throw new UnauthorizedException('shop not registed');
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
         const { publicKey, privateKey } = this.generateKeyPair()
-        const tokens = this.jwtService.createToken({accountId: accountId,email, role: 'SHOP'},publicKey,privateKey)
+        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
 
-        const update = await this.prismaService.keyToken.update({
+        const update = await this.prismaService.shopKeyToken.update({
             where:{
                 accountId: account.accountId
             },
             data:{
                 publicKey,
-                refreshToken: tokens.refreshToken
+                refreshToken: refreshToken
             }
         })
 
-        const createUsedToken = await this.prismaService.refreshTokenUsed.create({
+        const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
             data:{
                 token:refreshToken,
                 keyTokenId: update.id
@@ -125,22 +192,21 @@ export class ShopService {
         })
 
         return {
-            tokens,
+            accessToken,
+            refreshToken,
             update,
             createUsedToken
         }
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<KeyToken | null>{
-        return await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
+    async logout ( keyStore: IKeyToken ): Promise<ShopKeyToken | null>{
+        return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
     async login(login: LoginShopDTO): Promise<{
         shop: object;
-        tokens: {
-            accessToken: string;
-            refreshToken: string;
-        };
+        accessToken: string;
+        refreshToken: string;
     }>{
         //check whether shop existed or not
         const foundShop = await this.find(login.email);
@@ -152,10 +218,10 @@ export class ShopService {
 
         //create key pair
         const { publicKey, privateKey } = this.generateKeyPair();
-        const tokens = this.jwtService.createToken({accountId: foundShop.id,email: login.email, role: 'SHOP'}, publicKey, privateKey);
+        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
 
         //create new keytoken
-        const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, tokens.refreshToken)
+        const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         await this.producerService.produce({
@@ -167,7 +233,8 @@ export class ShopService {
 
         return{
             shop:getInfoData(['id','email'],foundShop),
-            tokens
+            accessToken, 
+            refreshToken
         }
     }
 
@@ -177,8 +244,8 @@ export class ShopService {
         if(shopHolder) throw new BadRequestException('Shop already existed');
 
         //hash password
-        const salt = crypto.randomBytes(32).toString('hex')
-        const passwordHashed = await this.hashPassword(register.password, salt)
+        const salt = crypto.randomBytes(32).toString('hex');
+        const passwordHashed = await this.hashPassword(register.password, salt);
 
         //create new shop
         const newShop = await this.prismaService.shop.create({
@@ -189,24 +256,33 @@ export class ShopService {
                 password:passwordHashed,
                 roles:RoleShop.SHOP
             }
-        })
+        });
 
         if(newShop){
             const { publicKey, privateKey } = this.generateKeyPair();
             
             //create token pair
-            const tokens = this.jwtService.createToken({accountId:newShop.id, email: newShop.email, role: 'SHOP'},publicKey, privateKey)
-            if(!tokens) throw new BadRequestException('create tokens error!!!!!!')
+            const {accessToken, refreshToken} = this.createTokenPair(newShop.id, ["product:create", "order:view"], privateKey);
+            if(!accessToken || !refreshToken) throw new BadRequestException('create tokens error!!!!!!');
 
             //create key store
-            const keyStore = await this.upsertKeyStore(newShop.id, publicKey, tokens.refreshToken)
+            const keyStore = await this.upsertKeyStore(newShop.id, publicKey, refreshToken);
             if(!keyStore) throw new Error('cannot generate keytoken');
+
+            await this.producerService.produce({
+                topic: 'login',
+                messages: [{
+                    value: `${newShop.name} has been created to our system`
+                }]
+            });
 
             return{
                 shop:getInfoData(['id','email',],newShop),
-                tokens
+                accessToken,
+                refreshToken
             }
-        }
+        };
+
         return {
             code:200,
             metadata:null

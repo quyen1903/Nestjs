@@ -8,7 +8,7 @@ import configuration from './config/configuration';
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
-    }),
+    })
   ],
   controllers: [PaymentController],
   providers: [PaymentService],

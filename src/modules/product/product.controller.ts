@@ -3,12 +3,12 @@ import { ApiKeyGuard } from '../auth/api-key.guard';
 import { Factory } from './services/factory.service';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { AuthGuard } from '../auth/auth-jwt.guard';
 import { RoleGuard } from '../auth/auth-role.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
+import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
 
 @UseGuards(ApiKeyGuard)
 @Controller('product')
@@ -16,7 +16,7 @@ export class ProductController {
     constructor(private readonly factory: Factory) {}
 
     @Post('')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     createProduct( @Body() createProductDTO: CreateProductDTO, @AuthRequest('account') account: JWTdecode ) {
         return this.factory.createProduct(createProductDTO.productType, {
@@ -26,7 +26,7 @@ export class ProductController {
     }
 
     @Patch(':productId')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     updateProduct( @Param('productId') productId: string, @Body() updateProductDTO: UpdateProductDTO, @AuthRequest('account') account: JWTdecode ) {
         return this.factory.updateProduct( updateProductDTO.productType, productId,{
@@ -37,7 +37,7 @@ export class ProductController {
     }
 
     @Post('publish/:id')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     publishProduct(@Param('id') productId: string, @AuthRequest('account') account: JWTdecode) {
         return this.factory.publishProductByShop({ 
@@ -47,7 +47,7 @@ export class ProductController {
     }
 
     @Post('unpublish/:id')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     unpublishProduct(@Param('id') productId: string, @AuthRequest('account') account: JWTdecode){
         return this.factory.unPublishProductByShop({
@@ -57,7 +57,7 @@ export class ProductController {
     }
 
     @Get('drafts/all')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     getAllDraftForShop(@AuthRequest('account') account: JWTdecode){
         return this.factory.findAllDraftsForShop({
@@ -66,7 +66,7 @@ export class ProductController {
     }
 
     @Get('published/all')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     getAllPublishForShop(@AuthRequest('account') account: JWTdecode){
         return this.factory.findAllPublishForShop({

@@ -6,9 +6,8 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
-import { KeyTokenService } from '../keytoken/keytoken.service';
-import { KeyToken, User, UserAuth, UserProfile, UserSocial } from '@prisma/client';
-import { RefreshTokenUsed } from '@prisma/client';
+import { UserKeyTokenService } from '../auth/user-auth/user-auth.keytoken';
+import { UserKeyToken,UserRefreshTokenUsed, User, UserAuth, UserProfile, UserSocial } from '@prisma/client';
 import { EmailService } from 'src/services/email/email.service';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { randomBytes } from 'node:crypto';
@@ -21,14 +20,12 @@ export class UserService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly keytokenService: KeyTokenService,
+        private readonly userKeyTokenService: UserKeyTokenService,
         private readonly emailService: EmailService,
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
     ) {};
 
-    private createTokenPair(userId: string, userName: string){
-        const { privateKey } = this.authService.generateKeyPair();
-
+    private createTokenPair(userId: string, userName: string, privateKey: string){
         const payload = {                
             accountId:userId, 
             username: userName,
@@ -54,7 +51,7 @@ export class UserService {
     }
 
     private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.keytokenService.createKeyToken({
+        return await this.userKeyTokenService.createKeyToken({
             accountId,
             publicKey,
             refreshToken,
@@ -70,13 +67,13 @@ export class UserService {
     async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, storedRefreshToken: string ): Promise<{
         accessToken: string,
         refreshToken: string
-        update: KeyToken;
-        createUsedToken: RefreshTokenUsed; 
+        update: UserKeyToken;
+        createUsedToken: UserRefreshTokenUsed; 
     }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
         const {accountId, username} = account;
 
-        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
+        const duplicateJWT = await this.prismaService.userRefreshTokenUsed.findFirst({
             where:{
                 token: storedRefreshToken
             }
@@ -91,10 +88,10 @@ export class UserService {
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
         const { publicKey, privateKey } = this.authService.generateKeyPair()
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName)
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName, privateKey)
 
 
-        const update = await this.prismaService.keyToken.update({
+        const update = await this.prismaService.userKeyToken.update({
             where:{
                 accountId: account.accountId
             },
@@ -104,7 +101,7 @@ export class UserService {
             }
         })
 
-        const createUsedToken = await this.prismaService.refreshTokenUsed.create({
+        const createUsedToken = await this.prismaService.userRefreshTokenUsed.create({
             data:{
                 token:refreshToken,
                 keyTokenId: update.id
@@ -119,8 +116,8 @@ export class UserService {
         }
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<KeyToken | null>{
-        return await this.keytokenService.removeKeyByAccountID(keyStore.accountId );
+    async logout ( keyStore: IKeyToken ): Promise<UserKeyToken | null>{
+        return await this.userKeyTokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
     async loginManual(login: LoginUserDTO): Promise<{
@@ -135,17 +132,19 @@ export class UserService {
         if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
 
         const { publicKey, privateKey } = this.authService.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName)
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName, privateKey);
+        if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!');
 
-        const keyStore = await this.upsertKeyStore(foundUser.userId, publicKey, refreshToken)
+
+        const keyStore = await this.upsertKeyStore(foundUser.userId, publicKey, refreshToken);
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         return{
             user:getInfoData(['id','email'],foundUser),
             accessToken, 
             refreshToken
-        }
-    }
+        };
+    };
 
     async registerManual(register: RegisterUserDTO) {
         const userHolder = await this.find(register.name);
@@ -190,9 +189,9 @@ export class UserService {
         })
 
         if(newUser && newUserProfile && newUserAuth){
-            const { publicKey } = this.authService.generateKeyPair();
-            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName)
-            if(!accessToken && !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
+            const { privateKey, publicKey } = this.authService.generateKeyPair();
+            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName, privateKey)
+            if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
 
             const keyStore = await this.upsertKeyStore(newUser.id, publicKey, refreshToken)
             if(!keyStore) throw new Error('cannot generate keytoken');

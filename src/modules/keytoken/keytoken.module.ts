@@ -5,7 +5,7 @@ import { ApiKeyService } from "./api-key.service";
 import { ApiController } from "./api.controller";
 
 @Module({
-    imports:[PrismaModule],
+    imports:[PrismaModule,],
     controllers:[ApiController],
     providers:[KeyTokenService, ApiKeyService],
     exports:[KeyTokenService, ApiKeyService]

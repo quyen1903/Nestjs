@@ -4,7 +4,7 @@ import { RegisterShopDTO } from "./dto/register.dto";
 import { LoginShopDTO } from "./dto/login.dto";
 import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
-import { AuthGuard } from "../auth/auth-jwt.guard";
+import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
 import { RoleGuard } from "../auth/auth-role.guard";
 import { Roles } from "../auth/roles.decorator";
 import { Role } from "src/shared/enums/role.enum";
@@ -25,14 +25,14 @@ export class ShopController{
     }
 
     @Post('logout')
-    @UseGuards(AuthGuard, RoleGuard)
+    @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
     logoutShop(@AuthRequest('keyStore') req: IKeyToken){
         return this.shopService.logout(req)
     }
 
     @Post('handlerRefreshToken')
-    @UseGuards(AuthGuard)
+    @UseGuards(ShopAuthGuard)
     handleRefreshToken(@AuthRequest() req: Authentication){
         return this.shopService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     }

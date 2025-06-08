@@ -6,13 +6,13 @@ import {
     BadRequestException, 
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { KeyTokenService } from '../keytoken/keytoken.service';
+import { ShopKeyTokenService } from './shop-auth.keytoken';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class ShopAuthGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly keyTokenService: KeyTokenService
+        private readonly shopKeyTokenService: ShopKeyTokenService
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
         if (!accountId) throw new UnauthorizedException('Invalid Request, missing client ID');
 
         // Find KeyStore
-        const keyStore = await this.keyTokenService.findByAccountId(accountId);
+        const keyStore = await this.shopKeyTokenService.findByAccountId(accountId);
         if (!keyStore) throw new UnauthorizedException('KeyStore not found');
 
 

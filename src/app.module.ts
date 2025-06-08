@@ -19,8 +19,6 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { EmailModule } from './services/email/email.module';
 import { AppController } from './app.controller';
 import { PaymentModule } from './modules/payment/payment.module';
-import { \src\modules\auth\shopModule } from './src/modules/auth/shop/src/modules/auth/shop.module';
-import { Modules\authModule } from './shop/modules/auth/modules/auth.module';
 @Module({
   imports: [
     AuthModule,
@@ -39,8 +37,7 @@ import { Modules\authModule } from './shop/modules/auth/modules/auth.module';
     DiscordModule,
     NotificationModule,
     EmailModule,
-    PaymentModule,
-    \src\modules\auth\shopModule, Modules\authModule,
+    PaymentModule
   ],
   controllers:[AppController],
   providers: [DiscordService],

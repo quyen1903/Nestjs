@@ -3,7 +3,7 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import * as crypto from 'crypto';
-import { Sex } from '@prisma/client';
+import { Sex, UserSocial } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -67,54 +67,53 @@ export class AuthService {
             return {publicKey, privateKey}
         }
 
-    async findOrCreateGoogleUser(profile: any) {
-        const { email, firstName, lastName, picture } = profile;
+    // async findOrCreateGoogleUser(profile: UserSocial) {
+    //     const { email, provider } = profile;
 
-        // Check if user exists
-        let user = await this.prismaService.userSocial.findUnique({
-            where: { email }
-        });
+    //     // Check if user exists
+    //     let user = await this.prismaService.userSocial.findUnique({
+    //         where: { email, provider }
+    //     });
 
-        if (!user) {
-            // Create new user if doesn't exist
-            user = await this.prismaService.userSocial.create({
-                data: {
-                    email,
-                    name: `${firstName} ${lastName}`,
-                    avatar: picture,
-                    isActive: true,
-                    password: '', // Required field
-                    salt: '', // Required field
-                    phone: '', // Required field
-                    sex: Sex.FEMALE, // Required field
-                    dateOfBirth: new Date(), // Required field
-                }
-            });
-        }
+    //     if (!user) {
+    //         // Create new user if doesn't exist
+    //         user = await this.prismaService.userSocial.create({
+    //             data: {
+    //                 email,
+    //                 name: `${firstName} ${lastName}`,
+    //                 avatar: picture,
+    //                 isActive: true,
+    //                 password: '', // Required field
+    //                 salt: '', // Required field
+    //                 phone: '', // Required field
+    //                 sex: Sex.FEMALE, // Required field
+    //                 dateOfBirth: new Date(), // Required field
+    //             }
+    //         });
+    //     }
 
-        // Generate tokens
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName)
+    //     // Generate tokens
+    //     const { publicKey, privateKey } = this.generateKeyPair();
+    //     const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName)
 
 
-        // Create or update key token
-        await this.keyTokenService.createKeyToken({
-            accountId: user.id,
-            publicKey,
-            refreshToken: refreshToken,
-            roles: 'USER'
-        });
+    //     // Create or update key token
+    //     await this.keyTokenService.createKeyToken({
+    //         accountId: user.id,
+    //         publicKey,
+    //         refreshToken: refreshToken,
+    //         roles: 'USER'
+    //     });
 
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                avatar: user.avatar
-            },
-            accessToken,
-            refreshToken
-        };
-    }
-
+    //     return {
+    //         user: {
+    //             id: user.id,
+    //             email: user.email,
+    //             name: user.name,
+    //             avatar: user.avatar
+    //         },
+    //         accessToken,
+    //         refreshToken
+    //     };
+    // }
 } 

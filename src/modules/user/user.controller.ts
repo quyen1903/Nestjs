@@ -4,10 +4,10 @@ import { RegisterUserDTO } from "./dto/register.dto";
 import { LoginUserDTO } from "./dto/login.dto";
 import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
-import { AuthGuard } from "../auth/auth-jwt.guard";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 import { ForgotPasswordDTO } from "./dto/forgot-password.dto";
 import { ResetPasswordDTO } from "./dto/reset-password.dto";
+import { UserAuthGuard } from "../auth/user-auth/auth-jwt.guard";
 @Controller('user')
 @UseGuards(ApiKeyGuard)
 export class ShopController{
@@ -24,13 +24,13 @@ export class ShopController{
     }
 
     @Post('logout')
-    @UseGuards(AuthGuard)
+    @UseGuards(UserAuthGuard)
     logoutUser(@AuthRequest('keyStore') req: IKeyToken){
         return this.userService.logout(req)
     }
 
     @Post('handlerRefreshToken')
-    @UseGuards(AuthGuard)
+    @UseGuards(UserAuthGuard)
     handleRefreshToken(@AuthRequest() req: Authentication){
         return this.userService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     }
