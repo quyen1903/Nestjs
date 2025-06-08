@@ -28,7 +28,7 @@ model Shop {
 
 model ShopKeyToken {
   id               String             @id @default(uuid())
-  accountId        String             @unique @map("account_id")
+  sub              String             @unique @map("account_id")
   publicKey        String             @map("public_key")
   refreshToken     String             @map("refresh_token")
   roles            AccountRole        @map("roles")
@@ -406,7 +406,7 @@ model PasswordReset {
 
 model UserKeyToken {
   id               String             @id @default(uuid())
-  accountId        String             @unique @map("account_id")
+  sub        String             @unique @map("account_id")
   publicKey        String             @map("public_key")
   refreshToken     String             @map("refresh_token")
   roles            AccountRole        @map("roles")

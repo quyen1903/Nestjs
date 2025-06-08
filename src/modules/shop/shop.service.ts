@@ -4,13 +4,14 @@ import crypto from 'crypto';
 import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { RoleShop } from 'src/shared/enums/shop.enum';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
 import { ShopKeyTokenService } from '../auth/shop-auth/shop-auth.keytoken';
+import { RoleShop } from '@prisma/client';
+import { JwtShop } from '../auth/shop-auth/interface/jwt.shop';
 @Injectable()
 export class ShopService {
     constructor(
@@ -31,7 +32,7 @@ export class ShopService {
     private createTokenPair(shopId: string, permissions: string[], privateKey: string){
         const payload = {                
             sub: shopId,
-            role: 'shop',
+            role: RoleShop.SHOP,
             permissions,
         };
         
@@ -148,14 +149,14 @@ export class ShopService {
      * @param refreshToken 
      * @returns new token pair
      */
-    async handleRefreshToken( keyStore: IKeyToken, account: JWTdecode, userRefreshToken: string ): Promise<{
+    async handleRefreshToken( keyStore: ShopKeyToken, account: JwtShop, userRefreshToken: string ): Promise<{
         accessToken: string,
         refreshToken: string
         update: ShopKeyToken;
         createUsedToken: ShopRefreshTokenUsed; 
     }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-        const {accountId, username} = account;
+        const {sub, username} = account;
 
         const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
             where:{
@@ -176,7 +177,7 @@ export class ShopService {
 
         const update = await this.prismaService.shopKeyToken.update({
             where:{
-                accountId: account.accountId
+                sub: sub
             },
             data:{
                 publicKey,
@@ -199,8 +200,9 @@ export class ShopService {
         }
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<ShopKeyToken | null>{
-        return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.accountId );
+    async logout ( keyStore: JwtShop ): Promise<ShopKeyToken | null>{
+        console.log("keystore",keyStore)
+        return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.sub);
     };
 
     async login(login: LoginShopDTO): Promise<{

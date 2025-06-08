@@ -93,7 +93,7 @@ export class UserService {
 
         const update = await this.prismaService.userKeyToken.update({
             where:{
-                accountId: account.accountId
+                sub: account.accountId
             },
             data:{
                 publicKey,

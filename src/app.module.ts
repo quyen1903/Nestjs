@@ -19,32 +19,32 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { EmailModule } from './services/email/email.module';
 import { AppController } from './app.controller';
 import { PaymentModule } from './modules/payment/payment.module';
+import { RequestIdMiddleware } from './middleware/request-id.middleware';
 @Module({
-  imports: [
-    AuthModule,
-    ShopModule,
-    PrismaModule,
-    KeyTokenModule,
-    ProductModule,
-    DiscountModule,
-    InventoryModule,
-    CartModule,
-    UserModule,
-    KafkaModule,
-    CheckoutModule,
-    CommentModule,
-    ConfigModule.forRoot(),
-    DiscordModule,
-    NotificationModule,
-    EmailModule,
-    PaymentModule
-  ],
-  controllers:[AppController],
-  providers: [DiscordService],
-
+    imports: [
+        AuthModule,
+        ShopModule,
+        PrismaModule,
+        KeyTokenModule,
+        ProductModule,
+        DiscountModule,
+        InventoryModule,
+        CartModule,
+        UserModule,
+        KafkaModule,
+        CheckoutModule,
+        CommentModule,
+        ConfigModule.forRoot(),
+        DiscordModule,
+        NotificationModule,
+        EmailModule,
+        PaymentModule
+    ],
+    controllers:[AppController],
+    providers: [DiscordService],
 })
 export class AppModule implements NestModule{
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DiscordMiddleware).forRoutes('*');
-  }
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(DiscordMiddleware, RequestIdMiddleware).forRoutes('*');
+    }
 }

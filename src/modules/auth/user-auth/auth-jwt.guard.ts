@@ -32,7 +32,7 @@ export class UserAuthGuard implements CanActivate {
         if (refreshToken) {
             const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
             if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
-
+            console.log("decoded User", decodedUser),
             request['account'] = decodedUser;
             request['keyStore'] = keyStore;
 
@@ -46,6 +46,7 @@ export class UserAuthGuard implements CanActivate {
         try {
             const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
             if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
+            console.log("decoded User", decodedUser),
             request['account'] = decodedUser;
             request['keyStore'] = keyStore;
 

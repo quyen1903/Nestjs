@@ -2,13 +2,13 @@ import { Body, Controller, Post, UseGuards, Get, Param } from "@nestjs/common";
 import { ShopService } from "./shop.service";
 import { RegisterShopDTO } from "./dto/register.dto";
 import { LoginShopDTO } from "./dto/login.dto";
-import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
+import { JwtShop } from "../auth/shop-auth/interface/jwt.shop";
 import { ApiKeyGuard } from "../auth/api-key.guard";
 import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
 import { RoleGuard } from "../auth/auth-role.guard";
 import { Roles } from "../auth/roles.decorator";
 import { Role } from "src/shared/enums/role.enum";
-import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
+import { ShopAuthRequest } from "../auth/shop-auth/interface/shop.request";
 @Controller('shop')
 @UseGuards(ApiKeyGuard)
 export class ShopController{
@@ -27,13 +27,14 @@ export class ShopController{
     @Post('logout')
     @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
-    logoutShop(@AuthRequest('keyStore') req: IKeyToken){
+    logoutShop(@ShopAuthRequest('keyStore') req: JwtShop){
         return this.shopService.logout(req)
     }
 
     @Post('handlerRefreshToken')
     @UseGuards(ShopAuthGuard)
-    handleRefreshToken(@AuthRequest() req: Authentication){
+    handleRefreshToken(@ShopAuthRequest() req: ShopAuthRequest){
+        console.log("request", req)
         return this.shopService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     }
 

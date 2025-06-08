@@ -9,16 +9,16 @@ export class ShopKeyTokenService {
         
     async createKeyToken({ accountId, publicKey, refreshToken, roles }: IKeyToken) : Promise<ShopKeyToken> {
         return this.prismaService.shopKeyToken.upsert({
-            where: { accountId },
+            where: { sub:accountId },
             update: { publicKey, refreshToken, isActive: true },
-            create: { accountId, publicKey, refreshToken, roles, isActive: true },
+            create: { sub:accountId, publicKey, refreshToken, roles, isActive: true },
         });
     }
 
     async findByAccountId(accountId: string): Promise<ShopKeyToken | null> {
         const result = await this.prismaService.shopKeyToken.findUnique({
             where: {
-                accountId,
+                sub:accountId,
             },
         });
         return result

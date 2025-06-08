@@ -13,59 +13,48 @@ export class AuthService {
         private readonly keyTokenService: KeyTokenService,
     ) {};
 
-        private createTokenPair(userId: string, userName: string){
-        const { privateKey } = this.generateKeyPair();
-
-        const payload = {                
-            accountId:userId, 
-            username: userName,
-            role: 'USER'
-        };
-        
-        const accessToken = this.jwtService.sign(payload,  
-            {
-                privateKey,              
-                algorithm: 'RS256',      
-                expiresIn: '1h',         
-            }
-        )
-
-        const refreshToken = this.jwtService.sign(payload,  
-            {
-                privateKey,              
-                algorithm: 'RS256',      
-                expiresIn: '6h',         
-            }
-        )
-        return {accessToken, refreshToken}
+    /**
+     * 
+     * @param password original password
+     * @param salt random string
+     * @returns hashed password, which had been add salt to hash, almost impossible to brute force
+    */
+    hashPassword(password:string, salt:string):Promise<string> {
+        return new Promise((resolve, reject) => {
+            crypto.pbkdf2(password, salt, 100,64,'sha512', (err, key) => {
+                if (err) return  reject(err)
+                resolve(key.toString('hex'));
+            })
+        });
     }
 
-        hashPassword(password:string, salt:string):Promise<string> {
-            return new Promise((resolve, reject) => {
-                crypto.pbkdf2(password, salt, 100,64,'sha512', (err, key) => {
-                    if (err) return  reject(err)
-                    resolve(key.toString('hex'));
-                })
-            });
-        }
-    
-        generateKeyPair(): {
-            publicKey: string;
-            privateKey: string;
-        }{
-            const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',{
-                modulusLength:4096,
-                publicKeyEncoding:{
-                    type:'pkcs1',
-                    format:'pem'
-                },
-                privateKeyEncoding:{
-                    type:'pkcs1',
-                    format:'pem'
-                }
-            })
-            return {publicKey, privateKey}
-        }
+    /**
+     * 
+     * @returns return public key and private key
+     * in cryptography
+     * public key are use for decrypt and to authorize jwt (this is our use case)
+     * private key are use for encrypt and to create jwt (this is our use case)
+     * public key are store in database, we drop private key
+     * 
+     * in both user case, anybody can see public key, it's ok. But dont let any one know your private key
+     */
+    generateKeyPair(): {
+        publicKey: string;
+        privateKey: string;
+    }{
+        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',{
+            modulusLength:4096,
+            publicKeyEncoding:{
+                type:'pkcs1',
+                format:'pem'
+            },
+            privateKeyEncoding:{
+                type:'pkcs1',
+                format:'pem'
+            }
+        })
+        return {publicKey, privateKey}
+    }
 
     // async findOrCreateGoogleUser(profile: UserSocial) {
     //     const { email, provider } = profile;

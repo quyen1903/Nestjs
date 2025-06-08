@@ -30,11 +30,11 @@ export class ShopAuthGuard implements CanActivate {
         const refreshToken = request.headers['x-rtoken-id'] as string;
         if (refreshToken) {
             const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
-            if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
-
+            if (accountId !== decodedUser['sub']) throw new UnauthorizedException('Invalid User ID');
+            console.log("this is refreshtoken", refreshToken)
             request['account'] = decodedUser;
             request['keyStore'] = keyStore;
-
+            request['refreshToken'] = refreshToken;
             return true;
         }
 
@@ -43,13 +43,14 @@ export class ShopAuthGuard implements CanActivate {
         if (!accessToken) throw new UnauthorizedException('Invalid Request');
 
         try {
-            const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
-            if (accountId !== decodedUser['accountId']) throw new UnauthorizedException('Invalid User ID');
+            const decodedUser = this.jwtService.verify(accessToken, {publicKey:keyStore.publicKey});
+            console.log("decoded>>>>>>>>>>>>>>>>",decodedUser)
+            if (accountId !== decodedUser['sub']) throw new UnauthorizedException('Invalid User ID');
             request['account'] = decodedUser;
             request['keyStore'] = keyStore;
-
+            request['refreshToken'] = accessToken;
         } catch (error) {
-            console.error('AuthGuard Error:', error); // Ghi log để debug
+            console.error('AuthGuard Error:', error);
             throw new BadRequestException('wrong access or refresh token, please relogin');
         }
 
