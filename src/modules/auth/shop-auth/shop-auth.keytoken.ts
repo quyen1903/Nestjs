@@ -45,14 +45,4 @@ export class ShopKeyTokenService {
         });
     }
 
-    async createAPIKey(){
-        return await this.prismaService.aPIkey.create({
-            data:{
-                key:crypto.randomBytes(64).toString('hex'),
-                status:true,
-                permission:['0000'],
-                isActive: true
-            }
-        })
-    }
 }

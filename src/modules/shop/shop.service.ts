@@ -5,8 +5,6 @@ import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
-import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
 import { ShopKeyTokenService } from '../auth/shop-auth/shop-auth.keytoken';
@@ -289,5 +287,16 @@ export class ShopService {
             code:200,
             metadata:null
         }  
+    }
+
+    async createAPIKey(){
+        return await this.prismaService.aPIkey.create({
+            data:{
+                key:crypto.randomBytes(64).toString('hex'),
+                status:true,
+                permission:['0000'],
+                isActive: true
+            }
+        })
     }
 }

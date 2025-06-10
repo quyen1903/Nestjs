@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
 import crypto from 'crypto';
 import { RegisterUserDTO } from './dto/register.dto';
-import { LoginUserDTO } from './dto/login.dto';
+import { LoginUserManualDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
@@ -59,8 +59,8 @@ export class UserService {
         })
     };
 
-    private async find(userName: string){
-        const user =await this.prismaService.userAuth.findUnique({where:{userName}})
+    private async find(username: string){
+        const user =await this.prismaService.userAuth.findUnique({where:{username}})
         return user 
     };
 
@@ -88,7 +88,7 @@ export class UserService {
 
         //3 if this accesstoken is valid, create new accesstoken, refreshtoken
         const { publicKey, privateKey } = this.authService.generateKeyPair()
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName, privateKey)
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.username, privateKey)
 
 
         const update = await this.prismaService.userKeyToken.update({
@@ -120,19 +120,19 @@ export class UserService {
         return await this.userKeyTokenService.removeKeyByAccountID(keyStore.accountId );
     };
 
-    async loginManual(login: LoginUserDTO): Promise<{
+    async loginManual(login: LoginUserManualDTO): Promise<{
         user: object;
         accessToken: string;
         refreshToken: string;
     }>{
-        const foundUser = await this.find(login.email);
+        const foundUser = await this.find(login.username);
         if(!foundUser) throw new BadRequestException('user not registed');
 
         const passwordHashed =await this.authService.hashPassword(login.password, foundUser.salt);
         if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
 
         const { publicKey, privateKey } = this.authService.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.userName, privateKey);
+        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.username, privateKey);
         if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!');
 
 
@@ -170,7 +170,7 @@ export class UserService {
                     userId: user.id,
                     password: passwordHashed,
                     salt,
-                    userName: register.userName
+                    username: register.userName
                 }
             });
 
@@ -190,7 +190,7 @@ export class UserService {
 
         if(newUser && newUserProfile && newUserAuth){
             const { privateKey, publicKey } = this.authService.generateKeyPair();
-            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName, privateKey)
+            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.username, privateKey)
             if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
 
             const keyStore = await this.upsertKeyStore(newUser.id, publicKey, refreshToken)
@@ -294,7 +294,6 @@ export class UserService {
     }
     
     async validatePasswordResetToken(token: string): Promise<{ valid: boolean }> {
-
         const passwordReset = await this.prismaService.passwordReset.findFirst({
             where: {
                 token,

@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { KeyTokenService } from '../keytoken/keytoken.service';
+import { UserKeyTokenService } from './user-auth/user-auth.keytoken';
 import * as crypto from 'crypto';
-import { Sex, UserSocial } from '@prisma/client';
-
+import { Sex, User, UserProfile, UserSocial, UserSocialProvider } from '@prisma/client';
+import { BadGatewayException } from '@nestjs/common';
 @Injectable()
 export class AuthService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly keyTokenService: KeyTokenService,
+        private readonly userKeyTokenService: UserKeyTokenService,
     ) {};
 
     /**
@@ -26,7 +26,7 @@ export class AuthService {
                 resolve(key.toString('hex'));
             })
         });
-    }
+    };
 
     /**
      * 
@@ -54,55 +54,111 @@ export class AuthService {
             }
         })
         return {publicKey, privateKey}
+    };
+
+    private createTokenPair(userId: string, email: string, privateKey: string){
+        const payload = {                
+            accountId:userId, 
+            email,
+            role: 'USER'
+        };
+        
+        const accessToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '1h',         
+            }
+        )
+
+        const refreshToken = this.jwtService.sign(payload,  
+            {
+                privateKey,              
+                algorithm: 'RS256',      
+                expiresIn: '6h',         
+            }
+        )
+        return {accessToken, refreshToken}
+    };
+
+    private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
+        return await this.userKeyTokenService.createKeyToken({
+            accountId,
+            publicKey,
+            refreshToken,
+            roles: 'USER'
+        })
+    };
+
+    async findOrCreateGoogleUser(social: UserSocial, profile: UserProfile | null) {
+        const existingSocial = await this.prismaService.userSocial.findUnique({
+            where: { email: social.email, providerId: social.providerId },
+        });
+
+        let user: User;
+
+        if (!existingSocial) {
+            // Create new user and related entities if social record does not exist
+            const { newUser, newSocial, newProfile } = await this.prismaService.$transaction(async (tx) => {
+                const newUser = await tx.user.create({ data: {} });
+
+                const newSocial = await tx.userSocial.create({
+                    data: {
+                        provider: UserSocialProvider.GOOGLE,
+                        providerId: social.providerId,
+                        email: social.email,
+                        userId: newUser.id,
+                    },
+                });
+
+                let newProfile: UserProfile | null = null;
+                if (profile && (profile.name || profile.phone)) {
+                    newProfile = await tx.userProfile.create({
+                        data: {
+                            name: profile.name ?? '',
+                            phone: profile.phone ?? '',
+                            sex: profile.sex ?? Sex.FEMALE,
+                            avatar: profile.avatar ?? '',
+                            dateOfBirth: profile.dateOfBirth ?? new Date(0),
+                            userId: newUser.id,
+                        },
+                    });
+                }
+
+                return { newUser, newSocial, newProfile };
+            });
+
+            user = newUser;
+
+            // Create Notification Thread
+            await this.prismaService.notificationThread.create({
+                data: { userId: newUser.id },
+            });
+        } else {
+            // Fetch existing user
+            user = await this.prismaService.user.findUnique({
+                where: { id: existingSocial.userId },
+            });
+        }
+
+        // Generate Token Pair
+        const { publicKey, privateKey } = this.generateKeyPair();
+        const { accessToken, refreshToken } = this.createTokenPair(user.id, social.email, privateKey);
+
+        if (!accessToken || !refreshToken) {
+            throw new BadGatewayException('Failed to generate tokens');
+        }
+
+        // Upsert Key Store
+        const keyStore = await this.upsertKeyStore(user.id, publicKey, refreshToken);
+        if (!keyStore) {
+            throw new BadGatewayException('Failed to create key store');
+        }
+
+        return {
+            user,
+            accessToken,
+            refreshToken,
+        };
     }
-
-    // async findOrCreateGoogleUser(profile: UserSocial) {
-    //     const { email, provider } = profile;
-
-    //     // Check if user exists
-    //     let user = await this.prismaService.userSocial.findUnique({
-    //         where: { email, provider }
-    //     });
-
-    //     if (!user) {
-    //         // Create new user if doesn't exist
-    //         user = await this.prismaService.userSocial.create({
-    //             data: {
-    //                 email,
-    //                 name: `${firstName} ${lastName}`,
-    //                 avatar: picture,
-    //                 isActive: true,
-    //                 password: '', // Required field
-    //                 salt: '', // Required field
-    //                 phone: '', // Required field
-    //                 sex: Sex.FEMALE, // Required field
-    //                 dateOfBirth: new Date(), // Required field
-    //             }
-    //         });
-    //     }
-
-    //     // Generate tokens
-    //     const { publicKey, privateKey } = this.generateKeyPair();
-    //     const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.userName)
-
-
-    //     // Create or update key token
-    //     await this.keyTokenService.createKeyToken({
-    //         accountId: user.id,
-    //         publicKey,
-    //         refreshToken: refreshToken,
-    //         roles: 'USER'
-    //     });
-
-    //     return {
-    //         user: {
-    //             id: user.id,
-    //             email: user.email,
-    //             name: user.name,
-    //             avatar: user.avatar
-    //         },
-    //         accessToken,
-    //         refreshToken
-    //     };
-    // }
 } 

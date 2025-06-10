@@ -341,14 +341,16 @@ model User {
   order               Order[]
   messages            Message[]         @relation("UserMessages")
   notificationThread  NotificationThread?
-
+  isActive   Boolean  @default(true)
+  createdAt  BigInt   @default(0)
+  updatedAt  BigInt   @default(0)
   @@map("users")
 }
 
 
 model UserAuth {
   userId     String   @id
-  userName   String   @unique
+  username   String   @unique
   password   String
   salt       String
   status     Status   @default(ACTIVE)
@@ -375,11 +377,10 @@ model UserProfile {
 }
 
 model UserSocial {
-  id        String   @id @default(uuid())
+  userId       String   @id
   provider  String   // 'google', 'facebook'
-  providerId String  // ID của user bên Google/Facebook
+  providerId String @unique  // ID của user bên Google/Facebook
   email     String
-  userId    String   
   user      User     @relation(fields: [userId], references: [id])
 
   isActive   Boolean  @default(true)
@@ -549,4 +550,9 @@ enum Sex {
 enum MessageType {
   USER_TO_SHOP
   SHOP_TO_USER
+}
+
+enum UserSocialProvider{
+  GOOGLE
+  FACEBOOK
 }

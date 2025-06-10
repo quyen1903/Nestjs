@@ -5,8 +5,8 @@ import { ApiKeyService } from "./api-key.service";
 export class ApiController{
     constructor(private readonly apikeyService: ApiKeyService){}
 
-    @Post('createApiKey')
-    createKey(){
-        return this.apikeyService.createAPIKey()
-    }
+    // @Post('createApiKey')
+    // createKey(){
+    //     return this.apikeyService.createAPIKey()
+    // }
 }

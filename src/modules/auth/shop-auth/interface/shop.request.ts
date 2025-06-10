@@ -23,7 +23,6 @@ export const ShopAuthRequest = createParamDecorator(
             apiKey: request.apiKey,
             requestId: request.requestId,
         };
-
         return data ? authData[data] : authData;
     },
 );

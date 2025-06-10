@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Get, Query, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { RegisterUserDTO } from "./dto/register.dto";
-import { LoginUserDTO } from "./dto/login.dto";
+import { LoginUserManualDTO } from "./dto/login.dto";
 import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { ApiKeyGuard } from "../auth/api-key.guard";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
@@ -13,13 +13,13 @@ import { UserAuthGuard } from "../auth/user-auth/auth-jwt.guard";
 export class ShopController{
     constructor( private readonly userService: UserService ){}
 
-    @Post('register')
+    @Post('registerManual')
     registerUser(@Body() body: RegisterUserDTO){
         return this.userService.registerManual(body)
     }
 
-    @Post('login')
-    loginUser(@Body() body: LoginUserDTO){
+    @Post('loginManual')
+    loginUser(@Body() body: LoginUserManualDTO){
         return this.userService.loginManual(body)
     }
 
