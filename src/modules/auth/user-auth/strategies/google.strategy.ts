@@ -12,44 +12,46 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         private readonly authService: AuthService,
     ) {
         super({
-            clientID: configService.get<string>('google.clientID'),
-            clientSecret: configService.get<string>('google.clientSecret'),
-            callbackURL: configService.get<string>('google.callbackURL'),
+            clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
+            clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
+            callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL'),
             scope: ['email', 'profile'],
         });
     }
 
-    async validate(
-        accessToken: string,
-        refreshToken: string,
-        profile: any,
-        done: VerifyCallback,
-    ): Promise<any> {
-        const { id: providerId, name, emails, photos } = profile;
+    async validate(accessToken, refreshToken, profile, done) {
+    const { id: providerId, name, emails, photos } = profile;
 
-        const social = {
-            email: emails[0].value,
-            provider: UserSocialProvider.GOOGLE,
-            providerId,
-            userId: '', // placeholder, will be used in service
-            isActive: true,
-            createdAt: BigInt(Date.now()),
-            updatedAt: BigInt(Date.now()),
-        };
+    const social = {
+        email: emails[0].value,
+        provider: UserSocialProvider.GOOGLE,
+        providerId,
+        userId: '',
+        isActive: true,
+        createdAt: BigInt(Date.now()),
+        updatedAt: BigInt(Date.now()),
+    };
 
-        const userProfile: UserProfile = {
-            userId: '', // placeholder, will be used in service
-            name: name?.givenName + ' ' + name?.familyName,
-            phone: '', // not available from Google by default
-            sex: Sex.FEMALE,
-            avatar: photos?.[0]?.value ?? '',
-            dateOfBirth: new Date(0),
-            isActive: true,
-            createdAt: BigInt(Date.now()),
-            updatedAt: BigInt(Date.now()),
-        };
+    const userProfile: UserProfile = {
+        userId: '',
+        name: name?.givenName + ' ' + name?.familyName,
+        phone: '',
+        sex: Sex.FEMALE,
+        avatar: photos?.[0]?.value ?? '',
+        dateOfBirth: new Date(0),
+        isActive: true,
+        createdAt: BigInt(Date.now()),
+        updatedAt: BigInt(Date.now()),
+    };
 
-        const result = await this.authService.findOrCreateGoogleUser(social, userProfile);
-        done(null, result);
+    const result = await this.authService.findOrCreateGoogleUser(social, userProfile);
+
+    // ✅ Return để gán vào req.user
+    return done(null, {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+    });
     }
+
 }

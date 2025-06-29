@@ -23,6 +23,9 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { ApiModule } from './modules/api/api.module';
 @Module({
     imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
         AuthModule,
         ShopModule,
         PrismaModule,
