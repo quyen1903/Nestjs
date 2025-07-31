@@ -1,7 +1,7 @@
 interface JwtUser{
   sub: "userId",
   role: "user",
-  email: string,
+  username: string,
   iat: number,
   exp: number
 };

@@ -5,12 +5,14 @@ import { UserKeyTokenService } from './user-auth/user-auth.keytoken';
 import * as crypto from 'crypto';
 import { Sex, User, UserProfile, UserSocial, UserSocialProvider } from '@prisma/client';
 import { BadGatewayException } from '@nestjs/common';
+import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly prismaService: PrismaService,
-        private readonly jwtService: JwtService,
-        private readonly userKeyTokenService: UserKeyTokenService,
+        protected readonly prismaService: PrismaService,
+        protected readonly jwtService: JwtService,
+        // private readonly userKeyTokenService: UserKeyTokenService,
+        protected readonly producerService: ProducerService
     ) {};
 
     /**
@@ -38,7 +40,7 @@ export class AuthService {
      * 
      * in both user case, anybody can see public key, it's ok. But dont let any one know your private key
      */
-    generateKeyPair(): {
+    protected generateKeyPair(): {
         publicKey: string;
         privateKey: string;
     }{
@@ -56,9 +58,9 @@ export class AuthService {
         return {publicKey, privateKey}
     };
 
-    private createTokenPair(userId: string, email: string, privateKey: string){
+    protected createTokenPair(id: string, email: string, privateKey: string){
         const payload = {                
-            accountId:userId, 
+            accountId:id, 
             email,
             role: 'USER'
         };
@@ -81,14 +83,14 @@ export class AuthService {
         return {accessToken, refreshToken}
     };
 
-    private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.userKeyTokenService.createKeyToken({
-            accountId,
-            publicKey,
-            refreshToken,
-            roles: 'USER'
-        })
-    };
+    // protected async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
+    //     return await this.userKeyTokenService.createKeyToken({
+    //         accountId,
+    //         publicKey,
+    //         refreshToken,
+    //         roles: 'USER'
+    //     })
+    // };
 
     async findOrCreateGoogleUser(social: UserSocial, profile: UserProfile | null) {
         const existingSocial = await this.prismaService.userSocial.findUnique({

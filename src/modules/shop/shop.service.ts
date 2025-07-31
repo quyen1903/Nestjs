@@ -140,154 +140,154 @@ export class ShopService {
         })
     };
 
-    /**
-     * use refreshtoken to get new token pair
-     * @param keyStore 
-     * @param account 
-     * @param refreshToken 
-     * @returns new token pair
-     */
-    async handleRefreshToken( keyStore: ShopKeyToken, account: JwtShop, userRefreshToken: string ): Promise<{
-        accessToken: string,
-        refreshToken: string
-        update: ShopKeyToken;
-        createUsedToken: ShopRefreshTokenUsed; 
-    }>{
-        //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-        const {sub, username} = account;
+    // /**
+    //  * use refreshtoken to get new token pair
+    //  * @param keyStore 
+    //  * @param account 
+    //  * @param refreshToken 
+    //  * @returns new token pair
+    //  */
+    // async handleRefreshToken( keyStore: ShopKeyToken, account: JwtShop, userRefreshToken: string ): Promise<{
+    //     accessToken: string,
+    //     refreshToken: string
+    //     update: ShopKeyToken;
+    //     createUsedToken: ShopRefreshTokenUsed; 
+    // }>{
+    //     //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
+    //     const {sub, username} = account;
 
-        const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
-            where:{
-                token: userRefreshToken
-            }
-        })
+    //     const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
+    //         where:{
+    //             token: userRefreshToken
+    //         }
+    //     })
 
-        if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
+    //     if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
 
-        //2 if user's token is not valid token, force them to relogin, too
-        if(keyStore.refreshToken !== userRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-        const foundShop = await this.find(username)
-        if(!foundShop) throw new UnauthorizedException('shop not registed');
+    //     //2 if user's token is not valid token, force them to relogin, too
+    //     if(keyStore.refreshToken !== userRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
+    //     const foundShop = await this.find(username)
+    //     if(!foundShop) throw new UnauthorizedException('shop not registed');
 
-        //3 if this accesstoken is valid, create new accesstoken, refreshtoken
-        const { publicKey, privateKey } = this.generateKeyPair()
-        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
+    //     //3 if this accesstoken is valid, create new accesstoken, refreshtoken
+    //     const { publicKey, privateKey } = this.generateKeyPair()
+    //     const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
 
-        const update = await this.prismaService.shopKeyToken.update({
-            where:{
-                sub: sub
-            },
-            data:{
-                publicKey,
-                refreshToken: refreshToken
-            }
-        })
+    //     const update = await this.prismaService.shopKeyToken.update({
+    //         where:{
+    //             sub: sub
+    //         },
+    //         data:{
+    //             publicKey,
+    //             refreshToken: refreshToken
+    //         }
+    //     })
 
-        const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
-            data:{
-                token:refreshToken,
-                keyTokenId: update.id
-            }
-        })
+    //     const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
+    //         data:{
+    //             token:refreshToken,
+    //             keyTokenId: update.id
+    //         }
+    //     })
 
-        return {
-            accessToken,
-            refreshToken,
-            update,
-            createUsedToken
-        }
-    };
+    //     return {
+    //         accessToken,
+    //         refreshToken,
+    //         update,
+    //         createUsedToken
+    //     }
+    // };
 
-    async logout ( keyStore: JwtShop ): Promise<ShopKeyToken | null>{
-        console.log("keystore",keyStore)
-        return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.sub);
-    };
+    // async logout ( keyStore: JwtShop ): Promise<ShopKeyToken | null>{
+    //     console.log("keystore",keyStore)
+    //     return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.sub);
+    // };
 
-    async login(login: LoginShopDTO): Promise<{
-        shop: object;
-        accessToken: string;
-        refreshToken: string;
-    }>{
-        //check whether shop existed or not
-        const foundShop = await this.find(login.email);
-        if(!foundShop) throw new BadRequestException('Shop not registed');
+    // async login(login: LoginShopDTO): Promise<{
+    //     shop: object;
+    //     accessToken: string;
+    //     refreshToken: string;
+    // }>{
+    //     //check whether shop existed or not
+    //     const foundShop = await this.find(login.email);
+    //     if(!foundShop) throw new BadRequestException('Shop not registed');
 
-        //hash password and compare
-        const passwordHashed =await this.hashPassword(login.password, foundShop.salt);
-        if (passwordHashed !== foundShop.password) throw new UnauthorizedException('Wrong password!!!');
+    //     //hash password and compare
+    //     const passwordHashed =await this.hashPassword(login.password, foundShop.salt);
+    //     if (passwordHashed !== foundShop.password) throw new UnauthorizedException('Wrong password!!!');
 
-        //create key pair
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
+    //     //create key pair
+    //     const { publicKey, privateKey } = this.generateKeyPair();
+    //     const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, ["product:create", "order:view"], privateKey);
 
-        //create new keytoken
-        const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, refreshToken)
-        if(!keyStore) throw new Error('cannot generate keytoken');
+    //     //create new keytoken
+    //     const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, refreshToken)
+    //     if(!keyStore) throw new Error('cannot generate keytoken');
 
-        await this.producerService.produce({
-            topic: 'login',
-            messages: [{
-                value: `${foundShop.name} has login to our system`
-            }]
-        })
+    //     await this.producerService.produce({
+    //         topic: 'login',
+    //         messages: [{
+    //             value: `${foundShop.name} has login to our system`
+    //         }]
+    //     })
 
-        return{
-            shop:getInfoData(['id','email'],foundShop),
-            accessToken, 
-            refreshToken
-        }
-    }
+    //     return{
+    //         shop:getInfoData(['id','email'],foundShop),
+    //         accessToken, 
+    //         refreshToken
+    //     }
+    // }
 
-    async register(register: RegisterShopDTO) {
-        //check whether shop existed
-        const shopHolder = await this.find(register.email);
-        if(shopHolder) throw new BadRequestException('Shop already existed');
+    // async register(register: RegisterShopDTO) {
+    //     //check whether shop existed
+    //     const shopHolder = await this.find(register.email);
+    //     if(shopHolder) throw new BadRequestException('Shop already existed');
 
-        //hash password
-        const salt = crypto.randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(register.password, salt);
+    //     //hash password
+    //     const salt = crypto.randomBytes(32).toString('hex');
+    //     const passwordHashed = await this.hashPassword(register.password, salt);
 
-        //create new shop
-        const newShop = await this.prismaService.shop.create({
-            data:{
-                name: register.name,
-                salt,
-                email: register.email,
-                password:passwordHashed,
-                roles:RoleShop.SHOP
-            }
-        });
+    //     //create new shop
+    //     const newShop = await this.prismaService.shop.create({
+    //         data:{
+    //             name: register.name,
+    //             salt,
+    //             email: register.email,
+    //             password:passwordHashed,
+    //             roles:RoleShop.SHOP
+    //         }
+    //     });
 
-        if(newShop){
-            const { publicKey, privateKey } = this.generateKeyPair();
+    //     if(newShop){
+    //         const { publicKey, privateKey } = this.generateKeyPair();
             
-            //create token pair
-            const {accessToken, refreshToken} = this.createTokenPair(newShop.id, ["product:create", "order:view"], privateKey);
-            if(!accessToken || !refreshToken) throw new BadRequestException('create tokens error!!!!!!');
+    //         //create token pair
+    //         const {accessToken, refreshToken} = this.createTokenPair(newShop.id, ["product:create", "order:view"], privateKey);
+    //         if(!accessToken || !refreshToken) throw new BadRequestException('create tokens error!!!!!!');
 
-            //create key store
-            const keyStore = await this.upsertKeyStore(newShop.id, publicKey, refreshToken);
-            if(!keyStore) throw new Error('cannot generate keytoken');
+    //         //create key store
+    //         const keyStore = await this.upsertKeyStore(newShop.id, publicKey, refreshToken);
+    //         if(!keyStore) throw new Error('cannot generate keytoken');
 
-            await this.producerService.produce({
-                topic: 'login',
-                messages: [{
-                    value: `${newShop.name} has been created to our system`
-                }]
-            });
+    //         await this.producerService.produce({
+    //             topic: 'login',
+    //             messages: [{
+    //                 value: `${newShop.name} has been created to our system`
+    //             }]
+    //         });
 
-            return{
-                shop:getInfoData(['id','email',],newShop),
-                accessToken,
-                refreshToken
-            }
-        };
+    //         return{
+    //             shop:getInfoData(['id','email',],newShop),
+    //             accessToken,
+    //             refreshToken
+    //         }
+    //     };
 
-        return {
-            code:200,
-            metadata:null
-        }  
-    }
+    //     return {
+    //         code:200,
+    //         metadata:null
+    //     }  
+    // }
 
     async createAPIKey(){
         return await this.prismaService.aPIkey.create({
