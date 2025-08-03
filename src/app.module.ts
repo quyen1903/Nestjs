@@ -20,7 +20,6 @@ import { EmailModule } from './services/email/email.module';
 import { AppController } from './app.controller';
 import { PaymentModule } from './modules/payment/payment.module';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
-import { ApiModule } from './modules/api/api.module';
 @Module({
     imports: [
     ConfigModule.forRoot({
@@ -43,7 +42,6 @@ import { ApiModule } from './modules/api/api.module';
         NotificationModule,
         EmailModule,
         PaymentModule,
-        ApiModule
     ],
     controllers:[AppController],
     providers: [DiscordService],

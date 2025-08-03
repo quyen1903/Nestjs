@@ -66,8 +66,7 @@ export class UserAuthService extends AuthService{
         prismaService: PrismaService,
         private readonly userKeyTokenService: UserKeyTokenService,
         private readonly emailService: EmailService,
-        private readonly authService: AuthService,
-        producerService: ProducerService
+        producerService: ProducerService,
     ) {
         super(prismaService,jwtService, producerService);
 
@@ -99,11 +98,10 @@ export class UserAuthService extends AuthService{
     }
 
     private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.userKeyTokenService.createKeyToken({
+        return await this.userKeyTokenService.upsertUserKeyToken({
             accountId,
             publicKey,
             refreshToken,
-            roles: 'USER'
         })
     };
 
@@ -199,7 +197,7 @@ export class UserAuthService extends AuthService{
         if(userHolder) throw new BadGatewayException('User already existed');
 
         const salt = crypto.randomBytes(32).toString('hex');
-        const passwordHashed = await this.authService.hashPassword(register.password, salt);
+        const passwordHashed = await this.hashPassword(register.password, salt);
 
         /**
          * we will use transaction to create user
@@ -329,7 +327,7 @@ export class UserAuthService extends AuthService{
     
         // Hash the new password and update the user
         const salt = randomBytes(32).toString('hex');
-        const passwordHashed = await this.authService.hashPassword(password, salt);
+        const passwordHashed = await this.hashPassword(password, salt);
     
         await this.prismaService.userAuth.update({
             where: { userId: passwordReset.userId },

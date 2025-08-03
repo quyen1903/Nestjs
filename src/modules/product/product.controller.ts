@@ -1,5 +1,4 @@
 import { Controller, Req, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
-import { ApiKeyGuard } from '../auth/api-key.guard';
 import { Factory } from './services/factory.service';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
@@ -10,7 +9,6 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
 import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
 
-@UseGuards(ApiKeyGuard)
 @Controller('product')
 export class ProductController {
     constructor(private readonly factory: Factory) {}

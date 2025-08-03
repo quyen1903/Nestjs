@@ -18,6 +18,9 @@ model Shop {
   isActive     Boolean        @default(true) @map("is_active")
   createdAt    BigInt         @default(0) @map("created_at")
   updatedAt    BigInt         @default(0) @map("updated_at")
+
+  keyToken     ShopKeyToken?
+  apiKey       APIkey[]
   discount     Discount[]
   products     Product[]
   notification Notification[]
@@ -28,15 +31,17 @@ model Shop {
 
 model ShopKeyToken {
   id               String             @id @default(uuid())
-  sub              String             @unique @map("account_id")
+  sub              String             @unique @map("shop_id") // aka shopId
   publicKey        String             @map("public_key")
   refreshToken     String             @map("refresh_token")
-  roles            AccountRole        @map("roles")
+  roles            RoleShop           @map("roles")
+
   isActive         Boolean            @default(true) @map("is_active")
   createdAt        BigInt             @default(0) @map("created_at")
   updatedAt        BigInt             @default(0) @map("updated_at")
-  refreshtokenused ShopRefreshTokenUsed[]
 
+  refreshtokenused ShopRefreshTokenUsed[]
+  shop             Shop                @relation(fields: [sub],references: [id])
   @@map("shop_key_tokens")
 }
 
@@ -59,11 +64,17 @@ model ShopRefreshTokenUsed {
 model APIkey {
   id         String   @id @default(uuid())
   key        String
-  status     Boolean
+  status     Status
   permission String[]
+  shopId     String
+
+  revokedAt DateTime? // timeline  which we disable a api key
+
   isActive   Boolean  @default(true) @map("is_active")
   createdAt  BigInt   @default(0) @map("created_at")
   updatedAt  BigInt   @default(0) @map("updated_at")
+
+  shop      Shop      @relation(fields: [shopId], references: [id])
 
   @@map("api_keys")
 }
@@ -336,11 +347,13 @@ model User {
 
   // Relations
   passwordReset       PasswordReset[]
+  keyToken            UserKeyToken?
   cart                Cart?
   comment             Comment[]
   order               Order[]
   messages            Message[]         @relation("UserMessages")
   notificationThread  NotificationThread?
+
   isActive   Boolean  @default(true)
   createdAt  BigInt   @default(0)
   updatedAt  BigInt   @default(0)
@@ -407,14 +420,14 @@ model PasswordReset {
 
 model UserKeyToken {
   id               String             @id @default(uuid())
-  sub        String             @unique @map("account_id")
+  sub              String             @unique @map("user_id") // aka userId
   publicKey        String             @map("public_key")
   refreshToken     String             @map("refresh_token")
-  roles            AccountRole        @map("roles")
   isActive         Boolean            @default(true) @map("is_active")
   createdAt        BigInt             @default(0) @map("created_at")
   updatedAt        BigInt             @default(0) @map("updated_at")
   refreshtokenused UserRefreshTokenUsed[]
+  user             User               @relation(fields: [sub], references: [id])
 
   @@map("user_key_tokens")
 }
@@ -552,7 +565,7 @@ enum MessageType {
   SHOP_TO_USER
 }
 
-enum UserSocialProvider{
+enum UserSocialProvider {
   GOOGLE
   FACEBOOK
 }

@@ -7,9 +7,10 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { AuthService } from '../auth.service';
-import { RoleShop, ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
+import { RoleShop, Shop, ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
 import { getInfoData } from 'src/shared/utils';
 import { JwtShop } from './interface/jwt.shop';
+import { ShopService } from 'src/modules/shop/shop.service';
 
 @Injectable()
 export class ShopAuthService extends AuthService {
@@ -18,6 +19,7 @@ export class ShopAuthService extends AuthService {
         jwtService: JwtService,
         private readonly shopKeyTokenService: ShopKeyTokenService,
         producerService: ProducerService,
+        private readonly shopService: ShopService
     ){
         super(prismaService,jwtService, producerService);
     };
@@ -58,65 +60,70 @@ export class ShopAuthService extends AuthService {
         });
     };
 
-    private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.shopKeyTokenService.createKeyToken({
+    private async upsertKeyStore(accountId: Shop['id'], publicKey: ShopKeyToken['publicKey'], refreshToken: ShopKeyToken['refreshToken']){
+        return await this.shopKeyTokenService.upsertShopKeyToken({
             accountId,
             publicKey,
             refreshToken,
-            roles: 'SHOP'
+            roles: RoleShop.SHOP
         })
     };
 
-        async handleRefreshToken( keyStore: ShopKeyToken, account: JwtShop, userRefreshToken: string ): Promise<{
-            accessToken: string,
-            refreshToken: string
-            update: ShopKeyToken;
-            createUsedToken: ShopRefreshTokenUsed; 
-        }>{
-            //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-            const {sub, email} = account;
-    
-            const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
-                where:{
-                    token: userRefreshToken
-                }
-            })
-    
-            if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
-    
-            //2 if user's token is not valid token, force them to relogin, too
-            if(keyStore.refreshToken !== userRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-            const foundShop = await this.find(email)
-            if(!foundShop) throw new UnauthorizedException('shop not registed');
-    
-            //3 if this accesstoken is valid, create new accesstoken, refreshtoken
-            const { publicKey, privateKey } = this.generateKeyPair()
-            const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, foundShop.email, privateKey);
-    
-            const update = await this.prismaService.shopKeyToken.update({
-                where:{
-                    sub: sub
-                },
-                data:{
-                    publicKey,
-                    refreshToken: refreshToken
-                }
-            })
-    
-            const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
-                data:{
-                    token:refreshToken,
-                    keyTokenId: update.id
-                }
-            })
-    
-            return {
-                accessToken,
-                refreshToken,
-                update,
-                createUsedToken
+    async handleRefreshToken( shopId: Shop['id'], requestRefreshToken: ShopKeyToken['refreshToken'] ): Promise<{
+        accessToken: string,
+        refreshToken: string
+        update: ShopKeyToken;
+        createUsedToken: ShopRefreshTokenUsed; 
+    }>{
+        //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
+        // const {sub, email} = account;
+
+
+        const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
+            where:{
+                token: requestRefreshToken
             }
-        };
+        });
+
+        const foundShop = await this.shopService.getShopInfo(shopId)
+        if(!foundShop) throw new UnauthorizedException('shop not registed');
+
+        if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin');
+
+        const keyStore = await this.shopKeyTokenService.findByRefreshToken(requestRefreshToken);
+
+
+        //2 if user's token is not valid token, force them to relogin, too
+        if(!keyStore)throw new UnauthorizedException('something was wrong happended, please relogin');
+
+        //3 if this accesstoken is valid, create new accesstoken, refreshtoken
+        const { publicKey, privateKey } = this.generateKeyPair()
+        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, foundShop.email, privateKey);
+
+        const update = await this.prismaService.shopKeyToken.update({
+            where:{
+                sub: foundShop.id
+            },
+            data:{
+                publicKey,
+                refreshToken: refreshToken
+            }
+        })
+
+        const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
+            data:{
+                token: requestRefreshToken,
+                keyTokenId: update.id
+            }
+        })
+
+        return {
+            accessToken,
+            refreshToken,
+            update,
+            createUsedToken
+        }
+    };
     
         async logout ( keyStore: JwtShop ): Promise<ShopKeyToken | null>{
             console.log("keystore",keyStore)

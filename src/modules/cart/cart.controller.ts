@@ -1,10 +1,8 @@
 import { Body, Controller, Delete, Post,Get, Query, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { ApiKeyGuard } from '../auth/api-key.guard';
 import { CreateCartDTO } from './dto/create-cart.dto';
 import { UpdateCartDTO } from './dto/update-cart.dto';
 
-UseGuards(ApiKeyGuard)
 @Controller('cart')
 export class CartController {
     constructor(private readonly cartService: CartService) {}

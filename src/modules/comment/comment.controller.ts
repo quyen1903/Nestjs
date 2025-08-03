@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
-import { ApiKeyGuard } from '../auth/api-key.guard';
 import { RoleGuard } from '../auth/auth-role.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
@@ -9,7 +8,6 @@ import { DeleteCommentDTO } from './dto/delete-comment.dto';
 import { UserAuthGuard } from '../auth/user-auth/auth-jwt.guard';
 
 @Controller('comment')
-@UseGuards(ApiKeyGuard)
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 

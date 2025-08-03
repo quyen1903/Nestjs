@@ -1,21 +1,19 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
-import { RegisterShopDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
 import { ShopKeyTokenService } from '../auth/shop-auth/shop-auth.keytoken';
-import { RoleShop } from '@prisma/client';
+import { RoleShop, Status, Shop } from '@prisma/client';
 import { JwtShop } from '../auth/shop-auth/interface/jwt.shop';
 @Injectable()
 export class ShopService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly shopKeyTokenService: ShopKeyTokenService,
         private readonly producerService: ProducerService,
         
     ) {};
@@ -101,31 +99,30 @@ export class ShopService {
      * @param find 
      * @returns 
      */
-    private async find(find: string){
-        return this.prismaService.shop.findFirst({
-            where: {email:find},
-        });
-    };
+    // private async find(find: string){
+    //     return this.prismaService.shop.findFirst({
+    //         where: {email:find},
+    //     });
+    // };
 
-    /**
-     * deprecated,now need to fix this method
-     * purpose: to upsert (create or update)
-     * @param accountId 
-     * @param publicKey 
-     * @param refreshToken 
-     * @returns 
-     */
-    private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.shopKeyTokenService.createKeyToken({
-            accountId,
-            publicKey,
-            refreshToken,
-            roles: 'SHOP'
-        })
-    };
+    // /**
+    //  * deprecated,now need to fix this method
+    //  * purpose: to upsert (create or update)
+    //  * @param accountId 
+    //  * @param publicKey 
+    //  * @param refreshToken 
+    //  * @returns 
+    //  */
+    // private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
+    //     return await this.shopKeyTokenService.createKeyToken({
+    //         accountId,
+    //         publicKey,
+    //         refreshToken,
+    //         roles: 'SHOP'
+    //     })
+    // };
 
     async getShopInfo(id: string){
-        console.log('shopId',id)
         return await this.prismaService.shop.findUnique({
             where:{
                 id
@@ -133,6 +130,7 @@ export class ShopService {
             select:{
                 id: true,
                 name: true,
+                email: true,
                 isActive: true,
                 createdAt:  true,
                 updatedAt: true
@@ -289,12 +287,13 @@ export class ShopService {
     //     }  
     // }
 
-    async createAPIKey(){
+    async createAPIKey(id: Shop['id']){
         return await this.prismaService.aPIkey.create({
             data:{
                 key:crypto.randomBytes(64).toString('hex'),
-                status:true,
+                status: Status.ACTIVE,
                 permission:['0000'],
+                shopId: id,
                 isActive: true
             }
         })

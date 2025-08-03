@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
-import { ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
-import crypto from 'node:crypto'
+import { Shop, ShopKeyToken, ShopRefreshTokenUsed } from "@prisma/client";
+
 @Injectable()
 export class ShopKeyTokenService {
     constructor(private readonly prismaService: PrismaService){}
         
-    async createKeyToken({ accountId, publicKey, refreshToken, roles }: IKeyToken) : Promise<ShopKeyToken> {
+    async upsertShopKeyToken({ accountId, publicKey, refreshToken, roles }: {
+        accountId: Shop['id'],
+        publicKey: ShopKeyToken['publicKey'],
+        refreshToken: ShopKeyToken['refreshToken'],
+        roles: ShopKeyToken['roles']
+    }) : Promise<ShopKeyToken> {
         return this.prismaService.shopKeyToken.upsert({
             where: { sub:accountId },
             update: { publicKey, refreshToken, isActive: true },

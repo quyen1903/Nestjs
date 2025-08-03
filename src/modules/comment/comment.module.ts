@@ -5,9 +5,8 @@ import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from 'src/services/prisma/prisma.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { ProductModule } from '../product/product.module';
-import { ApiModule } from '../api/api.module';
 @Module({
-  imports:[PrismaModule, AuthModule, KeyTokenModule, ProductModule, CommentModule, ApiModule],
+  imports:[PrismaModule, AuthModule, KeyTokenModule, ProductModule, CommentModule],
   controllers: [CommentController],
   providers: [CommentService],
 })

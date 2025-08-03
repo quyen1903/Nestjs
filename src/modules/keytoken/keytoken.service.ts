@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
-import crypto from 'node:crypto'
+import crypto from 'node:crypto';
+import { Shop,Status } from "@prisma/client";
 @Injectable()
 export class KeyTokenService {
     constructor(private readonly prismaService: PrismaService){}
@@ -44,11 +45,12 @@ export class KeyTokenService {
     //     });
     // }
 
-    async createAPIKey(){
+    async createAPIKey(id: Shop['id']){
         return await this.prismaService.aPIkey.create({
             data:{
                 key:crypto.randomBytes(64).toString('hex'),
-                status:true,
+                status: Status.ACTIVE,
+                shopId:id,
                 permission:['0000'],
                 isActive: true
             }

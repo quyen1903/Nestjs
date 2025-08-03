@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from '../../auth.service';
+import { UserAuthService } from '../user-auth.service';
 import { Sex, UserProfile, UserSocialProvider } from '@prisma/client';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     constructor(
         readonly configService: ConfigService,
-        private readonly authService: AuthService,
+        private readonly userAuthService: UserAuthService,
     ) {
         super({
             clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -44,7 +44,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         updatedAt: BigInt(Date.now()),
     };
 
-    const result = await this.authService.findOrCreateGoogleUser(social, userProfile);
+    const result = await this.userAuthService.findOrCreateGoogleUser(social, userProfile);
 
     // ✅ Return để gán vào req.user
     return done(null, {

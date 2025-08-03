@@ -10,23 +10,6 @@ export type CustomExcelJsHeader = {
   outlineLevel?: number;
 };
 
-export type CustomExcelJsHeaderJustin<T> = {
-  key: keyof T;
-  name: string;
-  startCell?: string;
-  endCell?: string;
-  width?: number;
-  isHeader?: boolean;
-  outlineLevel?: number;
-  color?: string;
-};
-
-export type CustomHeaderMergeCellJustin<T> = {
-  worksheet: ExcelJS.Worksheet;
-  headers: CustomExcelJsHeaderJustin<T>[];
-  startRowNo?: number;
-};
-
 export type CustomHeaderMergeCell = {
   worksheet: ExcelJS.Worksheet;
   headers: CustomExcelJsHeader[];
