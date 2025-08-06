@@ -9,6 +9,8 @@ import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.inte
 import { SuccessInterceptor } from './interceptors/response.interceptor';
 import { ValidationCustomPipe } from './pipes/validation-custom.pipe';
 import { HttpExceptionFilter } from './exception-filter/http.exception-filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -81,13 +83,22 @@ async function bootstrap() {
             }));
             // app.useGlobalInterceptors(new PrismaExceptionInterceptor());
 
+
             // Global prefix for all routes
             app.setGlobalPrefix('v1/api');
             app.useGlobalInterceptors(new PrismaExceptionInterceptor());
             app.useGlobalInterceptors(new SuccessInterceptor())
             app.useGlobalPipes(ValidationCustomPipe.compactVersion());
             app.useGlobalFilters(new HttpExceptionFilter());
+            const config = new DocumentBuilder()
+                .setTitle('E-Commerce API')
+                .setDescription('The API documentation')
+                .setVersion('1.0')
+                .addBearerAuth() //for bear token
+                .build();
 
+            const document = SwaggerModule.createDocument(app, config);
+            SwaggerModule.setup('api-docs', app, document);
             // Start listening
             await app.listen(port);
             console.log(`Worker ${process.pid} started on port ${port}`);

@@ -46,7 +46,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     const result = await this.userAuthService.findOrCreateGoogleUser(social, userProfile);
 
-    // ✅ Return để gán vào req.user
+    // ✅ Return to bind into req.user
     return done(null, {
         user: result.user,
         accessToken: result.accessToken,

@@ -1,5 +1,6 @@
 import { ShopAuthService } from './shop-auth.service';
-import { Body, 
+import { 
+    Body, 
     Controller, 
     Post, 
     UseGuards, 
@@ -14,6 +15,7 @@ import { Roles } from "../roles.decorator";
 import { Role } from "src/shared/enums/role.enum";
 import { ShopAuthRequest } from "./interface/shop.request";
 import { ShopRequestDTO } from './dto/auth-request.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('shop')
 export class ShopAuthController {
     constructor(private readonly shopAuthService: ShopAuthService) {}
@@ -30,6 +32,7 @@ export class ShopAuthController {
 
     @Post('logout')
     @UseGuards(ShopAuthGuard, RoleGuard)
+    @ApiBearerAuth()
     @Roles(Role.Shop)
     logoutShop(@Req() req: JwtShop){
         return this.shopAuthService.logout(req)

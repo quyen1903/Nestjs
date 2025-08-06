@@ -7,6 +7,7 @@ import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 import { ForgotPasswordDTO } from "./dto/forgot-password.dto";
 import { ResetPasswordDTO } from "./dto/reset-password.dto";
 import { UserAuthGuard } from './auth-jwt.guard';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 
 @Controller('user-auth')
 export class UserAuthController {
@@ -21,7 +22,8 @@ export class UserAuthController {
     loginUser(@Body() body: LoginUserManualDTO){
         return this.userAuthService.loginManual(body)
     }
-
+    
+    @ApiBearerAuth()
     @Post('logout')
     @UseGuards(UserAuthGuard)
     logoutUser(@Req() req: IKeyToken){
