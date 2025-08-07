@@ -22,7 +22,6 @@ model Shop {
   keyToken     ShopKeyToken?
   apiKey       APIkey[]
   discount     Discount[]
-  products     Product[]
   notification Notification[]
   messages     Message[]      @relation("ShopMessages")
 
@@ -79,79 +78,6 @@ model APIkey {
   @@map("api_keys")
 }
 
-model Product {
-  id                    String      @id @default(uuid())
-  productName           String      @map("product_name")
-  productThumb          String      @map("product_thumb")
-  productDescription    String?     @map("product_description")
-  productSlug           String?     @map("product_slug")
-  productPrice          Float       @map("product_price")
-  productQuantity       Int         @map("product_quantity")
-  productType           ProductType @map("product_type")
-  productRatingsAverage Float       @default(4.5) @map("product_ratingsAverage")
-  productVariation      String[]    @default([]) @map("product_variation")
-  isDraft               Boolean     @default(true) @map("product_is_draft")
-  isPublished           Boolean     @default(false) @map("product_is_published")
-
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-
-  productShopId String @map("product_shop")
-  productShop   Shop   @relation(fields: [productShopId], references: [id])
-
-  clothing   Clothing?
-  comment    Comment[]
-  electronic Electronic?
-  furniture  Furniture?
-  inventory  Inventory?
-
-  @@index([productName, productDescription])
-  @@map("products")
-}
-
-model Clothing {
-  id        String  @id @default(uuid())
-  brand     String  @map("clothing_brand")
-  size      String  @map("clothing_size")
-  material  String  @map("clothing_material")
-  productId String  @unique @map("product_id")
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-  product   Product @relation(fields: [productId], references: [id])
-
-  @@map("clothes")
-}
-
-model Electronic {
-  id           String  @id @default(uuid())
-  manufacturer String  @map("electronic_manufacturer")
-  model        String  @map("electronic_model")
-  color        String  @map("electronic_color")
-  productId    String  @unique @map("product_id")
-  isActive     Boolean @default(true) @map("is_active")
-  createdAt    BigInt  @default(0) @map("created_at")
-  updatedAt    BigInt  @default(0) @map("updated_at")
-  product      Product @relation(fields: [productId], references: [id])
-
-  @@map("electronics")
-}
-
-model Furniture {
-  id        String  @id @default(uuid())
-  brand     String  @map("furniture_brand")
-  size      String  @map("furniture_size")
-  material  String  @map("furniture_material")
-  productId String  @unique @map("product_id")
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-  product   Product @relation(fields: [productId], references: [id])
-
-  @@map("furnitures")
-}
-
 model Inventory {
   id                    String  @id @default(uuid())
   inventoryLocation     String  @default("unKnow") @map("inventory_location")
@@ -162,7 +88,7 @@ model Inventory {
   updatedAt             BigInt  @default(0) @map("updated_at")
 
   inventoryProductId    String  @unique @map("inventory_product_id")
-  inventoryProduct      Product @relation(fields: [inventoryProductId], references: [id])
+  inventoryProduct      Sku @relation(fields: [inventoryProductId], references: [id])
 
   reservations          ReservationInventory[]
   orderItem             OrderItem[]
@@ -184,6 +110,7 @@ model ReservationInventory {
   createdAt      BigInt  @default(0) @map("created_at")
   updatedAt      BigInt  @default(0) @map("updated_at")
 
+  @@unique([inventoryId, userId])
   @@map("reservation_inventories")
 }
 
@@ -299,7 +226,7 @@ model Comment {
   updatedAt        BigInt    @default(0) @map("updated_at")
   commentParent    Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
   childComments    Comment[] @relation("ParentChild")
-  commentProduct   Product   @relation(fields: [commentProductId], references: [id])
+  commentProduct   Spu   @relation(fields: [commentProductId], references: [id])
   commentUser      User      @relation(fields: [commentUserId], references: [id])
 
   @@map("comments")
@@ -448,41 +375,6 @@ model UserRefreshTokenUsed {
   @@map("user_refresh_tokens_used")
 }
 
-model SdProduct {
-  id                String  @id @default(uuid())
-  isActive          Boolean @default(true) @map("is_active")
-  createdAt         BigInt  @default(0) @map("created_at")
-  updatedAt         BigInt  @default(0) @map("updated_at")
-  productName       String  @default("") @map("sd_product_name") //0: out of stock, 1: in stock
-  productDesc       String  @default("") @map("sd_product_desc")
-  productStatus     Int     @map("sd_product_status")
-  productAttributes Json    @map("sd_product_attributes")
-  productShopId     String  @map("sd_product_shop_id")
-  sort              Int     @map("sort") //if shop pays money for us, we should give them priority
-  productId         String  @map("product_id")
-
-  @@map("sd_product")
-}
-
-//Stock Keeping Unit
-model SKU {
-  id             String     @id @default(uuid())
-  skuNo          String     @default("") @map("sku_no")
-  skuName        String     @map("sku_name")
-  skuDescription String     @map("sku_description")
-  skuType        Int        @map("sku_type")
-  skuStatus      Int        @map("sku_status")
-  skuSort        Int        @map("sku_sort") //priority sort
-  skuStock       Int        @default(0) @map("sku_stock")
-  skuPrice       Float      @map("sku_price")
-
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-  isActive       Boolean    @default(true) @map("is_active")
-
-  @@map("sku")
-}
-
 model Message {
   id         String      @id @default(uuid())
   content    String      @map("content") @db.Text
@@ -501,11 +393,117 @@ model Message {
   @@map("messages")
 }
 
-// enum AccountLoginRequestStatus {
-//   PENDING
-//   APPROVED
-//   REJECTED
-// }
+model Spu {
+  id                 String   @id @db.VarChar(60)
+  name               String?  @db.VarChar(100)
+  intro              String?  @db.VarChar(200)
+  brandId            Int?     
+  categoryOneId      Int?     
+  categoryTwoId      Int?     
+  categoryThreeId    Int?     
+  images             String?  @db.VarChar(1000)
+  afterSalesService  String?  @db.VarChar(50)
+  content            String?  @db.Text
+  attributeList      String?  @db.VarChar(3000)
+  isMarketable       Int      @default(0)
+  isDelete           Int      @default(0)
+  status             Int      @default(0)
+
+  // relations
+  brand              Brand?   @relation(fields: [brandId], references: [id])
+  skus               Sku[]    @relation("SpuSkus")
+  comment            Comment[]
+}
+
+model Sku {
+  id           String   @id @db.VarChar(60)
+  name         String   @db.VarChar(200)
+  price        Int      @default(1)
+  num          Int?     @default(100)
+  image        String?  @db.VarChar(200)
+  images       String?  @db.VarChar(2000)
+  createTime   DateTime? @map("create_time")
+  updateTime   DateTime? @map("update_time")
+  spuId        String?   @db.VarChar(60)
+  categoryId   Int?
+  categoryName String?   @db.VarChar(200)
+  brandId      Int?
+  brandName    String?   @db.VarChar(100)
+  skuAttribute String?   @db.VarChar(200)
+  status       Int?      @default(1)
+  inventoryId  String    @map("inventory_id")
+
+  // relations
+  spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
+  brand        Brand?    @relation(fields: [brandId], references: [id])
+  category     Category? @relation(fields: [categoryId], references: [id])
+  inventory   Inventory?
+
+  @@index([categoryId], name: "cid")
+  @@index([status])
+  @@index([updateTime], name: "updated")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String?   @db.VarChar(50)
+  sort      Int?
+  parentId  Int?
+  
+  // relations
+  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+
+  products  Sku[]
+  brands    CategoryBrand[]
+  attrs     CategoryAttr[]
+}
+
+model Brand {
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(100)
+  image    String  @default("") @db.VarChar(1000)
+  initial  String  @default("") @db.VarChar(1)
+  sort     Int?
+
+  // relations
+  spus     Spu[]
+  skus     Sku[]
+  categories CategoryBrand[]
+}
+
+model CategoryBrand {
+  categoryId Int
+  brandId    Int
+
+  // relations
+  category   Category @relation(fields: [categoryId], references: [id])
+  brand      Brand    @relation(fields: [brandId], references: [id])
+
+  @@id([brandId, categoryId])
+}
+
+model CategoryAttr {
+  categoryId Int
+  attrId     Int
+
+  // relations
+  category   Category @relation(fields: [categoryId], references: [id])
+  attribute  SkuAttribute @relation(fields: [attrId], references: [id])
+
+  @@id([categoryId, attrId])
+}
+
+model SkuAttribute {
+  id      Int     @id @default(autoincrement())
+  name    String? @db.VarChar(50)
+  options String? @db.VarChar(2000)
+  sort    Int?
+
+  categories CategoryAttr[]
+}
+
+
 
 enum AccountRole {
   SHOP
