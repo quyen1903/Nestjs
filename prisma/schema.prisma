@@ -1,570 +1,599 @@
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres"]
-}
+// generator client {
+//   provider        = "prisma-client-js"
+//   previewFeatures = ["fullTextSearchPostgres"]
+// }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
 
-model Shop {
-  id           String         @id @default(uuid())
-  name         String         @map("shop_name")
-  email        String         @unique @map("shop_email")
-  password     String         @map("shop_password")
-  salt         String         @map("shop_salt")
-  roles        String         @map("shop_role")
-  isActive     Boolean        @default(true) @map("is_active")
-  createdAt    BigInt         @default(0) @map("created_at")
-  updatedAt    BigInt         @default(0) @map("updated_at")
+// model Shop {
+//   id           String         @id @default(uuid())
+//   name         String         @map("shop_name")
+//   email        String         @unique @map("shop_email")
+//   password     String         @map("shop_password")
+//   salt         String         @map("shop_salt")
+//   roles        String         @map("shop_role")
+//   isActive     Boolean        @default(true) @map("is_active")
+//   createdAt    BigInt         @default(0) @map("created_at")
+//   updatedAt    BigInt         @default(0) @map("updated_at")
 
-  keyToken     ShopKeyToken?
-  apiKey       APIkey[]
-  discount     Discount[]
-  notification Notification[]
-  messages     Message[]      @relation("ShopMessages")
+//   keyToken     ShopKeyToken?
+//   apiKey       APIkey[]
+//   discount     Discount[]
+//   notification Notification[]
+//   messages     Message[]      @relation("ShopMessages")
 
-  @@map("shops")
-}
+//   @@map("shops")
+// }
 
-model ShopKeyToken {
-  id               String             @id @default(uuid())
-  sub              String             @unique @map("shop_id") // aka shopId
-  publicKey        String             @map("public_key")
-  refreshToken     String             @map("refresh_token")
-  roles            RoleShop           @map("roles")
+// model ShopKeyToken {
+//   id               String             @id @default(uuid())
+//   sub              String             @unique @map("shop_id") // aka shopId
+//   publicKey        String             @map("public_key")
+//   refreshToken     String             @map("refresh_token")
+//   roles            RoleShop           @map("roles")
 
-  isActive         Boolean            @default(true) @map("is_active")
-  createdAt        BigInt             @default(0) @map("created_at")
-  updatedAt        BigInt             @default(0) @map("updated_at")
+//   isActive         Boolean            @default(true) @map("is_active")
+//   createdAt        BigInt             @default(0) @map("created_at")
+//   updatedAt        BigInt             @default(0) @map("updated_at")
 
-  refreshtokenused ShopRefreshTokenUsed[]
-  shop             Shop                @relation(fields: [sub],references: [id])
-  @@map("shop_key_tokens")
-}
+//   refreshtokenused ShopRefreshTokenUsed[]
+//   shop             Shop                @relation(fields: [sub],references: [id])
+//   @@map("shop_key_tokens")
+// }
 
-model ShopRefreshTokenUsed {
-  id         String   @id @default(uuid())
-  token      String   @map("refresh_token")
-  usedAt     DateTime @default(now()) @map("used_at")
-  userAgent  String?  @map("user_agent")
-  ipAddress  String?  @map("ip_address")
-  keyTokenId String   @map("refresh_token_use")
-  createdAt  BigInt   @default(0) @map("created_at")
-  isActive   Boolean  @default(true) @map("is_active")
-  updatedAt  BigInt   @default(0) @map("updated_at")
-  keyToken   ShopKeyToken @relation(fields: [keyTokenId], references: [id])
+// model ShopRefreshTokenUsed {
+//   id         String   @id @default(uuid())
+//   token      String   @map("refresh_token")
+//   usedAt     DateTime @default(now()) @map("used_at")
+//   userAgent  String?  @map("user_agent")
+//   ipAddress  String?  @map("ip_address")
+//   keyTokenId String   @map("refresh_token_use")
+//   createdAt  BigInt   @default(0) @map("created_at")
+//   isActive   Boolean  @default(true) @map("is_active")
+//   updatedAt  BigInt   @default(0) @map("updated_at")
+//   keyToken   ShopKeyToken @relation(fields: [keyTokenId], references: [id])
 
-  @@index([token])
-  @@map("shop_refresh_tokens_used")
-}
+//   @@index([token])
+//   @@map("shop_refresh_tokens_used")
+// }
 
-model APIkey {
-  id         String   @id @default(uuid())
-  key        String
-  status     Status
-  permission String[]
-  shopId     String
+// model APIkey {
+//   id         String   @id @default(uuid())
+//   key        String
+//   status     Status
+//   permission String[]
+//   shopId     String
 
-  revokedAt DateTime? // timeline  which we disable a api key
+//   revokedAt DateTime? // timeline  which we disable a api key
 
-  isActive   Boolean  @default(true) @map("is_active")
-  createdAt  BigInt   @default(0) @map("created_at")
-  updatedAt  BigInt   @default(0) @map("updated_at")
+//   isActive   Boolean  @default(true) @map("is_active")
+//   createdAt  BigInt   @default(0) @map("created_at")
+//   updatedAt  BigInt   @default(0) @map("updated_at")
 
-  shop      Shop      @relation(fields: [shopId], references: [id])
+//   shop      Shop      @relation(fields: [shopId], references: [id])
 
-  @@map("api_keys")
-}
+//   @@map("api_keys")
+// }
 
-model Inventory {
-  id                    String  @id @default(uuid())
-  inventoryLocation     String  @default("unKnow") @map("inventory_location")
-  inventoryStock        Int     @map("inventory_stock")
+// model Inventory {
+//   id                    String  @id @default(uuid())
+//   inventoryLocation     String  @default("unKnow") @map("inventory_location")
+//   inventoryStock        Int     @map("inventory_stock")
 
-  isActive              Boolean @default(true) @map("is_active")
-  createdAt             BigInt  @default(0) @map("created_at")
-  updatedAt             BigInt  @default(0) @map("updated_at")
+//   isActive              Boolean @default(true) @map("is_active")
+//   createdAt             BigInt  @default(0) @map("created_at")
+//   updatedAt             BigInt  @default(0) @map("updated_at")
 
-  inventoryProductId    String  @unique @map("inventory_product_id")
-  inventoryProduct      Sku @relation(fields: [inventoryProductId], references: [id])
+//   inventoryProductId    String  @unique @map("inventory_product_id")
+//   inventoryProduct      Sku @relation(fields: [inventoryProductId], references: [id])
 
-  reservations          ReservationInventory[]
-  orderItem             OrderItem[]
+//   reservations          ReservationInventory[]
+//   orderItem             OrderItem[]
 
-  @@map("inventories")
-}
+//   @@map("inventories")
+// }
 
-model ReservationInventory {
-  id             String     @id @default(uuid())
-  inventory      Inventory  @relation(fields: [inventoryId], references: [id])
-  inventoryId    String     @map("inventory_id")
-  userId         String     @map("user_id")
-  quantity       Int        @map("quantity") 
-  expiredAt      DateTime   @map("expired_at")
-  isConfirmed    Boolean    @default(false)
-  valid          Boolean    @default(true)
+// model ReservationInventory {
+//   id             String     @id @default(uuid())
+//   inventory      Inventory  @relation(fields: [inventoryId], references: [id])
+//   inventoryId    String     @map("inventory_id")
+//   userId         String     @map("user_id")
+//   quantity       Int        @map("quantity") 
+//   expiredAt      DateTime   @map("expired_at")
+//   isConfirmed    Boolean    @default(false)
+//   valid          Boolean    @default(true)
 
-  isActive       Boolean @default(true) @map("is_active")
-  createdAt      BigInt  @default(0) @map("created_at")
-  updatedAt      BigInt  @default(0) @map("updated_at")
+//   isActive       Boolean @default(true) @map("is_active")
+//   createdAt      BigInt  @default(0) @map("created_at")
+//   updatedAt      BigInt  @default(0) @map("updated_at")
 
-  @@unique([inventoryId, userId])
-  @@map("reservation_inventories")
-}
+//   @@unique([inventoryId, userId])
+//   @@map("reservation_inventories")
+// }
 
-model Discount {
-  id                     String            @id @default(uuid())
-  discountName           String            @map("discount_name")
-  discountDescription    String            @map("discount_description")
-  discountType           String            @default("fixed_amount") @map("discount_type")
-  discountValue          Float             @map("discount_value")
-  discountCode           String            @unique @map("discount_code")
-  discountStartDates     DateTime          @map("discount_start_dates")
-  discountEndDates       DateTime          @map("discount_end_dates")
-  discountMaxUses        Int               @map("discount_max_uses")
-  discountUsesCount      Int               @map("discount_uses_count")
-  discountUsersUsed      String[]          @default([]) @map("discount_users_used")
-  discountMaxUsesPerUser Int               @map("discount_max_uses_per_user")
-  discountMinOrderValue  Float             @map("discount_min_order_value")
-  discountShopId         String            @map("discount_shop")
-  discountIsActive       Boolean           @default(true) @map("discount_is_active")
-  discountAppliesTo      DiscountAppliesTo @map("discount_applies_to")
-  discountProductIds     String[]          @default([]) @map("discount_product_ids")
-  isActive               Boolean           @default(true) @map("is_active")
-  createdAt              BigInt            @default(0) @map("created_at")
-  updatedAt              BigInt            @default(0) @map("updated_at")
-  discountShop           Shop              @relation(fields: [discountShopId], references: [id])
+// model Discount {
+//   id                     String            @id @default(uuid())
+//   discountName           String            @map("discount_name")
+//   discountDescription    String            @map("discount_description")
+//   discountType           String            @default("fixed_amount") @map("discount_type")
+//   discountValue          Float             @map("discount_value")
+//   discountCode           String            @unique @map("discount_code")
+//   discountStartDates     DateTime          @map("discount_start_dates")
+//   discountEndDates       DateTime          @map("discount_end_dates")
+//   discountMaxUses        Int               @map("discount_max_uses")
+//   discountUsesCount      Int               @map("discount_uses_count")
+//   discountUsersUsed      String[]          @default([]) @map("discount_users_used")
+//   discountMaxUsesPerUser Int               @map("discount_max_uses_per_user")
+//   discountMinOrderValue  Float             @map("discount_min_order_value")
+//   discountShopId         String            @map("discount_shop")
+//   discountIsActive       Boolean           @default(true) @map("discount_is_active")
+//   discountAppliesTo      DiscountAppliesTo @map("discount_applies_to")
+//   discountProductIds     String[]          @default([]) @map("discount_product_ids")
+//   isActive               Boolean           @default(true) @map("is_active")
+//   createdAt              BigInt            @default(0) @map("created_at")
+//   updatedAt              BigInt            @default(0) @map("updated_at")
+//   discountShop           Shop              @relation(fields: [discountShopId], references: [id])
 
-  @@map("discounts")
-}
+//   @@map("discounts")
+// }
 
-model Cart {
-  id           String        @id @default(uuid())
-  state        CartState     @default(ACTIVE) @map("cart_state")
-  countProduct Int           @default(0) @map("cart_count_product")
-  userId       String        @unique @map("cart_userId")
-  isActive     Boolean       @default(true) @map("is_active")
-  createdAt    BigInt        @default(0) @map("created_at")
-  updatedAt    BigInt        @default(0) @map("updated_at")
-  cartProducts CartProduct[]
-  user         User          @relation(fields: [userId], references: [id])
+// model Cart {
+//   id           String        @id @default(uuid())
+//   state        CartState     @default(ACTIVE) @map("cart_state")
+//   countProduct Int           @default(0) @map("cart_count_product")
+//   userId       String        @unique @map("cart_userId")
+//   isActive     Boolean       @default(true) @map("is_active")
+//   createdAt    BigInt        @default(0) @map("created_at")
+//   updatedAt    BigInt        @default(0) @map("updated_at")
+//   cartProducts CartProduct[]
+//   user         User          @relation(fields: [userId], references: [id])
 
-  @@map("carts")
-}
+//   @@map("carts")
+// }
 
-model CartProduct {
-  id        String  @id @default(uuid())
-  productId String  @map("cart_product_productId")
-  shopId    String  @map("cart_product_shopId")
-  quantity  Int     @map("cart_product_quantity")
-  name      String  @map("cart_product_name")
-  price     Float   @map("cart_product_price")
-  cartId    String  @map("cart_product_cartId")
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-  cart      Cart    @relation(fields: [cartId], references: [id])
+// model CartProduct {
+//   id        String  @id @default(uuid())
+//   productId String  @map("cart_product_productId")
+//   shopId    String  @map("cart_product_shopId")
+//   quantity  Int     @map("cart_product_quantity")
+//   name      String  @map("cart_product_name")
+//   price     Float   @map("cart_product_price")
+//   cartId    String  @map("cart_product_cartId")
+//   isActive  Boolean @default(true) @map("is_active")
+//   createdAt BigInt  @default(0) @map("created_at")
+//   updatedAt BigInt  @default(0) @map("updated_at")
+//   cart      Cart    @relation(fields: [cartId], references: [id])
 
-  @@unique([cartId, productId])
-  @@map("cart_products")
-}
+//   @@unique([cartId, productId])
+//   @@map("cart_products")
+// }
 
-model Order {
-  id              String      @id @default(uuid())
-  userId          String      @map("user_id")
-  status          OrderStatus @map("status")
-  totalDiscount   Decimal     @map("total_discount ")
-  shippingFee     Decimal     @map("shipping_fee")
-  shippingAddress String      @map("shipping_street")
-  totalPrice      Decimal     @map("total_price")
-  paymentInfo     Json        @map("payment_info")
-  paymentIntentId String?     @map("payment_intent_id")
-  expiredAt       DateTime    @map("expired_at")
+// model Order {
+//   id              String      @id @default(uuid())
+//   userId          String      @map("user_id")
+//   status          OrderStatus @map("status")
+//   totalDiscount   Decimal     @map("total_discount ")
+//   shippingFee     Decimal     @map("shipping_fee")
+//   shippingAddress String      @map("shipping_street")
+//   totalPrice      Decimal     @map("total_price")
+//   paymentInfo     Json        @map("payment_info")
+//   paymentIntentId String?     @map("payment_intent_id")
+//   expiredAt       DateTime    @map("expired_at")
 
-  isActive        Boolean     @default(true) @map("is_active")
-  createdAt       BigInt      @default(0) @map("created_at")
-  updatedAt       BigInt      @default(0) @map("updated_at")
+//   isActive        Boolean     @default(true) @map("is_active")
+//   createdAt       BigInt      @default(0) @map("created_at")
+//   updatedAt       BigInt      @default(0) @map("updated_at")
 
-  // Relations
-  orderItems      OrderItem[]
-  user            User        @relation(fields: [userId], references: [id])
+//   // Relations
+//   orderItems      OrderItem[]
+//   user            User        @relation(fields: [userId], references: [id])
 
-  @@map("orders")
-}
+//   @@map("orders")
+// }
 
-model OrderItem {
-  id           String    @id @default(cuid())
-  order        Order     @relation(fields: [orderId], references: [id])
-  orderId      String
-  inventoryId  String
-  inventory    Inventory @relation(fields: [inventoryId], references: [id])
+// model OrderItem {
+//   id           String    @id @default(cuid())
+//   order        Order     @relation(fields: [orderId], references: [id])
+//   orderId      String
+//   inventoryId  String
+//   inventory    Inventory @relation(fields: [inventoryId], references: [id])
   
-  quantity     Int
-  price        Int
+//   quantity     Int
+//   price        Int
 
-  isActive        Boolean     @default(true) @map("is_active")
-  createdAt       BigInt      @default(0) @map("created_at")
-  updatedAt       BigInt      @default(0) @map("updated_at")
+//   isActive        Boolean     @default(true) @map("is_active")
+//   createdAt       BigInt      @default(0) @map("created_at")
+//   updatedAt       BigInt      @default(0) @map("updated_at")
 
-  @@map("order_items")
-}
-
-
-model Comment {
-  id               String    @id @default(uuid())
-  commentProductId String    @map("comment_product")
-  commentUserId    String    @map("comment_user")
-  commentContent   String    @map("comment_content")
-  commentLeft      Int       @default(0) @map("comment_left")
-  commentRight     Int       @default(0) @map("comment_right")
-  commentParentId  String?   @map("comment_parent_id")
-  isDeleted        Boolean   @default(false) @map("is_deleted")
-  isActive         Boolean   @default(true) @map("is_active")
-  createdAt        BigInt    @default(0) @map("created_at")
-  updatedAt        BigInt    @default(0) @map("updated_at")
-  commentParent    Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
-  childComments    Comment[] @relation("ParentChild")
-  commentProduct   Spu   @relation(fields: [commentProductId], references: [id])
-  commentUser      User      @relation(fields: [commentUserId], references: [id])
-
-  @@map("comments")
-}
-
-model NotificationThread {
-  id            String         @id @default(uuid())
-  userId        String         @unique @map("noti_thread_user_id")
-  user          User           @relation(fields: [userId], references: [id])
-  notifications Notification[]
-
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-
-  @@map("notification_threads")
-}
-
-model Notification {
-  id       String             @id @default(uuid())
-  type     NotificationType   @map("noti_type")
-  sender   Shop               @relation(fields: [senderId], references: [id])
-  senderId String             @map("noti_sender_id")
-  thread   NotificationThread @relation(fields: [threadId], references: [id])
-  threadId String             @map("noti_thread_id")
-  content  String             @map("noti_content")
-  option   Json               @map("noti_option")
-  status   String             @default("unread") @map("notification_status")
-
-  productId  String? @map("noti_product_id")
-  discountId String? @map("noti_discount_id")
-
-  isActive  Boolean @default(true) @map("is_active")
-  createdAt BigInt  @default(0) @map("created_at")
-  updatedAt BigInt  @default(0) @map("updated_at")
-
-  @@map("notifications")
-}
-
-model User {
-  id                String   @id @default(uuid())
-  auth              UserAuth?
-  profile           UserProfile?
-  social            UserSocial[]
-
-  // Relations
-  passwordReset       PasswordReset[]
-  keyToken            UserKeyToken?
-  cart                Cart?
-  comment             Comment[]
-  order               Order[]
-  messages            Message[]         @relation("UserMessages")
-  notificationThread  NotificationThread?
-
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-  @@map("users")
-}
+//   @@map("order_items")
+// }
 
 
-model UserAuth {
-  userId     String   @id
-  username   String   @unique
-  password   String
-  salt       String
-  status     Status   @default(ACTIVE)
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
+// model Comment {
+//   id               String    @id @default(uuid())
+//   commentProductId String    @map("comment_product")
+//   commentUserId    String    @map("comment_user")
+//   commentContent   String    @map("comment_content")
+//   commentLeft      Int       @default(0) @map("comment_left")
+//   commentRight     Int       @default(0) @map("comment_right")
+//   commentParentId  String?   @map("comment_parent_id")
+//   isDeleted        Boolean   @default(false) @map("is_deleted")
+//   isActive         Boolean   @default(true) @map("is_active")
+//   createdAt        BigInt    @default(0) @map("created_at")
+//   updatedAt        BigInt    @default(0) @map("updated_at")
+//   commentParent    Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
+//   childComments    Comment[] @relation("ParentChild")
+//   commentProduct   Spu   @relation(fields: [commentProductId], references: [id])
+//   commentUser      User      @relation(fields: [commentUserId], references: [id])
 
-  user       User     @relation(fields: [userId], references: [id])
-}
+//   @@map("comments")
+// }
+
+// /*
+//   each user have a seperate thread like this (1-1 relation)
+//   and each thread have array of notification (1-n relation)
+// */
+// model NotificationThread {
+//   id            String         @id @default(uuid())
+//   userId        String         @unique @map("noti_thread_user_id")
+//   user          User           @relation(fields: [userId], references: [id])
+//   notifications Notification[]
+
+//   isActive  Boolean @default(true) @map("is_active")
+//   createdAt BigInt  @default(0) @map("created_at")
+//   updatedAt BigInt  @default(0) @map("updated_at")
+
+//   @@map("notification_threads")
+// }
+
+// model Notification {
+//   id       String             @id @default(uuid())
+//   type     NotificationType   @map("noti_type")
+//   sender   Shop               @relation(fields: [senderId], references: [id])
+//   senderId String             @map("noti_sender_id")
+//   thread   NotificationThread @relation(fields: [threadId], references: [id])
+//   threadId String             @map("noti_thread_id")
+//   content  String             @map("noti_content")
+//   option   Json               @map("noti_option")
+//   status   String             @default("unread") @map("notification_status")
+
+//   productId  String? @map("noti_product_id")
+//   discountId String? @map("noti_discount_id")
+
+//   isActive  Boolean @default(true) @map("is_active")
+//   createdAt BigInt  @default(0) @map("created_at")
+//   updatedAt BigInt  @default(0) @map("updated_at")
+
+//   @@map("notifications")
+// }
+
+// model User {
+//   id                String   @id @default(uuid())
+//   auth              UserAuth?
+//   profile           UserProfile?
+//   social            UserSocial[]
+
+//   // Relations
+//   passwordReset       PasswordReset[]
+//   keyToken            UserKeyToken?
+//   cart                Cart?
+//   comment             Comment[]
+//   order               Order[]
+//   messages            Message[]         @relation("UserMessages")
+//   notificationThread  NotificationThread?
+
+//   isActive   Boolean  @default(true)
+//   createdAt  BigInt   @default(0)
+//   updatedAt  BigInt   @default(0)
+//   @@map("users")
+// }
 
 
-model UserProfile {
-  userId       String   @id
-  name         String
-  phone        String   @unique
-  sex          Sex
-  avatar       String
-  dateOfBirth  DateTime
+// model UserAuth {
+//   userId     String   @id
+//   username   String   @unique
+//   password   String
+//   salt       String
+//   status     Status   @default(ACTIVE)
+//   isActive   Boolean  @default(true)
+//   createdAt  BigInt   @default(0)
+//   updatedAt  BigInt   @default(0)
 
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-  user         User   @relation(fields: [userId], references: [id])
-}
+//   user       User     @relation(fields: [userId], references: [id])
+// }
 
-model UserSocial {
-  userId       String   @id
-  provider  String   // 'google', 'facebook'
-  providerId String @unique  // ID của user bên Google/Facebook
-  email     String
-  user      User     @relation(fields: [userId], references: [id])
 
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
+// model UserProfile {
+//   userId       String   @id
+//   name         String
+//   phone        String   @unique
+//   sex          Sex
+//   avatar       String
+//   dateOfBirth  DateTime
 
-  @@unique([userId, provider])
+//   isActive   Boolean  @default(true)
+//   createdAt  BigInt   @default(0)
+//   updatedAt  BigInt   @default(0)
+//   user         User   @relation(fields: [userId], references: [id])
+// }
 
-}
+// model UserSocial {
+//   userId       String   @id
+//   provider  String   // 'google', 'facebook'
+//   providerId String @unique  // ID của user bên Google/Facebook
+//   email     String
+//   user      User     @relation(fields: [userId], references: [id])
 
-model PasswordReset {
-  id        String   @id @default(uuid())
-  userId    String   @map("password_reset_userId")
-  token     String   @unique @map("password_reset_token")
-  expiresAt DateTime @map("password_reset_expires_at")
-  isUsed    Boolean  @default(false) @map("password_reset_is_used")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt BigInt   @default(0) @map("created_at")
-  updatedAt BigInt   @default(0) @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id])
+//   isActive   Boolean  @default(true)
+//   createdAt  BigInt   @default(0)
+//   updatedAt  BigInt   @default(0)
 
-  @@map("password_resets")
-}
+//   @@unique([userId, provider])
 
-model UserKeyToken {
-  id               String             @id @default(uuid())
-  sub              String             @unique @map("user_id") // aka userId
-  publicKey        String             @map("public_key")
-  refreshToken     String             @map("refresh_token")
-  isActive         Boolean            @default(true) @map("is_active")
-  createdAt        BigInt             @default(0) @map("created_at")
-  updatedAt        BigInt             @default(0) @map("updated_at")
-  refreshtokenused UserRefreshTokenUsed[]
-  user             User               @relation(fields: [sub], references: [id])
+// }
 
-  @@map("user_key_tokens")
-}
+// model PasswordReset {
+//   id        String   @id @default(uuid())
+//   userId    String   @map("password_reset_userId")
+//   token     String   @unique @map("password_reset_token")
+//   expiresAt DateTime @map("password_reset_expires_at")
+//   isUsed    Boolean  @default(false) @map("password_reset_is_used")
+//   isActive  Boolean  @default(true) @map("is_active")
+//   createdAt BigInt   @default(0) @map("created_at")
+//   updatedAt BigInt   @default(0) @map("updated_at")
+//   user      User     @relation(fields: [userId], references: [id])
 
-model UserRefreshTokenUsed {
-  id         String   @id @default(uuid())
-  token      String   @map("refresh_token")
-  usedAt     DateTime @default(now()) @map("used_at")
-  userAgent  String?  @map("user_agent")
-  ipAddress  String?  @map("ip_address")
-  keyTokenId String   @map("refresh_token_use")
-  createdAt  BigInt   @default(0) @map("created_at")
-  isActive   Boolean  @default(true) @map("is_active")
-  updatedAt  BigInt   @default(0) @map("updated_at")
-  keyToken   UserKeyToken @relation(fields: [keyTokenId], references: [id])
+//   @@map("password_resets")
+// }
 
-  @@index([token])
-  @@map("user_refresh_tokens_used")
-}
+// model UserKeyToken {
+//   id               String             @id @default(uuid())
+//   sub              String             @unique @map("user_id") // aka userId
+//   publicKey        String             @map("public_key")
+//   refreshToken     String             @map("refresh_token")
+//   isActive         Boolean            @default(true) @map("is_active")
+//   createdAt        BigInt             @default(0) @map("created_at")
+//   updatedAt        BigInt             @default(0) @map("updated_at")
+//   refreshtokenused UserRefreshTokenUsed[]
+//   user             User               @relation(fields: [sub], references: [id])
 
-model Message {
-  id         String      @id @default(uuid())
-  content    String      @map("content") @db.Text
-  senderId   String      @map("sender_id")
-  receiverId String      @map("receiver_id")
-  type       MessageType @map("message_type")
-  isRead     Boolean     @default(false) @map("is_read")
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
-  isActive   Boolean     @default(true) @map("is_active")
+//   @@map("user_key_tokens")
+// }
 
-  // Define relations based on the type field
-  shop Shop? @relation(fields: [receiverId], references: [id], name: "ShopMessages")
-  user User? @relation(fields: [senderId], references: [id], name: "UserMessages")
+// model UserRefreshTokenUsed {
+//   id         String   @id @default(uuid())
+//   token      String   @map("refresh_token")
+//   usedAt     DateTime @default(now()) @map("used_at")
+//   userAgent  String?  @map("user_agent")
+//   ipAddress  String?  @map("ip_address")
+//   keyTokenId String   @map("refresh_token_use")
+//   createdAt  BigInt   @default(0) @map("created_at")
+//   isActive   Boolean  @default(true) @map("is_active")
+//   updatedAt  BigInt   @default(0) @map("updated_at")
+//   keyToken   UserKeyToken @relation(fields: [keyTokenId], references: [id])
 
-  @@map("messages")
-}
+//   @@index([token])
+//   @@map("user_refresh_tokens_used")
+// }
 
-model Spu {
-  id                 String   @id @db.VarChar(60)
-  name               String?  @db.VarChar(100)
-  intro              String?  @db.VarChar(200)
-  brandId            Int?     
-  categoryOneId      Int?     
-  categoryTwoId      Int?     
-  categoryThreeId    Int?     
-  images             String?  @db.VarChar(1000)
-  afterSalesService  String?  @db.VarChar(50)
-  content            String?  @db.Text
-  attributeList      String?  @db.VarChar(3000)
-  isMarketable       Int      @default(0)
-  isDelete           Int      @default(0)
-  status             Int      @default(0)
+// model Message {
+//   id         String      @id @default(uuid())
+//   content    String      @map("content") @db.Text
+//   senderId   String      @map("sender_id")
+//   receiverId String      @map("receiver_id")
+//   type       MessageType @map("message_type")
+//   isRead     Boolean     @default(false) @map("is_read")
+//   createdAt  DateTime    @default(now()) @map("created_at")
+//   updatedAt  DateTime    @updatedAt @map("updated_at")
+//   isActive   Boolean     @default(true) @map("is_active")
 
-  // relations
-  brand              Brand?   @relation(fields: [brandId], references: [id])
-  skus               Sku[]    @relation("SpuSkus")
-  comment            Comment[]
-}
+//   // Define relations based on the type field
+//   shop Shop? @relation(fields: [receiverId], references: [id], name: "ShopMessages")
+//   user User? @relation(fields: [senderId], references: [id], name: "UserMessages")
 
-model Sku {
-  id           String   @id @db.VarChar(60)
-  name         String   @db.VarChar(200)
-  price        Int      @default(1)
-  num          Int?     @default(100)
-  image        String?  @db.VarChar(200)
-  images       String?  @db.VarChar(2000)
-  createTime   DateTime? @map("create_time")
-  updateTime   DateTime? @map("update_time")
-  spuId        String?   @db.VarChar(60)
-  categoryId   Int?
-  categoryName String?   @db.VarChar(200)
-  brandId      Int?
-  brandName    String?   @db.VarChar(100)
-  skuAttribute String?   @db.VarChar(200)
-  status       Int?      @default(1)
-  inventoryId  String    @map("inventory_id")
+//   @@map("messages")
+// }
 
-  // relations
-  spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
-  brand        Brand?    @relation(fields: [brandId], references: [id])
-  category     Category? @relation(fields: [categoryId], references: [id])
-  inventory   Inventory?
-
-  @@index([categoryId], name: "cid")
-  @@index([status])
-  @@index([updateTime], name: "updated")
-}
-
-model Category {
-  id        Int       @id @default(autoincrement())
-  name      String?   @db.VarChar(50)
-  sort      Int?
-  parentId  Int?
+// /*
+//   standard product unit
   
-  // relations
-  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children  Category[] @relation("CategoryHierarchy")
+//   The SPU is the minimum unit of product information aggregation. 
+//   It is a set of reused, easy to retrieve standardized information, which describes a product
+// */
+// model Spu {
+//   id                 String   @id @db.VarChar(60)//primary key
+//   name               String?  @db.VarChar(100)//SPU name
+//   intro              String?  @db.VarChar(200)//introduction
+//   brandId            Int?     //brand Id
+//   categoryOneId      Int?     //level classification foreign key and point to category 
+//   categoryTwoId      Int?     //level classification foreign key and point to category 
+//   categoryThreeId    Int?     //level classification foreign key and point to category 
+//   images             String?  @db.VarChar(1000) //list of picture 
+//   afterSalesService  String?  @db.VarChar(50) //After-sales service
+//   content            String?  @db.Text //introduce
+//   attributeList      String?  @db.VarChar(3000) //Specifications
+//   isMarketable       Int      @default(0) //Unsaleable or not
+//   status             Int      @default(0)//Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
 
-  products  Sku[]
-  brands    CategoryBrand[]
-  attrs     CategoryAttr[]
-}
+//   createdAt  DateTime    @default(now()) @map("created_at")
+//   updatedAt  DateTime    @updatedAt @map("updated_at")
+//   isActive   Boolean     @default(true) @map("is_active")
 
-model Brand {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(100)
-  image    String  @default("") @db.VarChar(1000)
-  initial  String  @default("") @db.VarChar(1)
-  sort     Int?
+//   // relations
+//   brand              Brand?   @relation(fields: [brandId], references: [id])
+//   skus               Sku[]    @relation("SpuSkus")
+//   comment            Comment[]
+// }
 
-  // relations
-  spus     Spu[]
-  skus     Sku[]
-  categories CategoryBrand[]
-}
-
-model CategoryBrand {
-  categoryId Int
-  brandId    Int
-
-  // relations
-  category   Category @relation(fields: [categoryId], references: [id])
-  brand      Brand    @relation(fields: [brandId], references: [id])
-
-  @@id([brandId, categoryId])
-}
-
-model CategoryAttr {
-  categoryId Int
-  attrId     Int
-
-  // relations
-  category   Category @relation(fields: [categoryId], references: [id])
-  attribute  SkuAttribute @relation(fields: [attrId], references: [id])
-
-  @@id([categoryId, attrId])
-}
-
-model SkuAttribute {
-  id      Int     @id @default(autoincrement())
-  name    String? @db.VarChar(50)
-  options String? @db.VarChar(2000)
-  sort    Int?
-
-  categories CategoryAttr[]
-}
+// /*
+//   Sku = stock Keeping Unit (inventory unit)
+//   SKU is a physically indivisible minimum inventory unit.
+//   Treatment according to different industrial states and different management models during use. In clothing, shoes
+// The most common use of class products is most common.
 
 
+// */
+// model Sku {
+//   id           String   @id @db.VarChar(60)//Id
+//   name         String   @db.VarChar(200)//SKU name
+//   price        Int      @default(1)//price
+//   num          Int?     @default(100)// quantity ()
+//   image        String?  @db.VarChar(200)//Product Image
+//   images       String?  @db.VarChar(2000)//Product Image List
+//   spuId        String?   @db.VarChar(60)
+//   categoryId   Int?       //classId
+//   categoryName String?   @db.VarChar(200) //Category Name
+//   brandId      Int?
+//   brandName    String?   @db.VarChar(100)
+//   skuAttribute String?   @db.VarChar(200)//Specification
+//   status       Int?      @default(1)
+//   inventoryId  String    @map("inventory_id")
 
-enum AccountRole {
-  SHOP
-  USER
-}
+//   createdAt  DateTime    @default(now()) @map("created_at")
+//   updatedAt  DateTime    @updatedAt @map("updated_at")
+//   isActive   Boolean     @default(true) @map("is_active")
 
-enum CartState {
-  ACTIVE
-  COMPLETE
-  FAIL
-  PENDING
-}
+//   // relations
+//   spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
+//   brand        Brand?    @relation(fields: [brandId], references: [id])
+//   category     Category? @relation(fields: [categoryId], references: [id])
+//   inventory   Inventory?
 
-enum RoleShop {
-  SHOP
-  WRITER
-  EDITOR
-  ADMIN
-}
+//   @@index([categoryId], name: "cid")
+//   @@index([status])
+//   @@index([updatedAt], name: "updated")
+// }
 
-enum Status {
-  ACTIVE
-  INACTIVE
-  PENDING
-}
+// /*
+//   this is self relation table
+//   Electricity (parentId = null)
+//   └── Phone (parentId = Electricity)
+//       └── Smartphone (parentId = Phone)
+// */
+// model Category {
+//   id        Int       @id @default(autoincrement())
+//   name      String?   @db.VarChar(50)
+//   sort      Int?
+//   parentId  Int?
+  
+//   // relations
+//   parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+//   children  Category[] @relation("CategoryHierarchy")
 
-enum ProductType {
-  Clothing
-  Electronic
-  Furniture
-}
+//   products  Sku[]
+//   brands    CategoryBrand[]
+//   attrs     CategoryAttr[]
+// }
 
-enum DiscountAppliesTo {
-  all
-  specific
-}
+// model Brand {
+//   id       Int     @id @default(autoincrement())
+//   name     String  @db.VarChar(100)
+//   image    String  @default("") @db.VarChar(1000)
+//   initial  String  @default("") @db.VarChar(1)
+//   sort     Int?
 
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  CANCELLED
-  DELIVERED
-}
+//   // relations
+//   spus     Spu[]
+//   skus     Sku[]
+//   categories CategoryBrand[]
+// }
 
-enum NotificationType {
-  PRODUCT
-  DISCOUNT
-}
+// model CategoryBrand {
+//   categoryId Int
+//   brandId    Int
 
-enum Sex {
-  MALE
-  FEMALE
-}
+//   // relations
+//   category   Category @relation(fields: [categoryId], references: [id])
+//   brand      Brand    @relation(fields: [brandId], references: [id])
 
-enum MessageType {
-  USER_TO_SHOP
-  SHOP_TO_USER
-}
+//   @@id([brandId, categoryId])
+// }
 
-enum UserSocialProvider {
-  GOOGLE
-  FACEBOOK
-}
+// model CategoryAttr {
+//   categoryId Int
+//   attrId     Int
+
+//   // relations
+//   category   Category @relation(fields: [categoryId], references: [id])
+//   attribute  SkuAttribute @relation(fields: [attrId], references: [id])
+
+//   @@id([categoryId, attrId])
+// }
+
+// model SkuAttribute {
+//   id      Int     @id @default(autoincrement())
+//   name    String? @db.VarChar(50)
+//   options String? @db.VarChar(2000)
+//   sort    Int?
+
+//   categories CategoryAttr[]
+// }
+
+
+
+// enum AccountRole {
+//   SHOP
+//   USER
+// }
+
+// enum CartState {
+//   ACTIVE
+//   COMPLETE
+//   FAIL
+//   PENDING
+// }
+
+// enum RoleShop {
+//   SHOP
+//   WRITER
+//   EDITOR
+//   ADMIN
+// }
+
+// enum Status {
+//   ACTIVE
+//   INACTIVE
+//   PENDING
+// }
+
+// enum ProductType {
+//   Clothing
+//   Electronic
+//   Furniture
+// }
+
+// enum DiscountAppliesTo {
+//   all
+//   specific
+// }
+
+// enum OrderStatus {
+//   PENDING
+//   CONFIRMED
+//   SHIPPED
+//   CANCELLED
+//   DELIVERED
+// }
+
+// enum NotificationType {
+//   PRODUCT
+//   DISCOUNT
+// }
+
+// enum Sex {
+//   MALE
+//   FEMALE
+// }
+
+// enum MessageType {
+//   USER_TO_SHOP
+//   SHOP_TO_USER
+// }
+
+// enum UserSocialProvider {
+//   GOOGLE
+//   FACEBOOK
+// }

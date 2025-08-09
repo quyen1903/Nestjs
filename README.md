@@ -125,3 +125,88 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Workflow
+SKU and SPU
+
+=================   FIRST STEP   =================================
+Category and shop are defined by Shop/Administrator following Parent-child structure like this
+
+Category defination:
+  Electricity (parentId = null)
+    |___Phone (parentId = Electricity)
+      |__SmartPhone (parentId = Phone )
+
+Brand (Apple, samsung, xiaomi.....)
+
+=================   SECOND STEP   ================================
+
+define Attribute for category
+
+for instance, category SmartPhone have attribute color and attribute storage
+
+we store these attributes to SkuAttribute
+
+we link category ↔ attribute through CategoryAttr
+
+=================   THIRD STEP   ================================
+generate  SPU (standard product unit)
+
+shop generate SPU with these information:
+
+  ---name: "iPhone 15 Pro"
+
+  ---brandId: Apple
+
+  ---categoryOneId/TwoId/ThreeId: (point to category)
+
+  ---images: major image
+
+  ---content: in detail description
+
+  ---attributeList: (General Specifications (remain unchanged between SKUs))
+
+  ---isMarketable: 0 (not for sale yet)
+
+  ---status: 0 (not approved yet)
+
+SPU is kinda "original" which variations Product will be created based on this original.
+
+=================   FOURTH STEP ==================================
+
+generate SKU (stock keeping unit)
+
+each SKU would bind to one SPU (SpuId)
+
+each SKU included:
+  --name: "iPhone 15 Pro - 256GB - Đen"
+  --price: 
+  --num: initial inventory
+  --skuAttribute: JSON /string describe option (for example: {color: 'Đen', storage: '256GB'})
+  --status: 1 (saleable)
+  --inventoryId: point to Inventory to managed real stock
+
+each Sku bind to category and branch for quick filtering
+=================   FIFTH STEP   ==================================
+Sale & manage inventory
+
+when CX order:
+
+  --get SKU info
+  --minus inventory in inventory table
+  --if we have reservation system ->we will remail stock, we just real minus them once user not show or return out of stock
+
+if (num == 0) -> SKU not show or return out of stock
+
+=================   SIX STEP   ==========================================
+
+in page list_of_product: query from SPU, filter by category/brand
+
+page product_detail:
+--get SPU information(image, general descrition)
+--get all SKU belong to SPU to show variation
+
+Filter:  CategoryAttr + SkuAttribute to filter .
+
+=====================================================================
+
