@@ -5,9 +5,7 @@ import { Product } from "@prisma/client";
 import { getSelectData, unGetSelectData } from "src/shared/utils";
 import { CreateProductDTO } from "../dto/create-product.dto";
 import { UpdateProductDTO } from "../dto/update-product.dto";
-import { ClothingService } from "./clothing.service";
-import { ElectronicService } from "./electronic.service";
-import { FurnitureService } from "./furniture.service";
+
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
 @Injectable()
 export class Factory{

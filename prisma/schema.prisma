@@ -397,7 +397,7 @@ model Spu {
   id                 String   @id @db.VarChar(60)
   name               String?  @db.VarChar(100)
   intro              String?  @db.VarChar(200)
-  brandId            Int?     
+  brandId            String?     
   categoryOneId      Int?     
   categoryTwoId      Int?     
   categoryThreeId    Int?     
@@ -413,6 +413,8 @@ model Spu {
   brand              Brand?   @relation(fields: [brandId], references: [id])
   skus               Sku[]    @relation("SpuSkus")
   comment            Comment[]
+
+  @@unique([name, brandId])
 }
 
 model Sku {
@@ -427,7 +429,7 @@ model Sku {
   spuId        String?   @db.VarChar(60)
   categoryId   Int?
   categoryName String?   @db.VarChar(200)
-  brandId      Int?
+  brandId      String?
   brandName    String?   @db.VarChar(100)
   skuAttribute String?   @db.VarChar(200)
   status       Int?      @default(1)
@@ -460,7 +462,7 @@ model Category {
 }
 
 model Brand {
-  id       Int     @id @default(autoincrement())
+  id              String      @id @default(uuid())
   name     String  @db.VarChar(100)
   image    String  @default("") @db.VarChar(1000)
   initial  String  @default("") @db.VarChar(1)
@@ -471,10 +473,10 @@ model Brand {
   skus     Sku[]
   categories CategoryBrand[]
 }
-
+  
 model CategoryBrand {
   categoryId Int
-  brandId    Int
+  brandId    String
 
   // relations
   category   Category @relation(fields: [categoryId], references: [id])

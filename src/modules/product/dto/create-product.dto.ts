@@ -5,58 +5,108 @@ import {
     IsEnum,
     ValidateNested,
     IsObject,
+    IsOptional,
+    IsBoolean
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ClothingDTO } from './product/clothing.products';
-import { ElectronicDTO } from './product/electronic.products';
-import { FurnitureDTO } from './product/furniture.products';
-enum ProductType {
-    CLOTHING = 'Clothing',
-    ELECTRONIC = 'Electronic',
-    FURNITURE = 'Furniture'
-}
 
-function resolveProductAttributes(productType: ProductType) {
-    switch (productType) {
-        case ProductType.CLOTHING:
-            return ClothingDTO;
-        case ProductType.ELECTRONIC:
-            return ElectronicDTO;
-        case ProductType.FURNITURE:
-            return FurnitureDTO;
-        default:
-            return Object;
-    }
-}
 
-export class CreateProductDTO {
-    @IsNotEmpty()
+
+export class CreateSpuDTO {
     @IsString()
-    productName: string;
-
     @IsNotEmpty()
+    name: string;
+
     @IsString()
-    productThumb: string;
+    @IsOptional()
+    intro?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    productDescription: string;
+    brandId?: String;
 
-    @IsNotEmpty()
-    @IsNumber()
-    productPrice: number;
+    @IsString()
+    categoryOneId?: string;
 
-    @IsNotEmpty()
-    @IsNumber()
-    productQuantity: number;
+    @IsString()
+    @IsOptional()
+    categoryTwoId?: string;
 
-    @IsNotEmpty()
-    @IsEnum(ProductType)
-    productType: ProductType;
+    @IsString()
+    @IsOptional()
+    categoryThreeId?: string;
 
-    @IsNotEmpty()
+    @IsString()
+    @IsOptional()
+    images?: string[]; 
+
+    @IsString()
+    @IsOptional()
+    afterSalesService?: string; 
+
+    @IsString()
+    @IsOptional()
+    content?: string;
+
     @IsObject()
-    @ValidateNested() // To recursively validate nested objects
-    @Type((obj) => resolveProductAttributes(obj!.object.productType))
-    productAttributes: ClothingDTO | ElectronicDTO | FurnitureDTO;
+    @IsString({ each: true })
+    @IsOptional()
+    attributeList?: Record<string, any>[];
+
+    @IsBoolean()
+    isMarketable?: boolean; 
+}
+
+
+export class CreateSkuDTO {
+
+    @IsString()
+    @IsNotEmpty()
+    spuId: string; 
+    
+    @IsString()
+    name: string;
+
+    @IsNotEmpty()
+    @IsNumber()
+    price: number;
+
+    @IsOptional()
+    @IsNumber()
+    num?: number;
+    
+    @IsString()
+    @IsOptional()
+    image?: string;
+    
+    @IsString()
+    @IsOptional()
+    images?: string[];
+
+    @IsString()
+    @IsOptional()
+    categoryId?: string;
+    
+    @IsString()
+    categoryName?: string;
+
+    @IsOptional()
+    @IsString()
+    brandId?: string;
+    
+    @IsString()
+    @IsOptional()
+    brandName?: string;
+
+    @IsObject()
+    @IsString({ each: true })
+    @IsOptional()
+    skuAttribute?: Record<string, string>; 
+    
+    @IsString()
+    @IsNumber()
+    status?: number; 
+
+    @IsString()
+    @IsOptional()
+    inventoryId?: string; 
 }
