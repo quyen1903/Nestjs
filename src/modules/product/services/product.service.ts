@@ -1,7 +1,7 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { ProductType } from "@prisma/client";
-import { CreateProductDTO, CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
+import { CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
 import { Product } from "@prisma/client";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 
@@ -62,8 +62,48 @@ export class ProductService {
     //     return product 
     // }
 
-    async createProduct(spu: CreateSpuDTO,sku: CreateSkuDTO){
-        const spuExisted = this.prismaService.spu.findFirst()
+    /**
+     * A closure table is a table that stores all the paths 
+     * between all elements in a hierarchical data structure.
+     * The table includes two columns for the IDs of the related 
+     * elements and a third column that represents the distance between them.
+     * 
+     */
+
+    async createCategory(){
+
+    }
+    async createProduct(spuDTO: CreateSpuDTO,  sku: CreateSkuDTO){
+        const spuExisted =await this.prismaService.spu.findUnique({
+            where:{
+                name:spuDTO.name
+            }
+        })
+
+        if(spuExisted) throw new BadRequestException(" SPU already existed")
+
+        const newSPU = await this.prismaService.spu.create({
+            data:{
+                name: spuDTO.name,
+                intro: spuDTO.intro,
+                brandId: spuDTO.brandId,
+                categoryOneId:  spuDTO.categoryOneId,
+                categoryTwoId: spuDTO.categoryTwoId,
+                categoryThreeId: spuDTO.categoryThreeId,
+                images: spuDTO.images,
+                afterSalesService: spuDTO.afterSalesService,
+                content: spuDTO.content,
+                attributeList: spuDTO.attributeList,
+                isMarketable: spuDTO.isMarketable,
+            }
+        })
+
+        const skuExisted = await this.prismaService.sku.findUnique({
+            where:{
+                name: newSPU.name,
+                spuId: newSPU.id
+            }
+        })
     }
 
     async updateProduct(productId: string, payload: any): Promise<Product>{

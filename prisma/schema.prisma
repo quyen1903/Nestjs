@@ -232,6 +232,11 @@ model Comment {
   @@map("comments")
 }
 
+/*
+  each user have a seperate thread like this (1-1 relation)
+  and each thread have array of notification (1-n relation)
+*/
+
 model NotificationThread {
   id            String         @id @default(uuid())
   userId        String         @unique @map("noti_thread_user_id")
@@ -393,21 +398,32 @@ model Message {
   @@map("messages")
 }
 
+/*
+
+  standard product unit
+  The SPU is the minimum unit of product information aggregation. 
+  It is a set of reused, easy to retrieve standardized information, which describes a product.
+
+*/
+
 model Spu {
-  id                 String   @id @db.VarChar(60)
-  name               String?  @db.VarChar(100)
+  id                 String   @id @default(uuid())
+  name               String   @db.VarChar(100)@unique()
   intro              String?  @db.VarChar(200)
-  brandId            String?     
-  categoryOneId      Int?     
-  categoryTwoId      Int?     
-  categoryThreeId    Int?     
-  images             String?  @db.VarChar(1000)
+  brandId            String
+  categoryOneId      String?     //level classification foreign key and point to category 
+  categoryTwoId      String?     //level classification foreign key and point to category 
+  categoryThreeId    String?     //level classification foreign key and point to category 
+  images             String[]  @db.VarChar(1000) //list of picture 
   afterSalesService  String?  @db.VarChar(50)
-  content            String?  @db.Text
-  attributeList      String?  @db.VarChar(3000)
-  isMarketable       Int      @default(0)
-  isDelete           Int      @default(0)
-  status             Int      @default(0)
+  content            String?  @db.Text  //introduce
+  attributeList      String?  @db.VarChar(3000) //Specifications
+  isMarketable       Boolean  @default(false) //Unsaleable or not
+  status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
+  
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
 
   // relations
   brand              Brand?   @relation(fields: [brandId], references: [id])
@@ -417,23 +433,32 @@ model Spu {
   @@unique([name, brandId])
 }
 
+/*
+  Sku = stock Keeping Unit (inventory unit)
+  SKU is a physically indivisible minimum inventory unit.
+  Treatment according to different industrial states and different management models during use. In clothing, shoes
+*/
 model Sku {
-  id           String   @id @db.VarChar(60)
-  name         String   @db.VarChar(200)
-  price        Int      @default(1)
-  num          Int?     @default(100)
-  image        String?  @db.VarChar(200)
-  images       String?  @db.VarChar(2000)
-  createTime   DateTime? @map("create_time")
-  updateTime   DateTime? @map("update_time")
-  spuId        String?   @db.VarChar(60)
-  categoryId   Int?
-  categoryName String?   @db.VarChar(200)
-  brandId      String?
-  brandName    String?   @db.VarChar(100)
-  skuAttribute String?   @db.VarChar(200)
-  status       Int?      @default(1)
-  inventoryId  String    @map("inventory_id")
+  id           String       @id @default(uuid())
+  name         String       @db.VarChar(200)  //SKU name
+  price        Int          @default(1)
+  num          Int?         @default(100) // quantity
+  image        String?      @db.VarChar(200)  ////Product Image
+  images       String[]     @db.VarChar(2000) ////Product Image list
+  createTime   DateTime?    @map("create_time")
+  updateTime   DateTime?    @map("update_time")
+  spuId        String       @db.VarChar(60)
+  categoryId   String?
+  categoryName String?      @db.VarChar(200)
+  brandId      String
+  brandName    String?      @db.VarChar(100)
+  skuAttribute String?      @db.VarChar(200) ////Specification
+  status       Int?         @default(1)
+  inventoryId  String?    @map("inventory_id")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
 
   // relations
   spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
@@ -446,11 +471,20 @@ model Sku {
   @@index([updateTime], name: "updated")
 }
 
+/*
+  IMPRORTANT: The creatationn of category must be handled by admin and must not be done by seller and user
+  
+  this is self relation table
+  Electricity (parentId = null)
+  └── Phone (parentId = Electricity)
+      └── Smartphone (parentId = Phone)
+*/
+
 model Category {
-  id        Int       @id @default(autoincrement())
+  id         String      @id @default(uuid())
   name      String?   @db.VarChar(50)
   sort      Int?
-  parentId  Int?
+  parentId  String?
   
   // relations
   parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
@@ -475,7 +509,7 @@ model Brand {
 }
   
 model CategoryBrand {
-  categoryId Int
+  categoryId String
   brandId    String
 
   // relations
@@ -486,8 +520,8 @@ model CategoryBrand {
 }
 
 model CategoryAttr {
-  categoryId Int
-  attrId     Int
+  categoryId String
+  attrId     String
 
   // relations
   category   Category @relation(fields: [categoryId], references: [id])
@@ -497,7 +531,7 @@ model CategoryAttr {
 }
 
 model SkuAttribute {
-  id      Int     @id @default(autoincrement())
+  id         String      @id @default(uuid())
   name    String? @db.VarChar(50)
   options String? @db.VarChar(2000)
   sort    Int?

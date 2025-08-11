@@ -22,7 +22,7 @@ export class CreateSpuDTO {
 
     @IsOptional()
     @IsString()
-    brandId?: String;
+    brandId?: string;
 
     @IsString()
     categoryOneId?: string;
@@ -47,10 +47,9 @@ export class CreateSpuDTO {
     @IsOptional()
     content?: string;
 
-    @IsObject()
-    @IsString({ each: true })
+    @IsString()
     @IsOptional()
-    attributeList?: Record<string, any>[];
+    attributeList?: string;
 
     @IsBoolean()
     isMarketable?: boolean; 

@@ -9,9 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
-import { ClothingDTO } from './product/clothing.products';
-import { ElectronicDTO } from './product/electronic.products';
-import { FurnitureDTO } from './product/furniture.products';
+
 
 enum ProductType {
     CLOTHING = 'Clothing',
