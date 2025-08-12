@@ -4,6 +4,16 @@ import { CreateCommentDTO } from './dto/create-comment.dto';
 import { GetCommentDTO } from './dto/get-comment.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
 import { Factory } from '../product/services/factory.service';
+
+/**
+ * Depth first search preorder traversal (Data structure and  algorithm perspective)
+ * we implementing nested set model (database perspective)
+ * because of each node store left and right value, we need 2 more value
+ * to add value for new node, first we increase left and right value
+ * of all node which is right-hand side
+ * 
+*/
+
 @Injectable()
 export class CommentService {
     constructor(
@@ -12,12 +22,10 @@ export class CommentService {
     ){}
 
     /**
-     * we implementing nested set model
-     * because of each node store left and right value, we need 2 more value
-     * to add value for new node, first we increase left and right value
-     * of all node which is right-hand side
-     * 
-    */
+     * remember to use transaction 
+     * @param param0 
+     * @returns create a new comment
+     */
     async createComment({commentProductId, commentUserId, commentContent, commentParentId = null}: CreateCommentDTO){
 
         /*
@@ -25,32 +33,42 @@ export class CommentService {
         */
         let rightValue: number;
         if(commentParentId){
+            // use transaction to make sure thing are atomic
+
             //reply comment
             const parentComment = await this.prismaService.comment.findFirst({
                 where:{id: commentParentId}
-            })
-            if(!parentComment) throw new NotFoundException('not found parent comment');
-            rightValue = parentComment.commentRight;
-
-            await this.prismaService.comment.updateMany({
-                where:{
-                    commentProductId: commentProductId,
-                    commentRight: { gte: rightValue }
-
-                },data:{
-                    commentRight:{ increment:2 }
-                }
             });
 
-            await this.prismaService.comment.updateMany({
-                where:{
-                    commentProductId: commentProductId,
-                    commentLeft: { gte  : rightValue }
+            if(!parentComment) throw new NotFoundException('not found parent comment');
 
-                },data:{
-                    commentLeft:{ increment:2 }
-                }
+            rightValue = parentComment.commentRight;
+
+            // transaction for atomic
+            await this.prismaService.$transaction(async(tx)=>{
+
+                await tx.comment.updateMany({
+                    where:{
+                        commentProductId: commentProductId,
+                        commentRight: { gte: rightValue }
+
+                    },data:{
+                        commentRight:{ increment:2 }
+                    }
+                });
+
+                await tx.comment.updateMany({
+                    where:{
+                        commentProductId: commentProductId,
+                        commentLeft: { gte  : rightValue }
+
+                    },data:{
+                        commentLeft:{ increment:2 }
+                    }
+                });
             })
+
+
         }else{
             /**
              * parent comment not existed 

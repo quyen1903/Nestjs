@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/complexity-report
 
 # Logs
 logs
