@@ -484,15 +484,26 @@ model Category {
   id         String      @id @default(uuid())
   name      String?   @db.VarChar(50)
   sort      Int?
-  parentId  String?
-  
-  // relations
-  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children  Category[] @relation("CategoryHierarchy")
+
+  ancestors CategoryClosureTable[]  @relation("ancestor")
+  descendants CategoryClosureTable[]  @relation("descendant")
 
   products  Sku[]
   brands    CategoryBrand[]
   attrs     CategoryAttr[]
+}
+
+model CategoryClosureTable {
+
+  ancestorId String
+  descendantId String 
+
+  ancestor   Category @relation("ancestor", fields: [ancestorId], references: [id])
+  descendant Category @relation("descendant",fields: [descendantId], references: [id])
+
+
+  depth Int
+  @@id([ancestorId, descendantId])
 }
 
 model Brand {

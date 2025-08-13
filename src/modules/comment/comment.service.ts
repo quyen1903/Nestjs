@@ -21,6 +21,8 @@ export class CommentService {
         private readonly factory: Factory
     ){}
 
+    //legacy code, this model use Nested set model, but now we switch to Closure table
+
     /**
      * remember to use transaction 
      * @param param0 
@@ -163,41 +165,48 @@ export class CommentService {
 
         if(!comment) throw new NotFoundException('comment not found');
 
-        
         const leftValue = comment.commentLeft
         const rightValue = comment.commentRight
 
         //2 caculate width 
         const width = rightValue - leftValue +1
 
-        //3delete all subcomment
-        const removed = await this.prismaService.comment.deleteMany({
-            where:{
-                commentProductId: deleted.commentProductId,
-                commentLeft: { gte: leftValue, lte: rightValue}
-            }
+        //use transaction for atomic 
+        await this.prismaService.$transaction(async(tx)=>{
+
+            //3delete all subcomment
+            await tx.comment.deleteMany({
+                where:{
+                    commentProductId: deleted.commentProductId,
+                    commentLeft: { gte: leftValue, lte: rightValue}
+                }
+            })
+
+            //4 update remain left/right value
+            await tx.comment.updateMany({
+                where:{
+                    commentProductId: deleted.commentProductId,
+                    commentRight:{ gt: rightValue }
+                },
+                data:{
+                    commentRight: { increment: -width}
+                }
+            })
+
+            await tx.comment.updateMany({
+                where:{
+                    commentProductId: deleted.commentProductId,
+                    commentLeft: { gt: rightValue}
+                },
+                data:{
+                    commentLeft: { increment: -width}
+                }
+            })
         })
 
-        //4 update remain left/right value
-        await this.prismaService.comment.updateMany({
-            where:{
-                commentProductId: deleted.commentProductId,
-                commentRight:{ gt: rightValue }
-            },
-            data:{
-                commentRight: { increment: -width}
-            }
-        })
 
-        await this.prismaService.comment.updateMany({
-            where:{
-                commentProductId: deleted.commentProductId,
-                commentLeft: { gt: rightValue}
-            },
-            data:{
-                commentLeft: { increment: -width}
-            }
-        })
         return true
     }
+
+
 }

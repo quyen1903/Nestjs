@@ -70,9 +70,10 @@ export class ProductService {
      * 
      */
 
-    async createCategory(){
-
-    }
+    async createCategory(cateid: string, ){
+        
+    };
+    
     async createProduct(spuDTO: CreateSpuDTO,  sku: CreateSkuDTO){
         const spuExisted =await this.prismaService.spu.findUnique({
             where:{
