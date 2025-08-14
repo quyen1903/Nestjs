@@ -411,9 +411,7 @@ model Spu {
   name               String   @db.VarChar(100)@unique()
   intro              String?  @db.VarChar(200)
   brandId            String
-  categoryOneId      String?     //level classification foreign key and point to category 
-  categoryTwoId      String?     //level classification foreign key and point to category 
-  categoryThreeId    String?     //level classification foreign key and point to category 
+  categoryId      String
   images             String[]  @db.VarChar(1000) //list of picture 
   afterSalesService  String?  @db.VarChar(50)
   content            String?  @db.Text  //introduce
@@ -445,8 +443,7 @@ model Sku {
   num          Int?         @default(100) // quantity
   image        String?      @db.VarChar(200)  ////Product Image
   images       String[]     @db.VarChar(2000) ////Product Image list
-  createTime   DateTime?    @map("create_time")
-  updateTime   DateTime?    @map("update_time")
+
   spuId        String       @db.VarChar(60)
   categoryId   String?
   categoryName String?      @db.VarChar(200)
@@ -468,7 +465,7 @@ model Sku {
 
   @@index([categoryId], name: "cid")
   @@index([status])
-  @@index([updateTime], name: "updated")
+  @@index([updatedAt], name: "updated")
 }
 
 /*

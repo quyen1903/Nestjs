@@ -2,8 +2,8 @@ import { Injectable, Inject, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { ProductType } from "@prisma/client";
 import { CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
-import { Product } from "@prisma/client";
 import { ProducerService } from "src/services/kafka/services/producer.service";
+import { Brand, Category } from "@prisma/client";
 
 @Injectable()
 export class ProductService {
@@ -11,6 +11,25 @@ export class ProductService {
         protected readonly prismaService: PrismaService,
         private readonly producerService: ProducerService
     ){}
+
+    private skuType(sku: CreateSkuDTO, brand: Brand, category: Category, spuId: string) {
+        return {
+            name: sku.name,
+            brandId: brand.id,
+            images: sku.images,
+            status: sku.status,
+            price: sku.price,
+            num: sku.num,
+            image: sku.image,
+            categoryName: category.name,
+            brandName: brand.name,
+            skuAttribute: sku.skuAttribute,
+            inventoryId: sku.inventoryId,
+            spuId,
+            categoryId: category.id
+        };
+    }
+
 
     // Create main product and return its ID
     /**
@@ -70,47 +89,69 @@ export class ProductService {
      * 
      */
 
-    async createCategory(cateid: string, ){
+    async createCategory(categoryId: string, ){
         
     };
     
     async createProduct(spuDTO: CreateSpuDTO,  sku: CreateSkuDTO){
         const spuExisted =await this.prismaService.spu.findUnique({
             where:{
-                name:spuDTO.name
+                name:spuDTO.name,
+                categoryId: spuDTO.categoryId,
+                brandId: spuDTO.brandId
             }
-        })
-
-        if(spuExisted) throw new BadRequestException(" SPU already existed")
-
-        const newSPU = await this.prismaService.spu.create({
-            data:{
-                name: spuDTO.name,
-                intro: spuDTO.intro,
-                brandId: spuDTO.brandId,
-                categoryOneId:  spuDTO.categoryOneId,
-                categoryTwoId: spuDTO.categoryTwoId,
-                categoryThreeId: spuDTO.categoryThreeId,
-                images: spuDTO.images,
-                afterSalesService: spuDTO.afterSalesService,
-                content: spuDTO.content,
-                attributeList: spuDTO.attributeList,
-                isMarketable: spuDTO.isMarketable,
-            }
-        })
-
-        const skuExisted = await this.prismaService.sku.findUnique({
-            where:{
-                name: newSPU.name,
-                spuId: newSPU.id
-            }
-        })
-    }
-
-    async updateProduct(productId: string, payload: any): Promise<Product>{
-        return await this.prismaService.product.update({
-            where: { id: productId },
-            data: payload
         });
+
+        const brand = await this.prismaService.brand.findUnique({ where: { id: sku.brandId } });
+        const category = await this.prismaService.category.findUnique({ where: { id: spuDTO.categoryId } });
+
+        if(spuExisted) {
+
+            return this.prismaService.$transaction(async(tx)=>{
+                const skuExists = await tx.sku.findFirst({
+                    where: {
+                        spuId: spuExisted.id,
+                        skuAttribute: sku.skuAttribute
+                    }
+                });
+
+                if (skuExists) throw new BadRequestException('SKU variant already exists for this SPU');
+
+                const skuData = this.skuType(sku, brand, category, spuExisted.id);
+                const newSKU = await tx.sku.create({ data: skuData });
+
+
+                return { spu: spuExisted, sku: newSKU };
+            })
+        }
+
+        return this.prismaService.$transaction(async (tx)=>{
+            const newSPU = await tx.spu.create({
+                data:{
+                    name: spuDTO.name,
+                    intro: spuDTO.intro,
+                    brandId: spuDTO.brandId,
+                    categoryId: spuDTO.categoryId,
+                    images: spuDTO.images,
+                    afterSalesService: spuDTO.afterSalesService,
+                    content: spuDTO.content,
+                    attributeList: spuDTO.attributeList,
+                    isMarketable: spuDTO.isMarketable,
+                }
+            })
+
+            const skuData = this.skuType(sku, brand, category, spuExisted.id);
+            const newSKU = await tx.sku.create({ data: skuData });
+
+            return { spu: newSPU, sku: newSKU };
+        })
+
     }
+
+    // async updateProduct(productId: string, payload: any): Promise<Product>{
+    //     return await this.prismaService.product.update({
+    //         where: { id: productId },
+    //         data: payload
+    //     });
+    // }
 }

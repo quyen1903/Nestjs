@@ -25,15 +25,7 @@ export class CreateSpuDTO {
     brandId?: string;
 
     @IsString()
-    categoryOneId?: string;
-
-    @IsString()
-    @IsOptional()
-    categoryTwoId?: string;
-
-    @IsString()
-    @IsOptional()
-    categoryThreeId?: string;
+    categoryId?: string;
 
     @IsString()
     @IsOptional()
@@ -96,10 +88,9 @@ export class CreateSkuDTO {
     @IsOptional()
     brandName?: string;
 
-    @IsObject()
-    @IsString({ each: true })
+    @IsString()
     @IsOptional()
-    skuAttribute?: Record<string, string>; 
+    skuAttribute?: string; 
     
     @IsString()
     @IsNumber()
