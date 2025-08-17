@@ -55,7 +55,7 @@ export class ShopAuthService extends AuthService {
     }
 
     private async find(find: string){
-        return this.prismaService.shop.findFirst({
+        return this.prismaService.accountAuthentication.findFirst({
             where: {email:find},
         });
     };
@@ -131,8 +131,8 @@ export class ShopAuthService extends AuthService {
         };
     
 
-    async login(login: LoginShopDTO): Promise<{
-        shop: object;
+    async loginManual(login: LoginShopDTO): Promise<{
+        account: object;
         accessToken: string;
         refreshToken: string;
     }>{
@@ -141,59 +141,39 @@ export class ShopAuthService extends AuthService {
         if(!foundShop) throw new BadRequestException('Shop not registed');
 
         //hash password and compare
-        const passwordHashed =await this.hashPassword(login.password, foundShop.salt);
-        if (passwordHashed !== foundShop.password) throw new UnauthorizedException('Wrong password!!!');
+        const passwordHashed =await this.hashPassword(login.password, foundShop.passwordSalt);
+        if (passwordHashed !== foundShop.passwordHash) throw new UnauthorizedException('Wrong password!!!');
 
         //create key pair
         const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, foundShop.email, privateKey);
+        const {accessToken, refreshToken} = this.createTokenPair(foundShop.accountId, foundShop.email, privateKey);
 
         //create new keytoken
-        const keyStore = await this.upsertKeyStore(foundShop.id, publicKey, refreshToken)
+        const keyStore = await this.upsertKeyStore(foundShop.accountId, publicKey, refreshToken)
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         await this.producerService.produce({
             topic: 'login',
             messages: [{
-                value: `${foundShop.name} has login to our system`
+                value: `${foundShop.email} has login to our system`
             }]
         })
 
         return{
-            shop:getInfoData(['id','email'],foundShop),
+            account:getInfoData(['accountId','email'],foundShop),
             accessToken, 
             refreshToken
         }
     }
 
-    async register(register: RegisterShopDTO, business: ShopBusinessDTO) {
-        //check whether shop existed
-        // const shopHolder = await this.find(register.email);
-        // if(shopHolder) throw new BadRequestException('Shop already existed');
-
-
-
-        // //create new shop
-        // const newShop = await this.prismaService.shop.create({
-        //     data:{
-        //         name: register.name,
-        //         salt,
-        //         email: register.email,
-        //         password:passwordHashed,
-        //         roles:RoleShop.SHOP
-        //     }
-        // });
-
-        // if(newShop){
-            
-        // };
-
-        // return {
-        //     code:200,
-        //     metadata:null
-        // }  
-
-        //hash password
+    /**
+     * 
+     * @param register ( information relating to account authentication)
+     * @param business (information relating to account business)
+     * @returns 
+     */
+    async registerManual(register: RegisterShopDTO, business: ShopBusinessDTO) {
+        //check account existed or not
         const checkAccountExisted = await this.prismaService.accountAuthentication.findFirst({
             where:{
                 OR:[                
@@ -202,7 +182,7 @@ export class ShopAuthService extends AuthService {
                 ]
             }
         });
-
+        //if not, throw error, different beween return and throw is throw directy jump right into nearest catch()
         if(checkAccountExisted) throw new BadRequestException(" Username or Email already existed, please try again later")
 
         const salt = crypto.randomBytes(32).toString('hex');
@@ -266,6 +246,11 @@ export class ShopAuthService extends AuthService {
                 refreshToken
             }
         }
+
+        return {
+            code:200,
+            metadata:null
+        }  
     }
     
 }
