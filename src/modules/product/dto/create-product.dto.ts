@@ -2,11 +2,11 @@ import {
     IsNotEmpty,
     IsNumber,
     IsString,
-    IsEnum,
-    ValidateNested,
+    IsArray,
     IsObject,
     IsOptional,
-    IsBoolean
+    IsBoolean,
+    IsInt
 } from 'class-validator';
 
 
@@ -20,16 +20,16 @@ export class CreateSpuDTO {
     @IsOptional()
     intro?: string;
 
-    @IsOptional()
     @IsString()
-    brandId?: string;
+    brandId: string;
 
     @IsString()
-    categoryId?: string;
+    categoryId: string;
 
-    @IsString()
+    @IsArray()
+    @IsString({ each: true })
     @IsOptional()
-    images?: string[]; 
+    images?: string[];
 
     @IsString()
     @IsOptional()
@@ -44,7 +44,10 @@ export class CreateSpuDTO {
     attributeList?: string;
 
     @IsBoolean()
-    isMarketable?: boolean; 
+    isMarketable?: boolean;
+
+    @IsInt()
+    status: number
 }
 
 
@@ -79,10 +82,6 @@ export class CreateSkuDTO {
     
     @IsString()
     categoryName?: string;
-
-    @IsOptional()
-    @IsString()
-    brandId?: string;
     
     @IsString()
     @IsOptional()
@@ -92,11 +91,34 @@ export class CreateSkuDTO {
     @IsOptional()
     skuAttribute?: string; 
     
-    @IsString()
     @IsNumber()
     status?: number; 
 
     @IsString()
     @IsOptional()
     inventoryId?: string; 
+}
+export class CreateBrandDTO {
+    
+    @IsString()
+    name: string;
+    
+    @IsString()
+    image: string;
+
+    @IsString()
+    initial: string;
+
+    @IsOptional()
+    @IsString()
+    sort?: number
+}
+
+export class CreateCategoryDTO {
+    @IsString()
+    name: string;
+
+    @IsOptional()
+    @IsString()
+    parentId?: string
 }

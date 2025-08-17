@@ -1,9 +1,10 @@
 import { Injectable, Inject, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { ProductType } from "@prisma/client";
-import { CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
+import { CreateBrandDTO, CreateCategoryDTO, CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { Brand, Category } from "@prisma/client";
+import { exists } from "@prisma/internals/dist/utils/tryLoadEnvs";
 
 @Injectable()
 export class ProductService {
@@ -11,25 +12,6 @@ export class ProductService {
         protected readonly prismaService: PrismaService,
         private readonly producerService: ProducerService
     ){}
-
-    private skuType(sku: CreateSkuDTO, brand: Brand, category: Category, spuId: string) {
-        return {
-            name: sku.name,
-            brandId: brand.id,
-            images: sku.images,
-            status: sku.status,
-            price: sku.price,
-            num: sku.num,
-            image: sku.image,
-            categoryName: category.name,
-            brandName: brand.name,
-            skuAttribute: sku.skuAttribute,
-            inventoryId: sku.inventoryId,
-            spuId,
-            categoryId: category.id
-        };
-    }
-
 
     // Create main product and return its ID
     /**
@@ -61,21 +43,7 @@ export class ProductService {
     //                 inventoryLocation: 'unknow',
     //             }
     //         })
-    //         const topics = this.producerService.getTopics()
 
-    //         await this.producerService.produce({
-    //             topic: topics.PRODUCT_CREATED,
-    //             messages:[
-    //                 {
-    //                     value:JSON.stringify({
-    //                         productId: product.id,
-    //                         productName: product.productName,
-    //                         shopId: product.productShopId,
-    //                         shopName: shop?.name
-    //                     })
-    //                 }
-    //             ]
-    //         })
     //     }
 
     //     return product 
@@ -88,23 +56,71 @@ export class ProductService {
      * elements and a third column that represents the distance between them.
      * 
      */
+    async createCategory(name: string, parentId?: string){
+        return await this.prismaService.$transaction(async (tx)=>{
 
-    async createCategory(categoryId: string, ){
-        
+            //1 create the new category
+            const newCategory = await tx.category.create({
+                data: { name },
+            });
+            // 2. Always insert self-reference
+            await tx.categoryClosureTable.create({
+                data:{
+                    ancestorId: newCategory.id,
+                    descendantId: newCategory.id,
+                    depth: 0
+                }
+            })
+
+            if(parentId){
+                //3 get all ancestors of parent
+
+                const ancestors = await tx.categoryClosureTable.findMany({
+                    where:{ descendantId: parentId}
+                });
+
+                //4 insert new paths (ancestor -> newCategory)
+                const newPaths = ancestors.map((accumulator)=>({
+                    ancestorId: accumulator.ancestorId,
+                    descendantId: newCategory.id,
+                    depth: accumulator.depth + 1
+                }));
+
+                newPaths.push({
+                    ancestorId: parentId,
+                    descendantId: newCategory.id,
+                    depth: 1,
+                });
+
+                await tx.categoryClosureTable.createMany({
+                    data: newPaths,
+                });
+
+                return newCategory;
+            }
+
+        })
     };
     
-    async createProduct(spuDTO: CreateSpuDTO,  sku: CreateSkuDTO){
+    /**
+     * create new product with sku and spu
+     * 
+     * @param spu standard product unit DTO
+     * @param sku stock keeping unit DTO
+     * @returns 
+     */
+    async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO){
+
+        // we check spu existed or not
         const spuExisted =await this.prismaService.spu.findUnique({
             where:{
-                name:spuDTO.name,
-                categoryId: spuDTO.categoryId,
-                brandId: spuDTO.brandId
+                name:spu.name,
+                categoryId: spu.categoryId,
+                brandId: spu.brandId
             }
         });
 
-        const brand = await this.prismaService.brand.findUnique({ where: { id: sku.brandId } });
-        const category = await this.prismaService.category.findUnique({ where: { id: spuDTO.categoryId } });
-
+        // 1.1 once spu existed, we use transaction
         if(spuExisted) {
 
             return this.prismaService.$transaction(async(tx)=>{
@@ -115,43 +131,51 @@ export class ProductService {
                     }
                 });
 
+                //1.2 once sku existed, throw error
                 if (skuExists) throw new BadRequestException('SKU variant already exists for this SPU');
 
-                const skuData = this.skuType(sku, brand, category, spuExisted.id);
-                const newSKU = await tx.sku.create({ data: skuData });
+                //1.3 create sku
+                const newSKU = await tx.sku.create({ 
+                    data: {...sku}
+                });
 
+                const topics = this.producerService.getTopics()
 
+                await this.producerService.produce({
+                    topic: topics.PRODUCT_CREATED,
+                    messages:[
+                        {
+                            value:JSON.stringify({
+                                spuId: newSKU.id,
+                                productName: spuExisted.name
+                            })
+                        }
+                    ]
+                })
+
+                //return spu and sku
                 return { spu: spuExisted, sku: newSKU };
             })
         }
 
+        // 2 spu are not existed, we create new spu and sku
         return this.prismaService.$transaction(async (tx)=>{
-            const newSPU = await tx.spu.create({
-                data:{
-                    name: spuDTO.name,
-                    intro: spuDTO.intro,
-                    brandId: spuDTO.brandId,
-                    categoryId: spuDTO.categoryId,
-                    images: spuDTO.images,
-                    afterSalesService: spuDTO.afterSalesService,
-                    content: spuDTO.content,
-                    attributeList: spuDTO.attributeList,
-                    isMarketable: spuDTO.isMarketable,
-                }
-            })
-
-            const skuData = this.skuType(sku, brand, category, spuExisted.id);
-            const newSKU = await tx.sku.create({ data: skuData });
+            const newSPU = await tx.spu.create({data:{ ...spu }});
+            const newSKU = await tx.sku.create({ data: {...sku} });
 
             return { spu: newSPU, sku: newSKU };
         })
 
     }
 
-    // async updateProduct(productId: string, payload: any): Promise<Product>{
-    //     return await this.prismaService.product.update({
-    //         where: { id: productId },
-    //         data: payload
-    //     });
-    // }
+    async createBrand(body: CreateBrandDTO){
+        const newBrand = await this.prismaService.brand.create({
+            data:{...body}
+        })
+
+        if(!newBrand) return new BadRequestException(' something was wrong, please check your paramerter')
+
+        return newBrand
+    }
+
 }

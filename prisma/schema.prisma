@@ -411,7 +411,7 @@ model Spu {
   name               String   @db.VarChar(100)@unique()
   intro              String?  @db.VarChar(200)
   brandId            String
-  categoryId      String
+  categoryId         String
   images             String[]  @db.VarChar(1000) //list of picture 
   afterSalesService  String?  @db.VarChar(50)
   content            String?  @db.Text  //introduce
@@ -423,8 +423,15 @@ model Spu {
   createdAt BigInt   @default(0) @map("created_at")
   updatedAt BigInt   @default(0) @map("updated_at")
 
-  // relations
-  brand              Brand?   @relation(fields: [brandId], references: [id])
+  /**
+    this is for relation
+    SPU and brand is 1-1
+    SPU and category is n-1
+    SPU and SKU is 1-n
+    SPU and Comment is 1-N
+  */
+  brand              Brand   @relation(fields: [brandId], references: [id])
+  category           Category @relation(fields: [categoryId], references: [id])
   skus               Sku[]    @relation("SpuSkus")
   comment            Comment[]
 
@@ -445,9 +452,6 @@ model Sku {
   images       String[]     @db.VarChar(2000) ////Product Image list
 
   spuId        String       @db.VarChar(60)
-  categoryId   String?
-  categoryName String?      @db.VarChar(200)
-  brandId      String
   brandName    String?      @db.VarChar(100)
   skuAttribute String?      @db.VarChar(200) ////Specification
   status       Int?         @default(1)
@@ -459,11 +463,8 @@ model Sku {
 
   // relations
   spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
-  brand        Brand?    @relation(fields: [brandId], references: [id])
-  category     Category? @relation(fields: [categoryId], references: [id])
   inventory   Inventory?
 
-  @@index([categoryId], name: "cid")
   @@index([status])
   @@index([updatedAt], name: "updated")
 }
@@ -485,7 +486,7 @@ model Category {
   ancestors CategoryClosureTable[]  @relation("ancestor")
   descendants CategoryClosureTable[]  @relation("descendant")
 
-  products  Sku[]
+  spu  Spu[]
   brands    CategoryBrand[]
   attrs     CategoryAttr[]
 }
@@ -493,26 +494,25 @@ model Category {
 model CategoryClosureTable {
 
   ancestorId String
-  descendantId String 
-
+  descendantId String
+  depth Int
   ancestor   Category @relation("ancestor", fields: [ancestorId], references: [id])
   descendant Category @relation("descendant",fields: [descendantId], references: [id])
 
 
-  depth Int
   @@id([ancestorId, descendantId])
 }
 
 model Brand {
   id              String      @id @default(uuid())
-  name     String  @db.VarChar(100)
+  name     String  @db.VarChar(100)@unique()
   image    String  @default("") @db.VarChar(1000)
   initial  String  @default("") @db.VarChar(1)
-  sort     Int?
+  sort     Int?    @default(10)
 
   // relations
   spus     Spu[]
-  skus     Sku[]
+
   categories CategoryBrand[]
 }
   
@@ -549,9 +549,11 @@ model SkuAttribute {
 
 
 
-enum AccountRole {
-  SHOP
+enum AccountType {
   USER
+  SHOP
+  ADMIN
+  SUPER_ADMIN
 }
 
 enum CartState {
@@ -571,15 +573,18 @@ enum RoleShop {
 enum Status {
   ACTIVE
   INACTIVE
-  PENDING
+  SUSPENDED
+  PENDING_VERIFICATION
+  BANNED
 }
 
-enum ProductType {
-  Clothing
-  Electronic
-  Furniture
+enum AdminLevel {
+  JUNIOR
+  SENIOR
+  MANAGER
+  DIRECTOR
+  SUPER
 }
-
 enum DiscountAppliesTo {
   all
   specific
