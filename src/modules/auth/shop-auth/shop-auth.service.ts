@@ -1,13 +1,13 @@
-import { Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import crypto from 'crypto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { ShopKeyTokenService } from './shop-auth.keytoken';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterShopDTO } from './dto/register.dto';
+import { RegisterShopDTO, ShopBusinessDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { AuthService } from '../auth.service';
-import { RoleShop, Shop, ShopKeyToken, ShopRefreshTokenUsed } from '@prisma/client';
+import { RoleShop,AccountType, AuthMethod, Account, AccountAuthentication, ShopBusiness } from '@prisma/client';
 import { getInfoData } from 'src/shared/utils';
 import { JwtShop } from './interface/jwt.shop';
 import { ShopService } from 'src/modules/shop/shop.service';
@@ -166,55 +166,106 @@ export class ShopAuthService extends AuthService {
         }
     }
 
-    async register(register: RegisterShopDTO) {
+    async register(register: RegisterShopDTO, business: ShopBusinessDTO) {
         //check whether shop existed
-        const shopHolder = await this.find(register.email);
-        if(shopHolder) throw new BadRequestException('Shop already existed');
+        // const shopHolder = await this.find(register.email);
+        // if(shopHolder) throw new BadRequestException('Shop already existed');
+
+
+
+        // //create new shop
+        // const newShop = await this.prismaService.shop.create({
+        //     data:{
+        //         name: register.name,
+        //         salt,
+        //         email: register.email,
+        //         password:passwordHashed,
+        //         roles:RoleShop.SHOP
+        //     }
+        // });
+
+        // if(newShop){
+            
+        // };
+
+        // return {
+        //     code:200,
+        //     metadata:null
+        // }  
 
         //hash password
-        const salt = crypto.randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(register.password, salt);
-
-        //create new shop
-        const newShop = await this.prismaService.shop.create({
-            data:{
-                name: register.name,
-                salt,
-                email: register.email,
-                password:passwordHashed,
-                roles:RoleShop.SHOP
+        const checkAccountExisted = await this.prismaService.accountAuthentication.findFirst({
+            where:{
+                OR:[                
+                    {username: register.name},
+                    {email: register.email}
+                ]
             }
         });
 
-        if(newShop){
+        if(checkAccountExisted) throw new BadRequestException(" Username or Email already existed, please try again later")
+
+        const salt = crypto.randomBytes(32).toString('hex');
+        const passwordHashed = await this.hashPassword(register.password, salt);
+
+        let transaction:{account: Account, accountAuth: AccountAuthentication, shopBusiness: ShopBusiness}
+        try {
+            await this.prismaService.$transaction(async()=>{
+                const account = await this.prismaService.account.create({
+                    data:{
+                        accountType: AccountType.SHOP
+                    }
+                });
+
+                const accountAuth = await this.prismaService.accountAuthentication.create({
+                    data:{
+                        accountId: account.id,
+                        email: register.email,
+                        passwordHash: passwordHashed,
+                        passwordSalt: salt,
+                        authMethod: AuthMethod.EMAIL_PASSWORD,                
+                    }
+                });
+
+                const shopBusiness = await this.prismaService.shopBusiness.create({
+                    data:{
+                        ...business,
+                        accountId: account.id
+                    }
+                });
+
+                return transaction = {account, accountAuth, shopBusiness}
+            });
+        } catch (error) {
+            Logger.error(`Error during creating account ${error}`);
+        }
+
+        //if successfully create account
+        if(transaction){
             const { publicKey, privateKey } = this.generateKeyPair();
             
             //create token pair
-            const {accessToken, refreshToken} = this.createTokenPair(newShop.id, newShop.email, privateKey);
+            const {accessToken, refreshToken} = this.createTokenPair(transaction.account.id, transaction.accountAuth.email, privateKey);
             if(!accessToken || !refreshToken) throw new BadRequestException('create tokens error!!!!!!');
 
+            
             //create key store
-            const keyStore = await this.upsertKeyStore(newShop.id, publicKey, refreshToken);
+            const keyStore = await this.upsertKeyStore(transaction.account.id, publicKey, refreshToken);
             if(!keyStore) throw new Error('cannot generate keytoken');
 
             await this.producerService.produce({
                 topic: 'login',
                 messages: [{
-                    value: `${newShop.name} has been created to our system`
+                    value: `${transaction.shopBusiness.businessName} has been created to our system`,
                 }]
             });
 
             return{
-                shop:getInfoData(['id','email',],newShop),
+                transaction,
                 accessToken,
                 refreshToken
             }
-        };
-
-        return {
-            code:200,
-            metadata:null
-        }  
+        }
     }
     
 }

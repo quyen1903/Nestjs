@@ -123,9 +123,9 @@ model UserBehavior {
   
   // Shopping behavior
   cart         Cart?
-//   wishlist     Wishlist?//ASITNF (at some point in the near future, this functionality would be implement)
+//   wishlist     Wishlist?//ASPITNF (at some point in the near future, this functionality would be implement)
   orders       Order[]
-//   reviews      Review[]//ASITNF (at some point in the near future, this functionality would be implement)
+//   reviews      Review[]//ASPITNF (at some point in the near future, this functionality would be implement)
   
   // Engagement
   loyaltyPoints Int        @default(0) @map("loyalty_points")
