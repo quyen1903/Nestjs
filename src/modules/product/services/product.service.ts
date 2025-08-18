@@ -1,9 +1,8 @@
 import { Injectable, Inject, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
-import { ProductType } from "@prisma/client";
 import { CreateBrandDTO, CreateCategoryDTO, CreateSkuDTO, CreateSpuDTO } from "../dto/create-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
-import { Brand, Category } from "@prisma/client";
+import { Brand, Category, Prisma } from "@prisma/client";
 import { exists } from "@prisma/internals/dist/utils/tryLoadEnvs";
 
 @Injectable()
@@ -160,7 +159,12 @@ export class ProductService {
 
         // 2 spu are not existed, we create new spu and sku
         return this.prismaService.$transaction(async (tx)=>{
-            const newSPU = await tx.spu.create({data:{ ...spu }});
+            const newSPU = await tx.spu.create({
+                data:{ 
+                    ...spu,
+                    brandId: spu.brandId
+                }
+            });
             const newSKU = await tx.sku.create({ data: {...sku} });
 
             return { spu: newSPU, sku: newSKU };

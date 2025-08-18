@@ -47,7 +47,11 @@ export class CreateSpuDTO {
     isMarketable?: boolean;
 
     @IsInt()
-    status: number
+    status: number;
+
+    @IsString()
+    @IsNotEmpty()
+    shopBusinessId: string; 
 }
 
 

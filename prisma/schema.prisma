@@ -245,9 +245,9 @@ model AccountPreferences {
 model KeyToken {
   id               String      @id @default(uuid())
   authId           String      @map("auth_id")
+  deviceId         String       @map("device_id")
   publicKey        String      @map("public_key")
   refreshToken     String      @map("refresh_token")
-  deviceInfo       String?     @map("device_info")
   expiresAt        BigInt?     @map("expires_at")
   
   isActive         Boolean     @default(true) @map("is_active")
@@ -257,6 +257,7 @@ model KeyToken {
   authentication   AccountAuthentication @relation(fields: [authId], references: [accountId])
   usedTokens       RefreshTokenUsed[]
   
+  @@unique([authId, deviceId])
   @@map("key_tokens")
 }
 
@@ -714,6 +715,8 @@ model Spu {
   attributeList      String?  @db.VarChar(3000) //Specifications
   isMarketable       Boolean  @default(false) //Unsaleable or not
   status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
+  shopBusinessId    String
+
   
   isActive  Boolean  @default(true) @map("is_active")
   createdAt BigInt   @default(0) @map("created_at")
@@ -721,7 +724,7 @@ model Spu {
 
   /**
     this is for relation
-    SPU and brand is 1-1
+    SPU and brand is n-1
     SPU and category is n-1
     SPU and SKU is 1-n
     SPU and Comment is 1-N
@@ -731,7 +734,6 @@ model Spu {
   skus               Sku[]    @relation("SpuSkus")
   comment            Comment[]
   shopBusiness       ShopBusiness   @relation(fields: [shopBusinessId],references: [accountId])
-  shopBusinessId    String
 
   @@unique([name, brandId])
 }
@@ -809,7 +811,7 @@ model Brand {
   sort     Int?    @default(10)
 
   // relations
-  spus     Spu[]
+  spu     Spu[]
 
   categories CategoryBrand[]
 }
