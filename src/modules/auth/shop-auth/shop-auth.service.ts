@@ -1,23 +1,37 @@
-import { Injectable, Logger, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { 
+    Injectable, 
+    Logger, 
+    BadRequestException, 
+    UnauthorizedException, 
+    ForbiddenException 
+} from '@nestjs/common';
 import crypto from 'crypto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { ShopKeyTokenService } from './shop-auth.keytoken';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterShopDTO, ShopBusinessDTO } from './dto/register.dto';
 import { LoginShopDTO } from './dto/login.dto';
 import { AuthService } from '../auth.service';
-import { RoleShop,AccountType, AuthMethod, Account, AccountAuthentication, ShopBusiness } from '@prisma/client';
+import { 
+    RoleShop,
+    AccountType, 
+    AuthMethod, 
+    Account, 
+    AccountAuthentication, 
+    ShopBusiness, 
+    KeyToken, 
+    RefreshTokenUsed 
+} from '@prisma/client';
 import { getInfoData } from 'src/shared/utils';
 import { JwtShop } from './interface/jwt.shop';
 import { ShopService } from 'src/modules/shop/shop.service';
-
+import { KeyTokenService } from '../keytoken.service';
 @Injectable()
 export class ShopAuthService extends AuthService {
     constructor(
         prismaService: PrismaService,
         jwtService: JwtService,
-        private readonly shopKeyTokenService: ShopKeyTokenService,
+        private readonly KeyTokenService: KeyTokenService,
         producerService: ProducerService,
         private readonly shopService: ShopService
     ){
@@ -60,37 +74,34 @@ export class ShopAuthService extends AuthService {
         });
     };
 
-    private async upsertKeyStore(accountId: Shop['id'], publicKey: ShopKeyToken['publicKey'], refreshToken: ShopKeyToken['refreshToken']){
-        return await this.shopKeyTokenService.upsertShopKeyToken({
-            accountId,
-            publicKey,
-            refreshToken,
-            roles: RoleShop.SHOP
-        })
+    private async upsertKeyStore(parameters: Pick<KeyToken,'authId' | 'deviceId' | 'publicKey' | 'refreshToken'>){
+        return await this.KeyTokenService.upsertShopKeyToken(parameters)
     };
 
-    async handleRefreshToken( shopId: Shop['id'], requestRefreshToken: ShopKeyToken['refreshToken'] ): Promise<{
+    async handleRefreshToken( shopId: Shop['id'], requestRefreshToken: KeyToken['refreshToken'] ): Promise<{
         accessToken: string,
         refreshToken: string
-        update: ShopKeyToken;
-        createUsedToken: ShopRefreshTokenUsed; 
+        update: KeyToken;
+        createUsedToken: RefreshTokenUsed; 
     }>{
         //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
         // const {sub, email} = account;
 
 
-        const duplicateJWT = await this.prismaService.shopRefreshTokenUsed.findFirst({
+        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
             where:{
                 token: requestRefreshToken
             }
         });
 
+        if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin');
+
+
         const foundShop = await this.shopService.getShopInfo(shopId)
         if(!foundShop) throw new UnauthorizedException('shop not registed');
 
-        if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin');
 
-        const keyStore = await this.shopKeyTokenService.findByRefreshToken(requestRefreshToken);
+        const keyStore = await this.KeyTokenService.findByRefreshToken(requestRefreshToken);
 
 
         //2 if user's token is not valid token, force them to relogin, too
@@ -125,13 +136,13 @@ export class ShopAuthService extends AuthService {
         }
     };
     
-        async logout ( keyStore: JwtShop ): Promise<ShopKeyToken | null>{
-            console.log("keystore",keyStore)
-            return await this.shopKeyTokenService.removeKeyByAccountID(keyStore.sub);
-        };
+    async logout ( keyStore: KeyToken ): Promise<KeyToken | null>{
+        console.log("keystore",keyStore)
+        return await this.KeyTokenService.removeKeyByAccountID(keyStore.authId, keyStore.deviceId);
+    };
     
 
-    async loginManual(login: LoginShopDTO): Promise<{
+    async loginManual(login: LoginShopDTO, deviceId: string): Promise<{
         account: object;
         accessToken: string;
         refreshToken: string;
@@ -148,8 +159,28 @@ export class ShopAuthService extends AuthService {
         const { publicKey, privateKey } = this.generateKeyPair();
         const {accessToken, refreshToken} = this.createTokenPair(foundShop.accountId, foundShop.email, privateKey);
 
+        //add device
+        let newDevice =await this.prismaService.deviceSession.findFirst({
+            where: {
+                accountId: foundShop.accountId,
+                deviceId
+            }
+        });
+
+        if(!newDevice){
+            newDevice = await this.prismaService.deviceSession.create({
+                data:{
+                    accountId: foundShop.accountId,
+                    deviceId,
+                    refreshToken
+                }
+            })
+        }
+
+
+
         //create new keytoken
-        const keyStore = await this.upsertKeyStore(foundShop.accountId, publicKey, refreshToken)
+        const keyStore = await this.upsertKeyStore({authId: foundShop.accountId, deviceId: newDevice.id ,publicKey, refreshToken});
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         await this.producerService.produce({
@@ -172,7 +203,7 @@ export class ShopAuthService extends AuthService {
      * @param business (information relating to account business)
      * @returns 
      */
-    async registerManual(register: RegisterShopDTO, business: ShopBusinessDTO) {
+    async registerManual(register: RegisterShopDTO, business: ShopBusinessDTO, deviceId: string) {
         //check account existed or not
         const checkAccountExisted = await this.prismaService.accountAuthentication.findFirst({
             where:{
@@ -230,7 +261,13 @@ export class ShopAuthService extends AuthService {
 
             
             //create key store
-            const keyStore = await this.upsertKeyStore(transaction.account.id, publicKey, refreshToken);
+            const keyStore = await this.upsertKeyStore({
+                authId: transaction.account.id,
+                deviceId,
+                publicKey,
+                refreshToken
+            });
+            
             if(!keyStore) throw new Error('cannot generate keytoken');
 
             await this.producerService.produce({
