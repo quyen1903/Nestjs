@@ -167,20 +167,19 @@ export class ShopAuthService extends AuthService {
             }
         });
 
-        if(!newDevice){
+        if (!newDevice) {
             newDevice = await this.prismaService.deviceSession.create({
-                data:{
-                    accountId: foundShop.accountId,
-                    deviceId,
-                    refreshToken
-                }
+                data: { accountId: foundShop.accountId, deviceId, refreshToken }
+            })
+        } else {
+            newDevice = await this.prismaService.deviceSession.update({
+                where: { id: newDevice.id },
+                data: { refreshToken }
             })
         }
 
-
-
         //create new keytoken
-        const keyStore = await this.upsertKeyStore({authId: foundShop.accountId, deviceId: newDevice.id ,publicKey, refreshToken});
+        const keyStore = await this.upsertKeyStore({authId: foundShop.accountId, deviceId ,publicKey, refreshToken});
         if(!keyStore) throw new Error('cannot generate keytoken');
 
         await this.producerService.produce({
