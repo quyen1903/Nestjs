@@ -78,7 +78,7 @@ export class ShopAuthService extends AuthService {
         return await this.KeyTokenService.upsertShopKeyToken(parameters)
     };
 
-    async handleRefreshToken( shopId: Shop['id'], requestRefreshToken: KeyToken['refreshToken'] ): Promise<{
+    async handleRefreshToken( accountId: Account['id'], requestRefreshToken: KeyToken['refreshToken'], deviceId: string ): Promise<{
         accessToken: string,
         refreshToken: string
         update: KeyToken;
@@ -97,7 +97,7 @@ export class ShopAuthService extends AuthService {
         if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin');
 
 
-        const foundShop = await this.shopService.getShopInfo(shopId)
+        const foundShop = await this.shopService.getShopInfo(accountId)
         if(!foundShop) throw new UnauthorizedException('shop not registed');
 
 
@@ -111,9 +111,12 @@ export class ShopAuthService extends AuthService {
         const { publicKey, privateKey } = this.generateKeyPair()
         const {accessToken, refreshToken} = this.createTokenPair(foundShop.id, foundShop.email, privateKey);
 
-        const update = await this.prismaService.shopKeyToken.update({
+        const update = await this.prismaService.keyToken.update({
             where:{
-                sub: foundShop.id
+                authId_deviceId: {
+                    authId:accountId,
+                    deviceId
+                }
             },
             data:{
                 publicKey,
@@ -121,7 +124,7 @@ export class ShopAuthService extends AuthService {
             }
         })
 
-        const createUsedToken = await this.prismaService.shopRefreshTokenUsed.create({
+        const createUsedToken = await this.prismaService.keyToken.create({
             data:{
                 token: requestRefreshToken,
                 keyTokenId: update.id
@@ -160,21 +163,54 @@ export class ShopAuthService extends AuthService {
         const {accessToken, refreshToken} = this.createTokenPair(foundShop.accountId, foundShop.email, privateKey);
 
         //add device
-        let newDevice =await this.prismaService.deviceSession.findFirst({
+        let checkNewDevice =await this.prismaService.keyToken.findUnique({
             where: {
-                accountId: foundShop.accountId,
-                deviceId
+                authId_deviceId:{
+                    authId: foundShop.accountId,
+                    deviceId
+                }
             }
         });
 
-        if (!newDevice) {
-            newDevice = await this.prismaService.deviceSession.create({
-                data: { accountId: foundShop.accountId, deviceId, refreshToken }
+        const upsertParams = 
+        {
+            where: { 
+                authId_deviceId: { 
+                    authId:foundShop.accountId, 
+                    deviceId 
+                } 
+            },update: { 
+                publicKey, 
+                refreshToken, 
+                isActive: true 
+            },create: { 
+                authId: foundShop.accountId,
+                deviceId, 
+                publicKey, 
+                refreshToken, 
+                isActive: true 
+            }
+        }
+
+        if (!checkNewDevice) {
+            await this.prismaService.$transaction(async(tx)=>{
+                await tx.deviceSession.create({
+                    data: { accountId: foundShop.accountId, deviceId, refreshToken }
+                });
+
+                await tx.keyToken.upsert(upsertParams);
             })
         } else {
-            newDevice = await this.prismaService.deviceSession.update({
-                where: { id: newDevice.id },
-                data: { refreshToken }
+            await this.prismaService.$transaction(async(tx)=>{
+                await tx.deviceSession.update({
+                    where: { id: checkNewDevice.id },
+                    data: { 
+                        refreshToken,
+                        lastLogin: new Date() 
+                     }
+                });
+
+                await tx.keyToken.upsert(upsertParams);
             })
         }
 
