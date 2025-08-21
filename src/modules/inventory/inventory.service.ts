@@ -2,16 +2,15 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { Factory } from '../product/services/factory.service';
 import { InventoryDTO } from './dto/inventory.dto';
-import { Product } from '@prisma/client';
-
+import { ProductService } from '../product/services/product.service';
 @Injectable()
 export class InventoryService{
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly factory: Factory
+        private readonly productService: ProductService
     ){}
     async addStockToInventory( { stock, productId, location = '17A, Conghoa' }: InventoryDTO ){
-        const product: Product = await this.factory.getProductByIdMethod(productId);
+        const product = await this.productService.findProduct(productId);
         if(!product) throw new BadRequestException('the product is not existed!!!');
 
         const existedInventory = await this.prismaService.inventory.findUnique({

@@ -3,7 +3,7 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { DiscountService } from '../discount/discount.service';
 import { CheckoutDTO, ItemProductDTO, ShopOrderIdDTO } from './dto/checkout.dto';
-import { Factory } from '../product/services/factory.service';
+import { ProductService } from '../product/services/product.service';
 import { ShopCheckout } from './interface';
 import { Cart, OrderStatus, OrderItem } from '@prisma/client';
 
@@ -13,7 +13,7 @@ export class CheckoutService {
         private readonly prismaService: PrismaService,
         private readonly cartService: CartService,
         private readonly discountService: DiscountService,
-        private readonly factory: Factory
+        private readonly productService: ProductService
     ) {}
 
     async checkoutReview({ cartId, userId, shopOrderIds }: CheckoutDTO) {
@@ -30,7 +30,7 @@ export class CheckoutService {
             };
     
             for (const { shopId, shopDiscounts, itemProducts } of shopOrderIds) {
-                const checkProductServer: ItemProductDTO[] = await this.factory.checkProductByServerMethod(itemProducts);
+                const checkProductServer: ItemProductDTO[] = await this.productService.checkProductByServer(itemProducts);
                 if (!checkProductServer[0]) throw new BadRequestException('order wrong !!!');
     
                 for (const product of checkProductServer) {

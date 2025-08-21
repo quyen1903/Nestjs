@@ -6,7 +6,7 @@ import { GetListDiscountDTO } from './dto/getListDiscount.dto';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 import { Factory } from '../product/services/factory.service';
 import { getSelectData } from 'src/shared/utils';
-import { Discount, Product } from '@prisma/client';
+import { Discount } from '@prisma/client';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class DiscountService {
@@ -30,6 +30,17 @@ export class DiscountService {
             select:getSelectData(select),
             take,
             skip,
+        })
+    };
+
+    private async findAllProduct (id: string){
+        return await this.prismaService.spu.findMany({
+            where:{
+                shopId: id,
+                isMarketable: true
+            },
+            take: 50,
+            skip:0
         })
     }
 
@@ -102,17 +113,8 @@ export class DiscountService {
         let products;
 
         //if discount apply for all product, we fillter by all product of specific shop
-        if(discountAppliesTo === 'all'){
-            products = await this.factory.findAllProductMethod(
-                50,
-                0,
-                {
-                    productShopId: discountShopId,
-                    isPublished:true
-                },
-                ['productName']
-            )
-        };
+        if(discountAppliesTo === 'all') products  = this.findAllProduct(discountShopId);
+
 
         /*
             if discount apply for specific product we filter by all product
@@ -120,18 +122,9 @@ export class DiscountService {
             $in operator selects the documents where the value of a field equals any value in the specified array
         */
 
-            if(discountAppliesTo === 'specific'){
-                products = await this.factory.findAllProductMethod(
-                   50,
-                   0,
-                    {
-                        uuid: discountProductIds,
-                        isPublished:true
-                    },
-                    ['productName']
-                )
-            }
-            return products
+        if(discountAppliesTo === 'specific') products = this.findAllProduct(discountShopId);
+        return products;
+
     }
 
     

@@ -18,11 +18,13 @@ model Shop {
   isActive     Boolean        @default(true) @map("is_active")
   createdAt    BigInt         @default(0) @map("created_at")
   updatedAt    BigInt         @default(0) @map("updated_at")
+  
 
   keyToken     ShopKeyToken?
   apiKey       APIkey[]
   discount     Discount[]
   notification Notification[]
+  spu Spu[]
   messages     Message[]      @relation("ShopMessages")
 
   @@map("shops")
@@ -411,24 +413,32 @@ model Spu {
   name               String   @db.VarChar(100)@unique()
   intro              String?  @db.VarChar(200)
   brandId            String
-  categoryOneId      String?     //level classification foreign key and point to category 
-  categoryTwoId      String?     //level classification foreign key and point to category 
-  categoryThreeId    String?     //level classification foreign key and point to category 
+  categoryId         String
   images             String[]  @db.VarChar(1000) //list of picture 
   afterSalesService  String?  @db.VarChar(50)
   content            String?  @db.Text  //introduce
   attributeList      String?  @db.VarChar(3000) //Specifications
   isMarketable       Boolean  @default(false) //Unsaleable or not
   status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
+  shopId    String
+
   
   isActive  Boolean  @default(true) @map("is_active")
   createdAt BigInt   @default(0) @map("created_at")
   updatedAt BigInt   @default(0) @map("updated_at")
 
-  // relations
-  brand              Brand?   @relation(fields: [brandId], references: [id])
+  /**
+    this is for relation
+    SPU and brand is n-1
+    SPU and category is n-1
+    SPU and SKU is 1-n
+    SPU and Comment is 1-N
+  */
+  brand              Brand   @relation(fields: [brandId], references: [id])
+  category           Category @relation(fields: [categoryId], references: [id])
   skus               Sku[]    @relation("SpuSkus")
   comment            Comment[]
+  shop       Shop   @relation(fields: [shopId],references: [id])
 
   @@unique([name, brandId])
 }
@@ -445,12 +455,8 @@ model Sku {
   num          Int?         @default(100) // quantity
   image        String?      @db.VarChar(200)  ////Product Image
   images       String[]     @db.VarChar(2000) ////Product Image list
-  createTime   DateTime?    @map("create_time")
-  updateTime   DateTime?    @map("update_time")
+
   spuId        String       @db.VarChar(60)
-  categoryId   String?
-  categoryName String?      @db.VarChar(200)
-  brandId      String
   brandName    String?      @db.VarChar(100)
   skuAttribute String?      @db.VarChar(200) ////Specification
   status       Int?         @default(1)
@@ -462,13 +468,10 @@ model Sku {
 
   // relations
   spu          Spu?      @relation("SpuSkus", fields: [spuId], references: [id])
-  brand        Brand?    @relation(fields: [brandId], references: [id])
-  category     Category? @relation(fields: [categoryId], references: [id])
   inventory   Inventory?
 
-  @@index([categoryId], name: "cid")
   @@index([status])
-  @@index([updateTime], name: "updated")
+  @@index([updatedAt], name: "updated")
 }
 
 /*
@@ -484,27 +487,37 @@ model Category {
   id         String      @id @default(uuid())
   name      String?   @db.VarChar(50)
   sort      Int?
-  parentId  String?
-  
-  // relations
-  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children  Category[] @relation("CategoryHierarchy")
 
-  products  Sku[]
+  ancestors CategoryClosureTable[]  @relation("ancestor")
+  descendants CategoryClosureTable[]  @relation("descendant")
+
+  spu  Spu[]
   brands    CategoryBrand[]
   attrs     CategoryAttr[]
 }
 
+model CategoryClosureTable {
+
+  ancestorId String
+  descendantId String
+  depth Int
+  ancestor   Category @relation("ancestor", fields: [ancestorId], references: [id])
+  descendant Category @relation("descendant",fields: [descendantId], references: [id])
+
+
+  @@id([ancestorId, descendantId])
+}
+
 model Brand {
   id              String      @id @default(uuid())
-  name     String  @db.VarChar(100)
+  name     String  @db.VarChar(100)@unique()
   image    String  @default("") @db.VarChar(1000)
   initial  String  @default("") @db.VarChar(1)
-  sort     Int?
+  sort     Int?    @default(10)
 
   // relations
-  spus     Spu[]
-  skus     Sku[]
+  spu     Spu[]
+
   categories CategoryBrand[]
 }
   
@@ -538,6 +551,7 @@ model SkuAttribute {
 
   categories CategoryAttr[]
 }
+
 
 
 

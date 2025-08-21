@@ -3,12 +3,12 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { GetCommentDTO } from './dto/get-comment.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
-import { Factory } from '../product/services/factory.service';
+import { ProductService } from '../product/services/product.service';
 @Injectable()
 export class CommentService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly factory: Factory
+        private readonly productService: ProductService,
     ){}
 
     /**
@@ -135,7 +135,7 @@ export class CommentService {
     */
 
     async deleteComments(deleted: DeleteCommentDTO){
-        const foundProduct = await this.factory.findProduct(deleted.commentProductId)
+        const foundProduct = await this.productService.findProduct(deleted.commentProductId)
         if(!foundProduct) throw new NotFoundException('product not found')
         
         //1 determine left/right value
