@@ -6,7 +6,8 @@ import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
 import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
-import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO } from './dto/request-product.dto';
+import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
+import { ApiResponse, ApiOperation } from '@nestjs/swagger';
 
 // Add this DTO for update operations
 export class UpdateProductDTO extends CreateSpuDTO {
@@ -22,12 +23,19 @@ export class ProductController {
     @Post('create_product')
     @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
+    @ApiOperation({ summary: 'Create a new product with SPU and SKU' })
+    @ApiResponse({ status: 201, description: 'Product created successfully' })
     createProduct(
-        @Body() body: { spu: CreateSpuDTO; sku: CreateSkuDTO },
+        @Body() createProductDto: CreateProductDTO,
         @AuthRequest('account') account: JWTdecode
     ) {
-        return this.productService.createProduct(body.spu, body.sku, account.accountId);
+        return this.productService.createProduct(
+            createProductDto.spu, 
+            createProductDto.sku, 
+            account.accountId
+        );
     }
+
 
     @Post('create_brand')
     @UseGuards(ShopAuthGuard, RoleGuard)
@@ -39,9 +47,13 @@ export class ProductController {
     @Post('create_category')
     @UseGuards(ShopAuthGuard, RoleGuard)
     @Roles(Role.Shop)
-    createCategory(@Body() body: { name: string; parentId?: string }) {
-        return this.productService.createCategory(body.name, body.parentId);
+    createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
+        return this.productService.createCategory(
+            createCategoryDto.name, 
+            createCategoryDto.parentId
+        );
     }
+
 
     @Patch(':productId')
     @UseGuards(ShopAuthGuard, RoleGuard)
