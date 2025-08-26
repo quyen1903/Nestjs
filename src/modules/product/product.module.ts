@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ProductService } from './services/product.service';
-import { Factory } from './services/factory.service';
+import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { AuthModule } from '../auth/auth.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
@@ -10,7 +9,7 @@ import { ShopAuthModule } from '../auth/shop-auth/shop-auth.module';
 @Module({
   imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, ],
   controllers: [ProductController],
-  providers: [ Factory, ProductService, ],
-  exports: [Factory, ProductService, ]
+  providers: [ ProductService ],
+  exports: [ ProductService ]
 })
 export class ProductModule {}

@@ -9,8 +9,6 @@ import {
     IsInt
 } from 'class-validator';
 
-
-
 export class CreateSpuDTO {
     @IsString()
     @IsNotEmpty()
@@ -21,9 +19,11 @@ export class CreateSpuDTO {
     intro?: string;
 
     @IsString()
+    @IsNotEmpty()
     brandId: string;
 
     @IsString()
+    @IsNotEmpty()
     categoryId: string;
 
     @IsArray()
@@ -44,29 +44,24 @@ export class CreateSpuDTO {
     attributeList?: string;
 
     @IsBoolean()
+    @IsOptional()
     isMarketable?: boolean;
 
     @IsInt()
-    status: number;
+    @IsOptional()
+    status?: number; // Made optional since it has default value 0
 
-    // @IsString()
-    // @IsNotEmpty()
-    // shopId: string; 
+    // shopId is handled in the service, not in DTO
 }
 
-
 export class CreateSkuDTO {
-
     @IsString()
     @IsNotEmpty()
-    spuId: string; 
-    
-    @IsString()
     name: string;
 
-    @IsNotEmpty()
     @IsNumber()
-    price: number;
+    @IsNotEmpty()
+    price: number; // Changed to number to match schema (Int type)
 
     @IsOptional()
     @IsNumber()
@@ -76,17 +71,11 @@ export class CreateSkuDTO {
     @IsOptional()
     image?: string;
     
-    @IsString()
+    @IsArray()
+    @IsString({ each: true })
     @IsOptional()
     images?: string[];
 
-    @IsString()
-    @IsOptional()
-    categoryId?: string;
-    
-    @IsString()
-    categoryName?: string;
-    
     @IsString()
     @IsOptional()
     brandName?: string;
@@ -95,34 +84,42 @@ export class CreateSkuDTO {
     @IsOptional()
     skuAttribute?: string; 
     
-    @IsNumber()
+    @IsInt()
+    @IsOptional()
     status?: number; 
 
-    @IsString()
-    @IsOptional()
-    inventoryId?: string; 
+    // Removed spuId - this will be set automatically when creating with SPU
+    // Removed inventoryId - this should be handled separately
 }
+
 export class CreateBrandDTO {
-    
     @IsString()
+    @IsNotEmpty()
     name: string;
     
     @IsString()
-    image: string;
+    @IsOptional()
+    image?: string; // Made optional since it has default value
 
     @IsString()
-    initial: string;
+    @IsOptional()  
+    initial?: string; // Made optional since it has default value
 
     @IsOptional()
-    @IsString()
-    sort?: number
+    @IsNumber() // Fixed type - should be number, not string
+    sort?: number;
 }
 
 export class CreateCategoryDTO {
     @IsString()
+    @IsNotEmpty()
     name: string;
 
     @IsOptional()
     @IsString()
-    parentId?: string
+    parentId?: string;
+
+    @IsOptional()
+    @IsNumber()
+    sort?: number; // Added sort field from schema
 }

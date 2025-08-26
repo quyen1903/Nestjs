@@ -4,7 +4,6 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { CreateDiscountDTO } from './dto/createDiscount.dto';
 import { GetListDiscountDTO } from './dto/getListDiscount.dto';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
-import { Factory } from '../product/services/factory.service';
 import { getSelectData } from 'src/shared/utils';
 import { Discount } from '@prisma/client';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
@@ -12,7 +11,6 @@ import { ProducerService } from 'src/services/kafka/services/producer.service';
 export class DiscountService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly factory: Factory,
         private readonly producerService: ProducerService
     ){}
     

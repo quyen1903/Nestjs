@@ -4,21 +4,7 @@ import { ProductType, Sku, Spu } from "@prisma/client";
 import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "./dto/request-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
-
-    interface ProductWithSkus extends Spu { 
-        skus: Sku[]; 
-        brand: { name: string }; 
-        category: { name: string }; 
-    
-    }
-
-    interface ProductSearchResult { 
-        id: string; 
-        name: string; 
-        images: string[]; 
-        price?: number; 
-        shopId: string; 
-    }
+import { ProductSearchResult, ProductWithSkus } from "./interfaces/product.interface";
 
 @Injectable()
 export class ProductService {
@@ -157,6 +143,7 @@ export class ProductService {
             where:{id}
         })
     };
+
     async checkProductByServer(skus: ItemProductDTO[]){
         return await Promise.all(skus.map(
             async (sku)=>{
@@ -217,64 +204,253 @@ export class ProductService {
         })
     }
 
-    // async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }) {
-    //     const query = { productShopId, isDraft: true };
-    //     return await this.findAll(query, skip, take);
-    // }
-
-    // async findAllPublishForShop({ productShopId, skip = 0, take = 10 }) {
-    //     const query = { productShopId, isPublished: true };
-    //     return await this.findAll( query, skip, take );
-    // }
-
-    //  async publishProductByShop({ productShopId, uuid, isDraft = false, isPublished = true }) {
-    //     return await this.publish( productShopId, uuid, isDraft, isPublished );
-    // }
-
-    //  async unPublishProductByShop({ productShopId, uuid, isDraft = true, isPublished = false }) {
-    //     return await this.publish( productShopId, uuid, isDraft, isPublished );
-    // }
-
-    async getListSearchProduct(keySearch: string): Promise<ProductSearchResult[]> { 
-        const products = await this.prismaService.spu.findMany({ 
-            where: { 
-                OR:[                
+    async getListSearchProduct(keySearch: string): Promise<ProductSearchResult[]> {
+        const products = await this.prismaService.spu.findMany({
+            where: {
+                AND: [
+                    { isActive: true },
+                    { status: 1 }, // Only published products
+                    { isMarketable: true },
                     {
-                        name: {search: keySearch}
-                    },
-                    {
-                        intro: {search: keySearch}
-                    },
-                    {
-                        content: {search: keySearch}
+                        OR: [
+                            { name: { search: keySearch } },
+                            { intro: { search: keySearch } },
+                            { content: { search: keySearch } }
+                        ]
                     }
                 ]
-
-            }, 
-            include: { 
-                skus: { 
+            },
+            include: {
+                skus: {
                     where: { isActive: true },
                     select: { price: true },
-                    take: 1 
-                } 
-            }, take: 50 
-        }); 
-        
-        return products.map(product => ({ 
+                    take: 1
+                }
+            },
+            take: 50
+        });
+
+        return products.map(product => ({
             id: product.id,
             name: product.name,
             images: product.images,
             price: product.skus[0]?.price,
-            shopId: product.shopId 
-        })); 
+            shopId: product.shopId
+        }));
     }
 
-    //  async findAllProducts({ take = 50, skip = 0, filter = { isPublished: true } }) {
-    //     return await this.findAllProduct(take, skip, filter, ['productName', 'productThumb', 'productPrice']);
-    // }
+    async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }) {
+        return await this.prismaService.spu.findMany({
+            where: {
+                shopId: productShopId,
+                status: 0, // Unaudited status indicates draft
+                isActive: true
+            },
+            include: {
+                skus: {
+                    where: { isActive: true },
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        image: true,
+                        num: true
+                    }
+                },
+                brand: {
+                    select: { name: true }
+                },
+                category: {
+                    select: { name: true }
+                }
+            },
+            skip,
+            take,
+            orderBy: { createdAt: 'desc' }
+        });
+    }
 
-    //  async findProduct(productId: string) {
-    //     return await this.findUniqueProduct(productId);
-    // }
+    async findAllPublishForShop({ productShopId, skip = 0, take = 10 }) {
+        return await this.prismaService.spu.findMany({
+            where: {
+                shopId: productShopId,
+                status: 1, // Reviewed status indicates published
+                isMarketable: true, // Published products should be marketable
+                isActive: true
+            },
+            include: {
+            skus: {
+                where: { isActive: true },
+                select: {
+                    id: true,
+                    name: true,
+                    price: true,
+                    image: true,
+                    num: true
+                }
+            },
+            brand: {
+                select: { name: true }
+            },
+            category: {
+                select: { name: true }
+            }
+            },
+            skip,
+            take,
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+
+    async publishProductByShop({ productShopId, uuid, isDraft = false, isPublished = true }) {
+        // Verify the product belongs to the shop
+        const product = await this.prismaService.spu.findFirst({
+            where: {
+                id: uuid,
+                shopId: productShopId,
+                isActive: true
+            }
+        });
+
+        if (!product) {
+            throw new NotFoundException('Product not found or does not belong to this shop');
+        }
+
+        return await this.prismaService.spu.update({
+            where: { id: uuid },
+            data: {
+                status: isPublished ? 1 : 0, // 1 = Reviewed/Published, 0 = Draft/Unaudited
+                isMarketable: isPublished,
+                updatedAt: Date.now()
+            },
+            include: {
+                skus: {
+                    where: { isActive: true }
+                },
+                brand: {
+                    select: { name: true }
+                },
+                category: {
+                    select: { name: true }
+                }
+            }
+        });
+    }
+
+    async unPublishProductByShop({ productShopId, uuid, isDraft = true, isPublished = false }) {
+        // Verify the product belongs to the shop
+        const product = await this.prismaService.spu.findFirst({
+            where: {
+                id: uuid,
+                shopId: productShopId,
+                isActive: true
+            }
+        });
+
+        if (!product) {
+            throw new NotFoundException('Product not found or does not belong to this shop');
+        }
+
+        return await this.prismaService.spu.update({
+            where: { id: uuid },
+            data: {
+                status: 0, // Set back to unaudited/draft
+                isMarketable: false,
+                updatedAt: Date.now()
+            },
+            include: {
+                skus: {
+                    where: { isActive: true }
+                },
+                brand: {
+                    select: { name: true }
+                },
+                category: {
+                    select: { name: true }
+                }
+            }
+        });
+    }
+
+    async findAllProducts({ take = 50, skip = 0, filter = { isPublished: true } }) {
+        const whereCondition: any = {
+            isActive: true
+        };
+
+        // Apply filters based on the filter parameter
+        if (filter.isPublished) {
+            whereCondition.status = 1; // Reviewed/Published
+            whereCondition.isMarketable = true;
+        }
+
+        return await this.prismaService.spu.findMany({
+            where: whereCondition,
+            select: {
+            id: true,
+            name: true, // productName equivalent
+            images: true, // productThumb equivalent (first image)
+            shopId: true,
+            createdAt: true,
+            updatedAt: true,
+            skus: {
+                where: { isActive: true },
+                select: {
+                    price: true // productPrice equivalent
+                },
+                take: 1
+            },
+            brand: {
+                select: { name: true }
+            },
+            category: {
+                select: { name: true }
+            }
+            },
+            take,
+            skip,
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+
+    async findUniqueProduct(productId: string) {
+        const product = await this.prismaService.spu.findUnique({
+            where: {
+                    id: productId,
+                    isActive: true
+                },
+            include: {
+                skus: {
+                    where: { isActive: true },
+                    include: { inventory: true }
+                },
+                brand: true,
+                category: true,
+                comment: {
+                    where: { isActive: true },
+                    include: {
+                    commentUser: {
+                        select: {
+                            id: true,
+                            profile: {
+                                select: {
+                                    name: true,
+                                    avatar: true
+                                }
+                            }
+                        }
+                    }
+                    },
+                    orderBy: { createdAt: 'desc' }
+                }
+            }
+        });
+
+        if (!product) {
+            throw new NotFoundException('Product not found');
+        }
+
+        return product;
+    }
+
 
 }
