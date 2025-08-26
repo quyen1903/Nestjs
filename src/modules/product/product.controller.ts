@@ -1,6 +1,5 @@
 import { Controller, Req, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
-import { Factory } from './services/factory.service';
-import { ProductService } from './services/product.service';
+import { ProductService } from './product.service';
 import { RoleGuard } from '../auth/auth-role.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
@@ -12,7 +11,6 @@ import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO } from './dto/request-produc
 @Controller('product')
 export class ProductController {
     constructor(
-        private readonly factory: Factory,
         private readonly productService: ProductService
     ) {}
 

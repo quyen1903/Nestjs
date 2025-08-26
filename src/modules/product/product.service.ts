@@ -1,9 +1,24 @@
-import { Injectable, Inject, BadRequestException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { ProductType, Sku, Spu } from "@prisma/client";
-import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "../dto/request-product.dto";
+import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "./dto/request-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
+
+    interface ProductWithSkus extends Spu { 
+        skus: Sku[]; 
+        brand: { name: string }; 
+        category: { name: string }; 
+    
+    }
+
+    interface ProductSearchResult { 
+        id: string; 
+        name: string; 
+        images: string[]; 
+        price?: number; 
+        shopId: string; 
+    }
 
 @Injectable()
 export class ProductService {
@@ -12,7 +27,6 @@ export class ProductService {
         private readonly producerService: ProducerService
     ){}
 
-
     /**
      * A closure table is a table that stores all the paths 
      * between all elements in a hierarchical data structure.
@@ -20,7 +34,6 @@ export class ProductService {
      * elements and a third column that represents the distance between them.
      * 
      */
-
     async createCategory(name: string, parentId?: string){
         return await this.prismaService.$transaction(async (tx)=>{
 
@@ -39,7 +52,6 @@ export class ProductService {
 
             if(parentId){
                 //3 get all ancestors of parent
-
                 const ancestors = await tx.categoryClosureTable.findMany({
                     where:{ descendantId: parentId}
                 });
@@ -129,13 +141,15 @@ export class ProductService {
     }
 
     async createBrand(body: CreateBrandDTO){
-        const newBrand = await this.prismaService.brand.create({
-            data:{...body}
-        })
 
-        if(!newBrand) return new BadRequestException(' something was wrong, please check your paramerter')
+        try {
+            return await this.prismaService.brand.create({
+                data:{...body}
+            })
+        } catch (error) {
+            throw new BadRequestException('Failed to create brand');
+        }
 
-        return newBrand
     }
 
     async findProduct(id: string){
@@ -160,11 +174,48 @@ export class ProductService {
         ))
     }
 
-    // async updateProduct(type: UpdateProductDTO['productType'], productId: string, payload: any): Promise<Product> {
-    //     const productInstance = this.productRegistry[type];
-    //     if (!productInstance) throw new BadRequestException(`Invalid Product Type ${type}`);
-    //     return productInstance.updateProduct(productId, payload);
-    // }
+    async updateProduct(productId: string, payload: Partial<CreateSpuDTO & CreateSkuDTO>){
+        const product = await this.prismaService.spu.findUnique({ where: { id: productId }, include: { skus: true } });
+        if (!product) { throw new NotFoundException('Product not found'); };
+
+        return this.prismaService.$transaction(async(tx)=>{
+            const spuFields = ['name', 'intro', 'brandId', 'categoryId', 'images', 'content', 'attributeList'];
+            const spuUpdates = Object.keys(payload)
+            .filter(key => spuFields.includes(key))
+            .reduce((obj, key) => ({ ...obj, [key]: payload[key] }), {});
+
+            let updatedSpu = product;
+            if (Object.keys(spuUpdates).length > 0) { 
+                updatedSpu = await tx.spu.update({ 
+                    where: { id: productId }, 
+                    data: { 
+                        ...spuUpdates, 
+                        updatedAt: Date.now() 
+                    },
+                    include:{ skus: true}
+                }); 
+            }
+
+            // Update first SKU if SKU fields are provided 
+            const skuFields = ['name', 'price', 'num', 'image', 'images', 'skuAttribute'];
+            const skuUpdates = Object.keys(payload) 
+            .filter(key => skuFields.includes(key))
+            .reduce((obj, key) => ({ ...obj, [key]: payload[key] }), {});
+
+            let updatedSku;
+            if (Object.keys(skuUpdates).length > 0 && product.skus.length > 0){
+                updatedSku = await tx.sku.update({ 
+                    where: { id: product.skus[0].id }, 
+                    data: { 
+                        ...skuUpdates, 
+                        updatedAt: Date.now() 
+                    } 
+                });
+            };
+
+            return { spu: updatedSpu, sku: updatedSku };
+        })
+    }
 
     // async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }) {
     //     const query = { productShopId, isDraft: true };
@@ -184,9 +235,39 @@ export class ProductService {
     //     return await this.publish( productShopId, uuid, isDraft, isPublished );
     // }
 
-    //  async getListSearchProduct(keySearch: string) {
-    //     return this.searchProductByUser(keySearch);
-    // }
+    async getListSearchProduct(keySearch: string): Promise<ProductSearchResult[]> { 
+        const products = await this.prismaService.spu.findMany({ 
+            where: { 
+                OR:[                
+                    {
+                        name: {search: keySearch}
+                    },
+                    {
+                        intro: {search: keySearch}
+                    },
+                    {
+                        content: {search: keySearch}
+                    }
+                ]
+
+            }, 
+            include: { 
+                skus: { 
+                    where: { isActive: true },
+                    select: { price: true },
+                    take: 1 
+                } 
+            }, take: 50 
+        }); 
+        
+        return products.map(product => ({ 
+            id: product.id,
+            name: product.name,
+            images: product.images,
+            price: product.skus[0]?.price,
+            shopId: product.shopId 
+        })); 
+    }
 
     //  async findAllProducts({ take = 50, skip = 0, filter = { isPublished: true } }) {
     //     return await this.findAllProduct(take, skip, filter, ['productName', 'productThumb', 'productPrice']);

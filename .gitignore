@@ -3,7 +3,9 @@
 /node_modules
 /build
 /complexity-report
-
+/.idea
+/.vscode
+/report
 # Logs
 logs
 *.log

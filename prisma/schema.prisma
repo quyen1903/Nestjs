@@ -426,6 +426,7 @@ model Spu {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt BigInt   @default(0) @map("created_at")
   updatedAt BigInt   @default(0) @map("updated_at")
+  
 
   /**
     this is for relation

@@ -3,7 +3,7 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { GetCommentDTO } from './dto/get-comment.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
-import { ProductService } from '../product/services/product.service';
+import { ProductService } from '../product/product.service';
 @Injectable()
 export class CommentService {
     constructor(
