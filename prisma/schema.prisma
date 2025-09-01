@@ -8,96 +8,366 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Shop {
+model Account {
   id           String         @id @default(uuid())
-  name         String         @map("shop_name")
-  email        String         @unique @map("shop_email")
-  password     String         @map("shop_password")
-  salt         String         @map("shop_salt")
-  roles        String         @map("shop_role")
+  accountType  AccountType    @map("account_type")
+  status       Status         @default(ACTIVE)
   isActive     Boolean        @default(true) @map("is_active")
   createdAt    BigInt         @default(0) @map("created_at")
   updatedAt    BigInt         @default(0) @map("updated_at")
+
+  // Relations to separated concerns
+  authentication AccountAuthentication?
+  profile        AccountProfile?
+  preferences    AccountPreferences?
+  security       AccountSecurity?
+  deviceSession  DeviceSession[]
   
+  // Business logic relations
+  userBehavior   UserBehavior?      // Only for USER accounts
+  shopBusiness   ShopBusiness?      // Only for SHOP accounts
+  adminAccess    AdminAccess?       // Only for ADMIN accounts
 
-  keyToken     ShopKeyToken?
-  apiKey       APIkey[]
-  discount     Discount[]
-  notification Notification[]
-  spu Spu[]
-  messages     Message[]      @relation("ShopMessages")
+  // Comment-related relations
+  comments         Comment[]
+  // commentLikes     CommentLike[]
+  // commentReports   CommentReport[]
+  // resolvedReports  CommentReport[] @relation("ReportResolver")
+  // moderationActions CommentModeration[]
 
-  @@map("shops")
+  //notification relation
+  notificationThread  NotificationThread?
+  notification      Notification[]
+
+  //coupon relation
+
+  @@map("accounts")
 }
 
-model ShopKeyToken {
-  id               String             @id @default(uuid())
-  sub              String             @unique @map("shop_id") // aka shopId
-  publicKey        String             @map("public_key")
-  refreshToken     String             @map("refresh_token")
-  roles            RoleShop           @map("roles")
+// Separated Authentication Concern
+model AccountAuthentication {
+  accountId    String         @id
+  username     String?        @unique
+  email        String         @unique
+  
+  // Password-based auth
+  passwordHash String?        @map("password_hash")
+  passwordSalt String?        @map("password_salt")
+  
+  // Auth metadata
+  authMethod   AuthMethod     @default(EMAIL_PASSWORD) @map("auth_method")
+  isVerified   Boolean        @default(false) @map("is_verified")
+  lastLoginAt  BigInt?        @map("last_login_at")
+  loginCount   Int            @default(0) @map("login_count")
+  
+  createdAt    BigInt         @default(0) @map("created_at")
+  updatedAt    BigInt         @default(0) @map("updated_at")
 
-  isActive         Boolean            @default(true) @map("is_active")
-  createdAt        BigInt             @default(0) @map("created_at")
-  updatedAt        BigInt             @default(0) @map("updated_at")
+  // Relations
+  account      Account        @relation(fields: [accountId], references: [id])
+  socialAuth   SocialAuthentication[]
+  keyTokens    KeyToken[]
+  passwordResets PasswordReset[]
 
-  refreshtokenused ShopRefreshTokenUsed[]
-  shop             Shop                @relation(fields: [sub],references: [id])
-  @@map("shop_key_tokens")
+  @@map("account_authentication")
 }
 
-model ShopRefreshTokenUsed {
+// Social Authentication - Separate table
+model SocialAuthentication {
+  id           String      @id @default(uuid())
+  authId       String      @map("auth_id")
+  provider     String      // 'google', 'facebook', 'apple'
+  providerId   String      @map("provider_id")
+  providerEmail String?    @map("provider_email")
+  accessToken  String?     @map("access_token")
+  refreshToken String?     @map("refresh_token")
+  expiresAt    BigInt?     @map("expires_at")
+  
+  isActive     Boolean     @default(true) @map("is_active")
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+  
+  authentication AccountAuthentication @relation(fields: [authId], references: [accountId])
+
+  @@unique([authId, provider])
+  @@unique([provider, providerId])
+  @@map("social_authentication")
+}
+
+// Security & Tokens - Separate concern
+model AccountSecurity {
+  accountId    String      @id
+  roles        String[]    // JSON array
+  permissions  String[]    // JSON array
+  
+  // Security settings
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+  twoFactorSecret  String? @map("two_factor_secret")
+  backupCodes      String[] @map("backup_codes")
+  
+  // Security tracking
+  failedLoginAttempts Int  @default(0) @map("failed_login_attempts")
+  lockedUntil      BigInt? @map("locked_until")
+  suspiciousActivity Boolean @default(false) @map("suspicious_activity")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  
+  @@map("account_security")
+}
+
+model DeviceSession{
+  id           String   @id @default(uuid())
+  accountId String  //reference to account
+  deviceId  String  //UUID
+  refreshToken String
+  deviceName   String?
+  lastLogin    DateTime @default(now())
+
+  account Account @relation(fields: [accountId], references: [id])
+}
+
+// User-specific behavior and data
+model UserBehavior {
+  accountId    String      @id
+  
+  // Shopping behavior
+  cart         Cart?
+//   wishlist     Wishlist?//ASPITNF (at some point in the near future, this functionality would be implement)
+  orders       Order[]
+//   reviews      Review[]//ASPITNF (at some point in the near future, this functionality would be implement)
+  
+  // Engagement
+  loyaltyPoints Int        @default(0) @map("loyalty_points")
+  membershipTier String?   @map("membership_tier")
+  sex           Sex   @default(FEMALE)
+  preferences   Json?      // Shopping preferences
+  dateOfBirth   DateTime    @map("date_of_birth")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  
+  @@map("user_behavior")
+}
+
+// Shop-specific business data
+model ShopBusiness {
+  accountId    String      @id
+  
+  // Business info
+  businessName    String   @map("business_name")
+  businessType    String   @map("business_type")
+  taxId           String?  @map("tax_id")
+  businessAddress String?  @map("business_address")
+  
+  // Shop operations
+  spu        Spu[]
+  orders          Order[]
+  inventory       Inventory[]
+  discount          Discount[]
+//   analytics       ShopAnalytics?
+  
+  // Business metrics
+  totalSales      Decimal  @default(0) @map("total_sales")
+  totalOrders     Int      @default(0) @map("total_orders")
+  rating          Float?   @default(0)
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  
+  @@map("shop_business")
+}
+
+// Admin-specific access and capabilities
+model AdminAccess {
+  accountId    String      @id
+  
+  // Admin info
+  department   String
+  position     String
+  adminLevel   AdminLevel  @map("admin_level")
+  supervisor   String?     // Another admin's accountId
+  
+  // Access control
+  modules      String[]    // Which admin modules they can access
+  territories  String[]    // Geographic or business areas they manage
+  
+  // Activity tracking
+  lastActivity BigInt?     @map("last_activity")
+  actionsToday Int         @default(0) @map("actions_today")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  adminLogs    AdminActivityLog[]
+  
+  @@map("admin_access")
+}
+
+// Generic profile for all account types
+model AccountProfile {
+  accountId    String      @id
+  name         String
+  avatar       String?
+  phone        String?     @unique
+  address      String?
+  timezone     String?
+  language     String?     @default("en")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  
+  @@map("account_profiles")
+}
+
+// Account preferences and settings
+model AccountPreferences {
+  accountId    String      @id
+  
+  // Notification preferences
+  emailNotifications    Boolean @default(true) @map("email_notifications")
+  smsNotifications      Boolean @default(false) @map("sms_notifications")
+  pushNotifications     Boolean @default(true) @map("push_notifications")
+  
+  // Privacy settings
+  profileVisibility     String  @default("public") @map("profile_visibility")
+  dataSharing           Boolean @default(false) @map("data_sharing")
+  
+  // UI preferences
+  theme                 String  @default("light")
+  language              String  @default("en")
+  currency              String  @default("USD")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+
+  account      Account     @relation(fields: [accountId], references: [id])
+  
+  @@map("account_preferences")
+}
+
+// Supporting models
+model KeyToken {
+  id               String      @id @default(uuid())
+  authId           String      @map("auth_id")
+  deviceId         String      @map("device_id")
+  publicKey        String      @map("public_key")
+  refreshToken     String      @map("refresh_token")
+  expiresAt        BigInt?     @map("expires_at")
+  
+  isActive         Boolean     @default(true) @map("is_active")
+  createdAt        BigInt      @default(0) @map("created_at")
+  updatedAt        BigInt      @default(0) @map("updated_at")
+
+  authentication   AccountAuthentication @relation(fields: [authId], references: [accountId])
+  usedTokens       RefreshTokenUsed[]
+  
+  @@unique([authId, deviceId])
+  @@map("key_tokens")
+}
+
+model RefreshTokenUsed {
   id         String   @id @default(uuid())
+  keyTokenId String   @map("key_token_id")
   token      String   @map("refresh_token")
   usedAt     DateTime @default(now()) @map("used_at")
+  reason     String?  // "logout", "refresh", "revoked", "expired", "suspicious_activity"
   userAgent  String?  @map("user_agent")
   ipAddress  String?  @map("ip_address")
-  keyTokenId String   @map("refresh_token_use")
-  createdAt  BigInt   @default(0) @map("created_at")
+  deviceInfo String?  @map("device_info")
+  
   isActive   Boolean  @default(true) @map("is_active")
+  createdAt  BigInt   @default(0) @map("created_at")
   updatedAt  BigInt   @default(0) @map("updated_at")
-  keyToken   ShopKeyToken @relation(fields: [keyTokenId], references: [id])
+  
+  keyToken   KeyToken @relation(fields: [keyTokenId], references: [id])
 
   @@index([token])
-  @@map("shop_refresh_tokens_used")
+  @@index([keyTokenId])
+  @@map("refresh_tokens_used")
 }
 
-model APIkey {
-  id         String   @id @default(uuid())
-  key        String
-  status     Status
-  permission String[]
-  shopId     String
+model PasswordReset {
+  id           String      @id @default(uuid())
+  authId       String      @map("auth_id")
+  token        String      @unique
+  tokenHash    String      @map("token_hash") // Hashed version for security
+  
+  // Request details
+  requestedAt  DateTime    @default(now()) @map("requested_at")
+  expiresAt    DateTime    @map("expires_at")
+  ipAddress    String?     @map("ip_address")
+  userAgent    String?     @map("user_agent")
+  
+  // Usage tracking
+  isUsed       Boolean     @default(false) @map("is_used")
+  usedAt       DateTime?   @map("used_at")
+  usedIpAddress String?    @map("used_ip_address")
+  usedUserAgent String?   @map("used_user_agent")
+  
+  // Security
+  attemptCount Int         @default(0) @map("attempt_count")
+  maxAttempts  Int         @default(5) @map("max_attempts")
+  isBlocked    Boolean     @default(false) @map("is_blocked")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  updatedAt    BigInt      @default(0) @map("updated_at")
+  
+  authentication AccountAuthentication @relation(fields: [authId], references: [accountId])
+  
+  @@index([token])
+  @@index([authId])
+  @@index([expiresAt])
+  @@map("password_resets")
+}
 
-  revokedAt DateTime? // timeline  which we disable a api key
 
-  isActive   Boolean  @default(true) @map("is_active")
-  createdAt  BigInt   @default(0) @map("created_at")
-  updatedAt  BigInt   @default(0) @map("updated_at")
-
-  shop      Shop      @relation(fields: [shopId], references: [id])
-
-  @@map("api_keys")
+model AdminActivityLog {
+  id           String      @id @default(uuid())
+  adminId      String      @map("admin_id")
+  action       String      // "USER_BANNED", "PRODUCT_APPROVED", etc.
+  targetType   String      @map("target_type") // "USER", "SHOP", "PRODUCT"
+  targetId     String      @map("target_id")
+  details      Json?
+  ipAddress    String?     @map("ip_address")
+  
+  createdAt    BigInt      @default(0) @map("created_at")
+  
+  admin        AdminAccess @relation(fields: [adminId], references: [accountId])
+  
+  @@map("admin_activity_logs")
 }
 
 model Inventory {
-  id                    String  @id @default(uuid())
-  inventoryLocation     String  @default("unKnow") @map("inventory_location")
-  inventoryStock        Int     @map("inventory_stock")
+    id                    String  @id @default(uuid())
+    inventoryLocation     String  @default("unKnow") @map("inventory_location")
+    inventoryStock        Int     @map("inventory_stock")
 
-  isActive              Boolean @default(true) @map("is_active")
-  createdAt             BigInt  @default(0) @map("created_at")
-  updatedAt             BigInt  @default(0) @map("updated_at")
+    isActive              Boolean @default(true) @map("is_active")
+    createdAt             BigInt  @default(0) @map("created_at")
+    updatedAt             BigInt  @default(0) @map("updated_at")
 
-  inventoryProductId    String  @unique @map("inventory_product_id")
-  inventoryProduct      Sku @relation(fields: [inventoryProductId], references: [id])
+    //relation
+    inventoryProductId    String  @unique @map("inventory_product_id")
+    inventoryProduct      Sku @relation(fields: [inventoryProductId], references: [id])
 
-  reservations          ReservationInventory[]
-  orderItem             OrderItem[]
+    reservations          ReservationInventory[]
+    orderItem             OrderItem[]
 
-  @@map("inventories")
+    shopBusiness    ShopBusiness    @relation(fields: [shopBusinessId], references: [accountId])
+    shopBusinessId  String
+
+    @@map("inventories")
 }
-
 model ReservationInventory {
   id             String     @id @default(uuid())
   inventory      Inventory  @relation(fields: [inventoryId], references: [id])
@@ -137,7 +407,7 @@ model Discount {
   isActive               Boolean           @default(true) @map("is_active")
   createdAt              BigInt            @default(0) @map("created_at")
   updatedAt              BigInt            @default(0) @map("updated_at")
-  discountShop           Shop              @relation(fields: [discountShopId], references: [id])
+  discountShop           ShopBusiness      @relation(fields: [discountShopId], references: [accountId])
 
   @@map("discounts")
 }
@@ -151,7 +421,7 @@ model Cart {
   createdAt    BigInt        @default(0) @map("created_at")
   updatedAt    BigInt        @default(0) @map("updated_at")
   cartProducts CartProduct[]
-  user         User          @relation(fields: [userId], references: [id])
+  user         UserBehavior          @relation(fields: [userId], references: [accountId])
 
   @@map("carts")
 }
@@ -191,7 +461,10 @@ model Order {
 
   // Relations
   orderItems      OrderItem[]
-  user            User        @relation(fields: [userId], references: [id])
+  user            UserBehavior        @relation(fields: [userId], references: [accountId])
+
+  shopBusiness      ShopBusiness    @relation(fields: [shopBusinessId],references: [accountId])
+  shopBusinessId    String
 
   @@map("orders")
 }
@@ -213,23 +486,65 @@ model OrderItem {
   @@map("order_items")
 }
 
+model CommentClosureTable {
+  ancestorId  String
+  descendantId  String
+  depth Int
+
+  ancestor  Comment @relation("CommentAncestor", fields: [ancestorId], references: [id])
+  descendants  Comment @relation("CommentDescendant", fields: [descendantId], references: [id])
+
+
+  @@id([ancestorId, descendantId])
+  @@map("comment_closure")
+}
 
 model Comment {
-  id               String    @id @default(uuid())
-  commentProductId String    @map("comment_product")
-  commentUserId    String    @map("comment_user")
-  commentContent   String    @map("comment_content")
-  commentLeft      Int       @default(0) @map("comment_left")
-  commentRight     Int       @default(0) @map("comment_right")
-  commentParentId  String?   @map("comment_parent_id")
-  isDeleted        Boolean   @default(false) @map("is_deleted")
-  isActive         Boolean   @default(true) @map("is_active")
-  createdAt        BigInt    @default(0) @map("created_at")
-  updatedAt        BigInt    @default(0) @map("updated_at")
-  commentParent    Comment?  @relation("ParentChild", fields: [commentParentId], references: [id])
-  childComments    Comment[] @relation("ParentChild")
-  commentProduct   Spu   @relation(fields: [commentProductId], references: [id])
-  commentUser      User      @relation(fields: [commentUserId], references: [id])
+  id               String         @id @default(uuid())
+  
+  // Core content
+  content          String         @map("content")
+  contentType      CommentType    @default(TEXT) @map("content_type") // TEXT, HTML, MARKDOWN
+  
+  // What is being commented on (polymorphic)
+  targetType       CommentTargetType @map("target_type") // PRODUCT, ORDER, REVIEW, etc.
+  targetId         String         @map("target_id")
+  
+  // Author information
+  authorId         String         @map("author_id")
+  authorType       CommentAuthorType @default(USER) @map("author_type") // USER, SHOP, ADMIN
+  
+  // Thread grouping (optional - can be derived from closure table)
+  threadId         String?        @map("thread_id") // Root comment ID for the thread
+
+  // Status and moderation
+  status           CommentStatus  @default(PUBLISHED) @map("status")
+  isDeleted        Boolean        @default(false) @map("is_deleted")
+  isPinned         Boolean        @default(false) @map("is_pinned")
+  isEdited         Boolean        @default(false) @map("is_edited")
+  editedAt         BigInt?        @map("edited_at")
+  
+  // Engagement
+  likesCount       Int            @default(0) @map("likes_count")
+  dislikesCount    Int            @default(0) @map("dislikes_count")
+  repliesCount     Int            @default(0) @map("replies_count")
+  
+  // Metadata
+  ipAddress        String?        @map("ip_address")@default("127.0.0.1")
+  userAgent        String?        @map("user_agent")
+
+  // Timestamps
+  isActive         Boolean        @default(true) @map("is_active")
+  createdAt        BigInt         @default(0) @map("created_at")
+  updatedAt        BigInt         @default(0) @map("updated_at")
+
+  // Relations
+  ancestors    CommentClosureTable[] @relation("CommentDescendant")
+  descendants  CommentClosureTable[] @relation("CommentAncestor")
+
+  author           Account        @relation(fields: [authorId], references: [id])
+  spuId            String         @map("spu_id")
+  spu              Spu            @relation(fields: [spuId], references: [id])
 
   @@map("comments")
 }
@@ -241,8 +556,8 @@ model Comment {
 
 model NotificationThread {
   id            String         @id @default(uuid())
-  userId        String         @unique @map("noti_thread_user_id")
-  user          User           @relation(fields: [userId], references: [id])
+  accountId        String         @unique @map("noti_thread_user_id")
+  account          Account           @relation(fields: [accountId], references: [id])
   notifications Notification[]
 
   isActive  Boolean @default(true) @map("is_active")
@@ -255,7 +570,7 @@ model NotificationThread {
 model Notification {
   id       String             @id @default(uuid())
   type     NotificationType   @map("noti_type")
-  sender   Shop               @relation(fields: [senderId], references: [id])
+  sender   Account            @relation(fields: [senderId], references: [id])
   senderId String             @map("noti_sender_id")
   thread   NotificationThread @relation(fields: [threadId], references: [id])
   threadId String             @map("noti_thread_id")
@@ -271,133 +586,6 @@ model Notification {
   updatedAt BigInt  @default(0) @map("updated_at")
 
   @@map("notifications")
-}
-
-model User {
-  id                String   @id @default(uuid())
-  auth              UserAuth?
-  profile           UserProfile?
-  social            UserSocial[]
-
-  // Relations
-  passwordReset       PasswordReset[]
-  keyToken            UserKeyToken?
-  cart                Cart?
-  comment             Comment[]
-  order               Order[]
-  messages            Message[]         @relation("UserMessages")
-  notificationThread  NotificationThread?
-
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-  @@map("users")
-}
-
-
-model UserAuth {
-  userId     String   @id
-  username   String   @unique
-  password   String
-  salt       String
-  status     Status   @default(ACTIVE)
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-
-  user       User     @relation(fields: [userId], references: [id])
-}
-
-
-model UserProfile {
-  userId       String   @id
-  name         String
-  phone        String   @unique
-  sex          Sex
-  avatar       String
-  dateOfBirth  DateTime
-
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-  user         User   @relation(fields: [userId], references: [id])
-}
-
-model UserSocial {
-  userId       String   @id
-  provider  String   // 'google', 'facebook'
-  providerId String @unique  // ID của user bên Google/Facebook
-  email     String
-  user      User     @relation(fields: [userId], references: [id])
-
-  isActive   Boolean  @default(true)
-  createdAt  BigInt   @default(0)
-  updatedAt  BigInt   @default(0)
-
-  @@unique([userId, provider])
-
-}
-
-model PasswordReset {
-  id        String   @id @default(uuid())
-  userId    String   @map("password_reset_userId")
-  token     String   @unique @map("password_reset_token")
-  expiresAt DateTime @map("password_reset_expires_at")
-  isUsed    Boolean  @default(false) @map("password_reset_is_used")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt BigInt   @default(0) @map("created_at")
-  updatedAt BigInt   @default(0) @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@map("password_resets")
-}
-
-model UserKeyToken {
-  id               String             @id @default(uuid())
-  sub              String             @unique @map("user_id") // aka userId
-  publicKey        String             @map("public_key")
-  refreshToken     String             @map("refresh_token")
-  isActive         Boolean            @default(true) @map("is_active")
-  createdAt        BigInt             @default(0) @map("created_at")
-  updatedAt        BigInt             @default(0) @map("updated_at")
-  refreshtokenused UserRefreshTokenUsed[]
-  user             User               @relation(fields: [sub], references: [id])
-
-  @@map("user_key_tokens")
-}
-
-model UserRefreshTokenUsed {
-  id         String   @id @default(uuid())
-  token      String   @map("refresh_token")
-  usedAt     DateTime @default(now()) @map("used_at")
-  userAgent  String?  @map("user_agent")
-  ipAddress  String?  @map("ip_address")
-  keyTokenId String   @map("refresh_token_use")
-  createdAt  BigInt   @default(0) @map("created_at")
-  isActive   Boolean  @default(true) @map("is_active")
-  updatedAt  BigInt   @default(0) @map("updated_at")
-  keyToken   UserKeyToken @relation(fields: [keyTokenId], references: [id])
-
-  @@index([token])
-  @@map("user_refresh_tokens_used")
-}
-
-model Message {
-  id         String      @id @default(uuid())
-  content    String      @map("content") @db.Text
-  senderId   String      @map("sender_id")
-  receiverId String      @map("receiver_id")
-  type       MessageType @map("message_type")
-  isRead     Boolean     @default(false) @map("is_read")
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
-  isActive   Boolean     @default(true) @map("is_active")
-
-  // Define relations based on the type field
-  shop Shop? @relation(fields: [receiverId], references: [id], name: "ShopMessages")
-  user User? @relation(fields: [senderId], references: [id], name: "UserMessages")
-
-  @@map("messages")
 }
 
 /*
@@ -420,13 +608,12 @@ model Spu {
   attributeList      String?  @db.VarChar(3000) //Specifications
   isMarketable       Boolean  @default(false) //Unsaleable or not
   status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
-  shopId    String
+  shopBusinessId    String
 
   
   isActive  Boolean  @default(true) @map("is_active")
   createdAt BigInt   @default(0) @map("created_at")
   updatedAt BigInt   @default(0) @map("updated_at")
-  
 
   /**
     this is for relation
@@ -439,7 +626,7 @@ model Spu {
   category           Category @relation(fields: [categoryId], references: [id])
   skus               Sku[]    @relation("SpuSkus")
   comment            Comment[]
-  shop       Shop   @relation(fields: [shopId],references: [id])
+  shopBusiness       ShopBusiness   @relation(fields: [shopBusinessId],references: [accountId])
 
   @@unique([name, brandId])
 }
@@ -474,7 +661,6 @@ model Sku {
   @@index([status])
   @@index([updatedAt], name: "updated")
 }
-
 /*
   IMPRORTANT: The creatationn of category must be handled by admin and must not be done by seller and user
   
@@ -553,8 +739,26 @@ model SkuAttribute {
   categories CategoryAttr[]
 }
 
+enum AccountType {
+  USER
+  SHOP
+  ADMIN
+  SUPER_ADMIN
+}
 
+enum AuthMethod {
+  EMAIL_PASSWORD
+  OAUTH2_ONLY
+  HYBRID
+}
 
+enum AdminLevel {
+  JUNIOR
+  SENIOR
+  MANAGER
+  DIRECTOR
+  SUPER
+}
 
 enum AccountRole {
   SHOP
@@ -581,10 +785,35 @@ enum Status {
   PENDING
 }
 
-enum ProductType {
-  Clothing
-  Electronic
-  Furniture
+enum CommentType {
+  TEXT
+  HTML
+  MARKDOWN
+}
+
+enum CommentTargetType {
+  PRODUCT      // Product reviews/questions
+  ORDER        // Order-related comments
+  REVIEW       // Comments on reviews
+  SHOP         // Shop page comments
+  BLOG_POST    // Blog post comments
+  ANNOUNCEMENT // Comments on announcements
+}
+
+enum CommentAuthorType {
+  USER         // Regular user
+  SHOP         // Shop owner/staff
+  ADMIN        // Platform admin
+  SYSTEM       // System-generated comments
+}
+
+enum CommentStatus {
+  DRAFT        // Not yet published
+  PUBLISHED    // Live and visible
+  PENDING      // Waiting for moderation
+  REJECTED     // Rejected by moderator
+  HIDDEN       // Hidden but not deleted
+  SPAM         // Marked as spam
 }
 
 enum DiscountAppliesTo {

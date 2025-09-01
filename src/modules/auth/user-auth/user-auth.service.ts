@@ -5,9 +5,7 @@ import { LoginUserManualDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
-import { UserKeyTokenService } from './user-auth.keytoken';
-import { UserKeyToken,UserRefreshTokenUsed, User, UserAuth, UserProfile, UserSocial, UserSocialProvider, Sex } from '@prisma/client';
+import { KeyToken, RefreshTokenUsed, Account, AccountAuthentication, AccountProfile, SocialAuthentication, AccountType, AuthMethod, Sex } from '@prisma/client';
 import { EmailService } from 'src/services/email/email.service';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { randomBytes } from 'node:crypto';
@@ -16,66 +14,22 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 
-// =====================================
-// SOCIAL LOGIN FLOW - NOTES
-// =====================================
-
-// Step 1: Find if social account (provider + providerId) already linked
-//   - If found → login user
-//   - If not found → continue
-
-// Step 2: Check if a user exists with the same email (manual registered)
-//   - If exists → DO NOT auto-link
-//   - Throw an error or prompt user to login manually first
-//   - Reason: Cannot trust email alone to identify same person
-
-// Step 3: If no user found with email
-//   - Create new User + UserProfile + UserSocial (linked to this providerId)
-//   - Proceed with login as new user
-
-// =====================================
-// SOCIAL LINKING FLOW (AFTER LOGIN MANUAL)
-// =====================================
-
-// Endpoint: POST /auth/link-social
-// Requirements:
-//   - User must be logged in manually (email + password)
-//   - Body must include: provider, providerId, email
-
-// Steps:
-//   - Step 1: Check if providerId already linked → if yes, throw error
-//   - Step 2: Check if request email matches logged-in user's email
-//   - Step 3: Create UserSocial entry to link the provider to the current user
-
-// Optional: Send confirmation message like "Google account successfully linked"
-
-// =====================================
-// BEST PRACTICES
-// =====================================
-// - Do NOT trust email alone for linking accounts
-// - Do NOT allow auto-linking between OAuth and manual accounts without user consent
-// - Always check for providerId uniqueness
-// - Allow one user to have multiple UserSocial entries (Google, Facebook, etc.)
-// - Use proper unique constraints: @@unique([provider, providerId]), email unique in UserProfile
-
 @Injectable()
 export class UserAuthService extends AuthService{
 
     constructor(
         jwtService: JwtService,
         prismaService: PrismaService,
-        private readonly userKeyTokenService: UserKeyTokenService,
         private readonly emailService: EmailService,
         producerService: ProducerService,
     ) {
         super(prismaService,jwtService, producerService);
-
     };
 
-    protected override createTokenPair(userId: string, userName: string, privateKey: string){
+    protected override createTokenPair(accountId: string, email: string, privateKey: string){
         const payload = {                
-            accountId:userId, 
-            username: userName,
+            accountId, 
+            email,
             role: 'USER'
         };
         
@@ -97,60 +51,132 @@ export class UserAuthService extends AuthService{
         return {accessToken, refreshToken}
     }
 
-    private async upsertKeyStore(accountId: string, publicKey: string, refreshToken: string){
-        return await this.userKeyTokenService.upsertUserKeyToken({
-            accountId,
-            publicKey,
-            refreshToken,
-        })
+    /**
+     * Upsert key store using the new KeyToken model
+     */
+    private async upsertKeyStore(accountId: string, deviceId: string, publicKey: string, refreshToken: string){
+        return await this.prismaService.keyToken.upsert({
+            where: {
+                authId_deviceId: {
+                    authId: accountId,
+                    deviceId: deviceId
+                }
+            },
+            update: {
+                publicKey,
+                refreshToken,
+                updatedAt: BigInt(Date.now())
+            },
+            create: {
+                authId: accountId,
+                deviceId,
+                publicKey,
+                refreshToken,
+                createdAt: BigInt(Date.now()),
+                updatedAt: BigInt(Date.now())
+            }
+        });
     };
 
-    private async find(username: string){
-        const user =await this.prismaService.userAuth.findUnique({where:{username}})
-        return user 
-    };
+    /**
+     * Find user account by email with all related data
+     */
+    private async findUserAccount(email: string) {
+        return this.prismaService.account.findFirst({
+            where: {
+                accountType: AccountType.USER,
+                authentication: {
+                    email: email
+                }
+            },
+            include: {
+                authentication: true,
+                profile: true,
+                userBehavior: true,
+                security: true
+            }
+        });
+    }
 
-    async handleRefreshToken( keyStore: UserKeyToken, account: JwtUser, storedRefreshToken: string ): Promise<{
+    /**
+     * Find user account by ID
+     */
+    private async findUserAccountById(accountId: string) {
+        return this.prismaService.account.findFirst({
+            where: {
+                id: accountId,
+                accountType: AccountType.USER
+            },
+            include: {
+                authentication: true,
+                profile: true,
+                userBehavior: true,
+                security: true
+            }
+        });
+    }
+
+    async handleRefreshToken( 
+        accountId: string, 
+        deviceId: string,
+        storedRefreshToken: string 
+    ): Promise<{
         accessToken: string,
         refreshToken: string
-        update: UserKeyToken;
-        createUsedToken: UserRefreshTokenUsed; 
+        update: KeyToken;
+        createUsedToken: RefreshTokenUsed; 
     }>{
-        //1 check wheather user's token been used or not, if been used, remove key and for them to relogin
-        const {sub, username} = account;
-
-        const duplicateJWT = await this.prismaService.userRefreshTokenUsed.findFirst({
+        // Check if token has been used before
+        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
             where:{
                 token: storedRefreshToken
             }
         })
 
-        if(duplicateJWT) throw new ForbiddenException('Something wrong happended, please relogin')
+        if(duplicateJWT) throw new ForbiddenException('Something wrong happened, please relogin')
 
-        //2 if user's token is not valid token, force them to relogin, too
-        if(keyStore.refreshToken !== storedRefreshToken)throw new UnauthorizedException('something was wrong happended, please relogin')
-        const foundUser = await this.find(username)
-        if(!foundUser) throw new UnauthorizedException('user not registed');
+        // Find the key token
+        const keyStore = await this.prismaService.keyToken.findFirst({
+            where: {
+                authId: accountId,
+                deviceId: deviceId,
+                refreshToken: storedRefreshToken,
+                isActive: true
+            }
+        });
 
-        //3 if this accesstoken is valid, create new accesstoken, refreshtoken
+        if(!keyStore) throw new UnauthorizedException('Something was wrong happened, please relogin')
+
+        const foundUser = await this.findUserAccountById(accountId)
+        if(!foundUser) throw new UnauthorizedException('User not registered');
+
+        // Generate new key pair
         const { publicKey, privateKey } = this.generateKeyPair()
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.username, privateKey)
+        const {accessToken, refreshToken} = this.createTokenPair(
+            foundUser.id, 
+            foundUser.authentication.email, 
+            privateKey
+        )
 
-
-        const update = await this.prismaService.userKeyToken.update({
+        // Update key token
+        const update = await this.prismaService.keyToken.update({
             where:{
-                sub: account.sub
+                id: keyStore.id
             },
             data:{
                 publicKey,
-                refreshToken: refreshToken
+                refreshToken,
+                updatedAt: BigInt(Date.now())
             }
         })
 
-        const createUsedToken = await this.prismaService.userRefreshTokenUsed.create({
+        // Create used token record
+        const createUsedToken = await this.prismaService.refreshTokenUsed.create({
             data:{
-                token:refreshToken,
-                keyTokenId: update.id
+                keyTokenId: keyStore.id,
+                token: storedRefreshToken,
+                reason: 'refresh',
+                createdAt: BigInt(Date.now())
             }
         })
 
@@ -162,127 +188,91 @@ export class UserAuthService extends AuthService{
         }
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<UserKeyToken | null>{
-        return await this.userKeyTokenService.removeKeyByAccountID(keyStore.accountId );
+    async logout ( keyStore: IKeyToken ): Promise<any>{
+        // Deactivate all key tokens for this account
+        return await this.prismaService.keyToken.updateMany({
+            where: {
+                authId: keyStore.accountId
+            },
+            data: {
+                isActive: false,
+                updatedAt: BigInt(Date.now())
+            }
+        });
     };
 
-    async loginManual(login: LoginUserManualDTO): Promise<{
+    async loginManual(login: LoginUserManualDTO, deviceId: string = crypto.randomUUID()): Promise<{
         user: object;
         accessToken: string;
         refreshToken: string;
     }>{
-        const foundUser = await this.find(login.username);
-        if(!foundUser) throw new BadRequestException('user not registed');
+        // Find user by email
+        const foundUser = await this.findUserAccount(login.email);
+        if(!foundUser) throw new BadRequestException('User not registered');
 
-        const passwordHashed =await this.hashPassword(login.password, foundUser.salt);
-        if (passwordHashed !== foundUser.password) throw new UnauthorizedException('Wrong password!!!');
+        // Verify password
+        const passwordHashed = await this.hashPassword(login.password, foundUser.authentication.passwordSalt);
+        if (passwordHashed !== foundUser.authentication.passwordHash) {
+            throw new UnauthorizedException('Wrong password!!!');
+        }
 
+        // Update login metadata
+        await this.prismaService.accountAuthentication.update({
+            where: {
+                accountId: foundUser.id
+            },
+            data: {
+                lastLoginAt: BigInt(Date.now()),
+                loginCount: {
+                    increment: 1
+                },
+                updatedAt: BigInt(Date.now())
+            }
+        });
+
+        // Generate tokens
         const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(foundUser.userId, foundUser.username, privateKey);
-        if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!');
+        const {accessToken, refreshToken} = this.createTokenPair(
+            foundUser.id, 
+            foundUser.authentication.email, 
+            privateKey
+        );
+        if(!accessToken || !refreshToken) throw new BadGatewayException('Create tokens error!!!!!!');
 
-
-        const keyStore = await this.upsertKeyStore(foundUser.userId, publicKey, refreshToken);
-        if(!keyStore) throw new Error('cannot generate keytoken');
+        // Create/update key store
+        const keyStore = await this.upsertKeyStore(foundUser.id, deviceId, publicKey, refreshToken);
+        if(!keyStore) throw new Error('Cannot generate keytoken');
 
         return{
-            user:getInfoData(['id','username'],foundUser),
+            user: getInfoData(['id'], foundUser),
             accessToken, 
             refreshToken
         };
     };
 
-    async registerManual(register: RegisterUserDTO) {
-        const userHolder = await this.find(register.name);
-        if(userHolder) throw new BadGatewayException('User already existed');
-
-        const salt = crypto.randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(register.password, salt);
-
-        /**
-         * we will use transaction to create user
-         * this make sure in our database, user Password-based signup
-         * will have profile, authentication information without missing 
-         * any data
-         */
-
-        let newUser:User, newUserAuth: UserAuth, newUserProfile: UserProfile;
-
-        await this.prismaService.$transaction(async(tx)=>{
-            const user =await tx.user.create({});
-
-            const userAuth = await tx.userAuth.create({
-                data:{
-                    userId: user.id,
-                    password: passwordHashed,
-                    salt,
-                    username: register.userName
-                }
-            });
-
-            const userProfile = await tx.userProfile.create({
-                data:{
-                    userId: user.id,
-                    name: register.name,
-                    phone: register.phone,
-                    sex: register.sex,
-                    avatar: register.avatar,
-                    dateOfBirth: register.dateOfBirth
-                }
-            });
-
-            newUser = user,newUserAuth = userAuth ,newUserProfile = userProfile;
-        })
-
-        if(newUser && newUserProfile && newUserAuth){
-            const { privateKey, publicKey } = this.generateKeyPair();
-            const {accessToken, refreshToken} = this.createTokenPair(newUserAuth.userId, newUserAuth.username, privateKey)
-            if(!accessToken || !refreshToken)throw new BadGatewayException('create tokens error!!!!!!')
-
-            const keyStore = await this.upsertKeyStore(newUser.id, publicKey, refreshToken)
-            if(!keyStore) throw new Error('cannot generate keytoken');
-
-            const notificationThread = await this.prismaService.notificationThread.create({
-                data:{
-                    userId: newUser.id
-                }
-            })
-
-            return{
-                user:getInfoData(['id','username',],newUser),
-                notificationThread,
-                accessToken,
-                refreshToken
-            }
-        }
-        return {
-            code:200,
-            metadata:null
-        }  
-    }
-
     async forgotPassword(forgotPasswordDto: ForgotPasswordDTO): Promise<{ message: string }> {
         const { email } = forgotPasswordDto;
         
         // Find the user by email
-        const user = await this.prismaService.userSocial.findFirst({
-            where:{email}
-        });
+        const user = await this.findUserAccount(email);
         if (!user) {
             // For security reasons, we still return success even if the email doesn't exist
             return { message: 'If your email is registered with us, you will receive a password reset link' };
         }
+        
         const resetToken = randomBytes(32).toString('hex');
+        const tokenHash = await this.hashPassword(resetToken, 'reset_salt'); // Hash the token for storage
         
         // Set token expiration (1 hour from now)
         const expiresAt = new Date();
-        console.log('expiresAt',expiresAt)
         expiresAt.setHours(expiresAt.getHours() + 1);
         
         await this.prismaService.passwordReset.create({
             data: {
-                userId: user.userId,
+                authId: user.id,
                 token: resetToken,
+                tokenHash,
+                requestedAt: new Date(),
                 expiresAt,
                 createdAt: BigInt(Date.now()),
                 updatedAt: BigInt(Date.now())
@@ -292,7 +282,6 @@ export class UserAuthService extends AuthService{
         const emailSent = await this.emailService.sendPasswordResetEmail(email, resetToken);        
         if (!emailSent) throw new BadRequestException('Failed to send reset email');
         
-    
         return { message: 'If your email is registered with us, you will receive a password reset link' };
     }
 
@@ -306,21 +295,29 @@ export class UserAuthService extends AuthService{
                 expiresAt: {
                     gt: new Date()
                 }
-            },
-            include: {
-                user: true
             }
         });
     
         if (!passwordReset) {
             throw new BadRequestException('Invalid or expired token');
         }
+
+        // Increment attempt count
+        await this.prismaService.passwordReset.update({
+            where: { id: passwordReset.id },
+            data: {
+                attemptCount: {
+                    increment: 1
+                }
+            }
+        });
     
         // Update the token as used
         await this.prismaService.passwordReset.update({
             where: { id: passwordReset.id },
             data: {
                 isUsed: true,
+                usedAt: new Date(),
                 updatedAt: BigInt(Date.now())
             }
         });
@@ -329,11 +326,11 @@ export class UserAuthService extends AuthService{
         const salt = randomBytes(32).toString('hex');
         const passwordHashed = await this.hashPassword(password, salt);
     
-        await this.prismaService.userAuth.update({
-            where: { userId: passwordReset.userId },
+        await this.prismaService.accountAuthentication.update({
+            where: { accountId: passwordReset.authId },
             data: {
-                password: passwordHashed,
-                salt,
+                passwordHash: passwordHashed,
+                passwordSalt: salt,
                 updatedAt: BigInt(Date.now())
             }
         });
@@ -341,7 +338,6 @@ export class UserAuthService extends AuthService{
         return { message: 'Password reset successful' };
     }
     
-    //small notice here: typecasting  !! means if password reset is object, it return true,vice versa, return false
     async validatePasswordResetToken(token: string): Promise<{ valid: boolean }> {
         const passwordReset = await this.prismaService.passwordReset.findFirst({
             where: {
@@ -356,73 +352,153 @@ export class UserAuthService extends AuthService{
         return { valid: !!passwordReset };
     }
 
-    async findOrCreateGoogleUser(social: UserSocial, profile: UserProfile | null) {
-        const existingSocial = await this.prismaService.userSocial.findUnique({
-            where: { email: social.email, providerId: social.providerId },
+    async findOrCreateGoogleUser(socialData: any, profileData: any) {
+        const existingSocial = await this.prismaService.socialAuthentication.findUnique({
+            where: { 
+                provider_providerId: {
+                    provider: 'google',
+                    providerId: socialData.providerId
+                }
+            },
+            include: {
+                authentication: {
+                    include: {
+                        account: true
+                    }
+                }
+            }
         });
 
-        let user: User;
+        let account: Account;
 
         if (!existingSocial) {
+            const currentTime = BigInt(Date.now());
+            
             // Create new user and related entities if social record does not exist
-            const { newUser, newSocial, newProfile } = await this.prismaService.$transaction(async (tx) => {
-                const newUser = await tx.user.create({ data: {} });
-
-                const newSocial = await tx.userSocial.create({
+            const result = await this.prismaService.$transaction(async (tx) => {
+                // 1. Create main account
+                const newAccount = await tx.account.create({
                     data: {
-                        provider: UserSocialProvider.GOOGLE,
-                        providerId: social.providerId,
-                        email: social.email,
-                        userId: newUser.id,
-                    },
+                        accountType: AccountType.USER,
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
                 });
 
-                let newProfile: UserProfile | null = null;
-                if (profile && (profile.name || profile.phone)) {
-                    newProfile = await tx.userProfile.create({
+                // 2. Create authentication
+                const newAuth = await tx.accountAuthentication.create({
+                    data: {
+                        accountId: newAccount.id,
+                        email: socialData.email,
+                        authMethod: AuthMethod.OAUTH2_ONLY,
+                        isVerified: true, // OAuth accounts are pre-verified
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                // 3. Create social authentication
+                const newSocial = await tx.socialAuthentication.create({
+                    data: {
+                        authId: newAccount.id,
+                        provider: 'google',
+                        providerId: socialData.providerId,
+                        providerEmail: socialData.email,
+                        accessToken: socialData.accessToken,
+                        refreshToken: socialData.refreshToken,
+                        expiresAt: socialData.expiresAt ? BigInt(socialData.expiresAt) : null,
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                // 4. Create profile if data available
+                let newProfile = null;
+                if (profileData && profileData.name) {
+                    newProfile = await tx.accountProfile.create({
                         data: {
-                            name: profile.name ?? '',
-                            phone: profile.phone ?? '',
-                            sex: profile.sex ?? Sex.FEMALE,
-                            avatar: profile.avatar ?? '',
-                            dateOfBirth: profile.dateOfBirth ?? new Date(0),
-                            userId: newUser.id,
-                        },
+                            accountId: newAccount.id,
+                            name: profileData.name,
+                            avatar: profileData.avatar,
+                            language: 'en',
+                            createdAt: currentTime,
+                            updatedAt: currentTime
+                        }
                     });
                 }
 
-                return { newUser, newSocial, newProfile };
+                // 5. Create user behavior
+                await tx.userBehavior.create({
+                    data: {
+                        accountId: newAccount.id,
+                        loyaltyPoints: 0,
+                        membershipTier: 'bronze',
+                        sex: profileData.sex,
+                        dateOfBirth: profileData.dateOfBirth,
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                // 6. Create security settings
+                await tx.accountSecurity.create({
+                    data: {
+                        accountId: newAccount.id,
+                        roles: ['USER'],
+                        permissions: ['user:read', 'user:write'],
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                // 7. Create preferences
+                await tx.accountPreferences.create({
+                    data: {
+                        accountId: newAccount.id,
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                return { newAccount, newAuth, newSocial, newProfile };
             });
 
-            user = newUser;
+            account = result.newAccount;
 
-            // Create Notification Thread
+            // Create notification thread
             await this.prismaService.notificationThread.create({
-                data: { userId: newUser.id },
+                data: { 
+                    accountId: result.newAccount.id,
+                    createdAt: currentTime,
+                    updatedAt: currentTime
+                }
             });
         } else {
-            // Fetch existing user
-            user = await this.prismaService.user.findUnique({
-                where: { id: existingSocial.userId },
-            });
+            // Use existing account
+            account = existingSocial.authentication.account;
         }
 
         // Generate Token Pair
         const { publicKey, privateKey } = this.generateKeyPair();
-        const { accessToken, refreshToken } = this.createTokenPair(user.id, social.email, privateKey);
+        const { accessToken, refreshToken } = this.createTokenPair(
+            account.id, 
+            socialData.email, 
+            privateKey
+        );
 
         if (!accessToken || !refreshToken) {
             throw new BadGatewayException('Failed to generate tokens');
         }
 
-        // Upsert Key Store
-        const keyStore = await this.upsertKeyStore(user.id, publicKey, refreshToken);
+        // Create key store
+        const deviceId = crypto.randomUUID();
+        const keyStore = await this.upsertKeyStore(account.id, deviceId, publicKey, refreshToken);
         if (!keyStore) {
             throw new BadGatewayException('Failed to create key store');
         }
 
         return {
-            user,
+            user: account,
             accessToken,
             refreshToken,
         };

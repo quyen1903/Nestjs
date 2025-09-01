@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
-import { ProductType, Sku, Spu } from "@prisma/client";
 import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "./dto/request-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
@@ -66,7 +65,7 @@ export class ProductService {
     };
 
 
-    async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO, shopId: string){
+    async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO, shopBusinessId: string){
         // we check spu existed or not
         const spuExisted =await this.prismaService.spu.findUnique({
             where:{
@@ -117,7 +116,7 @@ export class ProductService {
         // 2 spu are not existed, we create new spu and sku
         return this.prismaService.$transaction(async (tx)=>{
             const newSPU = await tx.spu.create({
-                data:{ ...spu, shopId }
+                data:{ ...spu, shopBusinessId }
             });
             const newSKU = await tx.sku.create({ data: {...sku} });
 
@@ -235,14 +234,14 @@ export class ProductService {
             name: product.name,
             images: product.images,
             price: product.skus[0]?.price,
-            shopId: product.shopId
+            shopId: product.shopBusinessId
         }));
     }
 
-    async findAllDraftsForShop({ productShopId, skip = 0, take = 10 }) {
+    async findAllDraftsForShop({ shopBusinessId, skip = 0, take = 10 }) {
         return await this.prismaService.spu.findMany({
             where: {
-                shopId: productShopId,
+                shopBusinessId,
                 status: 0, // Unaudited status indicates draft
                 isActive: true
             },
@@ -270,10 +269,10 @@ export class ProductService {
         });
     }
 
-    async findAllPublishForShop({ productShopId, skip = 0, take = 10 }) {
+    async findAllPublishForShop({ shopBusinessId, skip = 0, take = 10 }) {
         return await this.prismaService.spu.findMany({
             where: {
-                shopId: productShopId,
+                shopBusinessId,
                 status: 1, // Reviewed status indicates published
                 isMarketable: true, // Published products should be marketable
                 isActive: true
@@ -302,12 +301,12 @@ export class ProductService {
         });
     }
 
-    async publishProductByShop({ productShopId, uuid, isDraft = false, isPublished = true }) {
+    async publishProductByShop({ shopBusinessId, uuid, isDraft = false, isPublished = true }) {
         // Verify the product belongs to the shop
         const product = await this.prismaService.spu.findFirst({
             where: {
                 id: uuid,
-                shopId: productShopId,
+                shopBusinessId,
                 isActive: true
             }
         });
@@ -337,12 +336,12 @@ export class ProductService {
         });
     }
 
-    async unPublishProductByShop({ productShopId, uuid, isDraft = true, isPublished = false }) {
+    async unPublishProductByShop({ shopBusinessId, uuid, isDraft = true, isPublished = false }) {
         // Verify the product belongs to the shop
         const product = await this.prismaService.spu.findFirst({
             where: {
                 id: uuid,
-                shopId: productShopId,
+                shopBusinessId,
                 isActive: true
             }
         });
@@ -389,7 +388,7 @@ export class ProductService {
             id: true,
             name: true, // productName equivalent
             images: true, // productThumb equivalent (first image)
-            shopId: true,
+            shopBusinessId: true,
             createdAt: true,
             updatedAt: true,
             skus: {
@@ -428,7 +427,7 @@ export class ProductService {
                 comment: {
                     where: { isActive: true },
                     include: {
-                    commentUser: {
+                    author: {
                         select: {
                             id: true,
                             profile: {

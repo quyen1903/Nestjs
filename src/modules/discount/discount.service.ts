@@ -34,7 +34,7 @@ export class DiscountService {
     private async findAllProduct (id: string){
         return await this.prismaService.spu.findMany({
             where:{
-                shopId: id,
+                shopBusinessId: id,
                 isMarketable: true
             },
             take: 50,
@@ -73,7 +73,7 @@ export class DiscountService {
 
         if(newDiscount){
             const topics = this.producerService.getTopics()
-            const shop = await this.prismaService.shop.findUnique({
+            const shop = await this.prismaService.spu.findUnique({
                 where:{
                     id: newDiscount.discountShopId
                 }

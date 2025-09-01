@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { UserAuthService } from '../user-auth.service';
-import { Sex, UserProfile, UserSocialProvider } from '@prisma/client';
+import { AccountProfile, Sex, UserBehavior, UserSocialProvider } from '@prisma/client';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -32,14 +32,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         updatedAt: BigInt(Date.now()),
     };
 
-    const userProfile: UserProfile = {
-        userId: '',
+    const userProfile = {
+        accountId: '',
         name: name?.givenName + ' ' + name?.familyName,
         phone: '',
         sex: Sex.FEMALE,
         avatar: photos?.[0]?.value ?? '',
         dateOfBirth: new Date(0),
-        isActive: true,
         createdAt: BigInt(Date.now()),
         updatedAt: BigInt(Date.now()),
     };

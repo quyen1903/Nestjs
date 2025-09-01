@@ -92,97 +92,91 @@ export class CheckoutService {
         on time miles which order has been create, once it fail after 15 minutes,
         we cancel  
     */
-        async createOrderByUser(
-            shopOrderIds: ShopOrderIdDTO[],
-            cartId: string,
-            userId: string,
-        ) {
-            const { reviewedOrders, checkoutOrder } = await this.checkoutReview({
-                cartId,
-                userId,
-                shopOrderIds
-            });
-        
-            try {
-                const newOrder = await this.prismaService.$transaction(async (tx) => {
-                    const orderItemPromises: Promise<OrderItem>[]  = []; // Array to hold all the promises for creating order items
-        
-                    for (const ShopCheckout of reviewedOrders) {
-                        const itemPromises = ShopCheckout.itemProducts.map(async (item) => {
-                            // Lock inventory row for update
-                            const inventory = await tx.inventory.findUnique({
-                                where: { inventoryProductId: item.productId },
-                                select: { id: true, inventoryStock: true },
-                            });
-        
-                            if (!inventory || inventory.inventoryStock < item.quantity) {
-                                throw new BadRequestException(`Not enough stock for product ID ${item.productId}`);
-                            }
-        
-                            // Create reservation inventory
-                            await tx.reservationInventory.create({
-                                data: {
-                                    userId,
-                                    inventoryId: inventory.id,
-                                    quantity: item.quantity,
-                                    expiredAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes expiration
-                                    isConfirmed: false,
-                                    valid: true,
-                                },
-                            });
-        
-                            // Update inventory stock
-                            await tx.inventory.update({
-                                where: { id: inventory.id },
-                                data: { inventoryStock: { decrement: item.quantity } },
-                            });
-        
-                            // Create order item entry
-                            orderItemPromises.push(
-                                tx.orderItem.create({
-                                    data: {
-                                        orderId: "", // This will be set once the order is created
-                                        inventoryId: inventory.id,
-                                        quantity: item.quantity,
-                                        price: item.price, // Assume price is passed from item
-                                    }
-                                })
-                            );
-                        });
-        
-                        // Wait for all itemPromises for this shop to complete
-                        await Promise.all(itemPromises);
+    async createOrderByUser(
+        shopOrderIds: ShopOrderIdDTO[],
+        cartId: string,
+        userId: string,
+    ) {
+        const { reviewedOrders, checkoutOrder } = await this.checkoutReview({
+            cartId,
+            userId,
+            shopOrderIds
+        });
+
+        return await this.prismaService.$transaction(async (tx) => {
+            const createdOrders = []; // Array to store multiple orders (one per shop)
+
+            for (const shopCheckout of reviewedOrders) {
+                // Create order for each shop
+                const order = await tx.order.create({
+                    data: {
+                        userId: userId,
+                        shopBusinessId: shopCheckout.shopId, // ✅ Required field
+                        status: OrderStatus.PENDING,
+                        totalDiscount: shopCheckout.priceRaw - shopCheckout.priceApplyDiscount,
+                        shippingFee: 0, // You can calculate this per shop
+                        shippingAddress: 'test', // Replace with actual address
+                        paymentInfo: {},
+                        paymentIntentId: null,
+                        totalPrice: shopCheckout.priceApplyDiscount,
+                        expiredAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiration
                     }
-        
-                    // Create the order after handling all items
-                    const createdOrder = await tx.order.create({
+                });
+
+                // Create order items for this shop
+                for (const item of shopCheckout.itemProducts) {
+                    const inventory = await tx.inventory.findUnique({
+                        where: { inventoryProductId: item.productId },
+                        select: { id: true, inventoryStock: true },
+                    });
+
+                    if (!inventory || inventory.inventoryStock < item.quantity) {
+                        throw new BadRequestException(`Not enough stock for product ID ${item.productId}`);
+                    }
+
+                    // Create reservation inventory
+                    await tx.reservationInventory.create({
                         data: {
-                            userId: userId,
-                            status: OrderStatus.PENDING,
-                            totalDiscount: checkoutOrder.totalDiscount,
-                            shippingFee: checkoutOrder.feeShip,
-                            shippingAddress: 'test', // Replace with real shipping address
-                            paymentInfo: {},
-                            paymentIntentId: null,
-                            totalPrice: checkoutOrder.totalPrice,
-                            expiredAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiration
+                            userId,
+                            inventoryId: inventory.id,
+                            quantity: item.quantity,
+                            expiredAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes expiration
+                            isConfirmed: false,
+                            valid: true,
+                        },
+                    });
+
+                    // Update inventory stock
+                    await tx.inventory.update({
+                        where: { id: inventory.id },
+                        data: { inventoryStock: { decrement: item.quantity } },
+                    });
+
+                    // Create order item
+                    await tx.orderItem.create({
+                        data: {
+                            orderId: order.id, // ✅ Now we have the order ID
+                            inventoryId: inventory.id,
+                            quantity: item.quantity,
+                            price: item.price,
                         }
                     });
-        
-                    // Once order is created, update order items with the correct order ID
-                    await Promise.all(orderItemPromises.map(promise => promise.then(item => item.orderId = createdOrder.id)));
-        
-                    // Clear the cart
-                    await this.cartService.clearCart(cartId);
-        
-                    return createdOrder;
-                });
-        
-                return newOrder;
-            } catch (error) {
-                throw error;
+                }
+
+                createdOrders.push(order);
             }
-        }
+
+            // Clear the cart after all orders are created
+            await this.cartService.clearCart(cartId);
+
+            return {
+                orders: createdOrders,
+                totalOrders: createdOrders.length,
+                message: 'Orders created successfully'
+            };
+        });
+    }
+
         
 
     async getOrdersByUser() {}

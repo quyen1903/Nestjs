@@ -1,25 +1,22 @@
-import { Prisma, Shop,ShopKeyToken, APIkey } from "@prisma/client";
+import { AccountAuthentication, KeyToken, Prisma } from "@prisma/client";
 
 import { StrictBuilder } from "builder-pattern";
 
 export class AuthSHopDTO{
-    accountId: ShopKeyToken['sub']
-    publicKey: ShopKeyToken['publicKey'];
-    refreshToken: ShopKeyToken['refreshToken'];
-    email: Shop['email'];
-
+    accountId: KeyToken['authId'];
+    deviceId: KeyToken['deviceId'];
+    publicKey: KeyToken['publicKey'];
+    refreshToken: KeyToken['refreshToken'];
     static fromEntity(
-        a: Prisma.ShopGetPayload<{
-            include:{
-                keyToken: true,
-            };
+        a: Prisma.KeyTokenGetPayload<{
+
         }>,
 
     ){
         return StrictBuilder<AuthSHopDTO>()
-            .accountId(a.id)
-            .email(a.email)
-            .publicKey(a.keyToken.publicKey)
-            .refreshToken(a.keyToken.refreshToken)
+            .accountId(a.authId)
+            .deviceId(a.authId)
+            .publicKey(a.publicKey)
+            .refreshToken(a.refreshToken)
     }
 }

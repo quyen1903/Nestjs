@@ -1,12 +1,10 @@
 import { Body, Controller, Post, Get, Query, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { RegisterUserDTO } from "./dto/register.dto";
 import { LoginUserManualDTO } from "./dto/login.dto";
 import { Authentication, AuthRequest } from "../auth/dto/auth-request.dto";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 import { ForgotPasswordDTO } from "./dto/forgot-password.dto";
 import { ResetPasswordDTO } from "./dto/reset-password.dto";
-import { UserAuthGuard } from "../auth/user-auth/auth-jwt.guard";
 @Controller('user')
 export class ShopController{
     constructor( private readonly userService: UserService ){}

@@ -6,30 +6,29 @@ import {
     BadRequestException, 
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ShopKeyTokenService } from './shop-auth.keytoken';
-
+import { KeyTokenService } from 'src/modules/keytoken/keytoken.service';
 @Injectable()
-export class ShopAuthGuard implements CanActivate {
+export class JWTGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
-        private readonly shopKeyTokenService: ShopKeyTokenService
+        private readonly keyTokenService: KeyTokenService
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const accountId = request.headers['x-client-id'] as string;
+        const accountId = request.headers['x-account-id'] as string;
+        const deviceId = request.headers['x-device-id'] as string;
 
         if (!accountId) throw new UnauthorizedException('Invalid Request, missing client ID');
 
         // Find KeyStore
-        const keyStore = await this.shopKeyTokenService.findByAccountId(accountId);
+        const keyStore = await this.keyTokenService.findByAccountId(accountId, deviceId);
         if (!keyStore) throw new UnauthorizedException('KeyStore not found');
-
 
         // Check Refresh Token
         const refreshToken = request.headers['x-rtoken-id'] as string;
         if (refreshToken) {
-            const decodedUser = this.jwtService.verify(refreshToken, {publicKey:keyStore.publicKey});
+            const decodedUser = this.jwtService.verify(refreshToken, { publicKey:keyStore.publicKey });
             if (accountId !== decodedUser['sub']) throw new UnauthorizedException('Invalid User ID');
             console.log("this is refreshtoken", refreshToken)
             request['account'] = decodedUser;

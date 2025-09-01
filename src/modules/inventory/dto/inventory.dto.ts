@@ -8,4 +8,8 @@ export class InventoryDTO{
     
     @IsNumber()
     stock: number;
+
+    @IsString()
+    shopBusinessId: string; // Add this field
+
 }

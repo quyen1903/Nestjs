@@ -3,7 +3,7 @@ import { PrismaService } from "src/services/prisma/prisma.service";
 import { KeyToken, RefreshTokenUsed } from "@prisma/client";
 
 @Injectable()
-export class KeyTokenService {
+export class ShopKeyTokenService {
     constructor(private readonly prismaService: PrismaService){}
         
     /**
@@ -50,14 +50,14 @@ export class KeyTokenService {
     /**
      * Find key token by account ID (returns all active tokens for the account)
      */
-    async findByAccountId(accountId: string, deviceId: string): Promise<KeyToken> {
-        return this.prismaService.keyToken.findUnique({
+    async findByAccountId(accountId: string): Promise<KeyToken[]> {
+        return this.prismaService.keyToken.findMany({
             where: {
-                authId_deviceId:{
-                    authId: accountId,
-                    deviceId,
-                },
+                authId: accountId,
                 isActive: true
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         });
     }

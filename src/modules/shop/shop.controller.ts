@@ -4,7 +4,6 @@ import { RegisterShopDTO } from "./dto/register.dto";
 import { LoginShopDTO } from "./dto/login.dto";
 import { JwtShop } from "../auth/shop-auth/interface/jwt.shop";
 // import { ApiKeyGuard } from "../auth/api-key.guard";
-import { ShopAuthGuard } from '../auth/shop-auth/auth-jwt.guard';
 import { RoleGuard } from "../auth/auth-role.guard";
 import { Roles } from "../auth/roles.decorator";
 import { Role } from "src/shared/enums/role.enum";
@@ -38,8 +37,8 @@ export class ShopController{
     //     return this.shopService.handleRefreshToken(req.keyStore, req.account, req.refreshToken)
     // }
 
-    @Get(':id')
-    getShopInfo(@Param('id') id: string){
-        return this.shopService.getShopInfo(id)
-    }
+    // @Get(':id')
+    // getShopInfo(@Param('id') id: string){
+    //     return this.shopService.getShopInfo(id)
+    // }
 }

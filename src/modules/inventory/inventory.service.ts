@@ -8,39 +8,65 @@ export class InventoryService{
         private readonly prismaService: PrismaService,
         private readonly productService: ProductService
     ){}
-    async addStockToInventory( { stock, productId, location = '17A, Conghoa' }: InventoryDTO ){
+
+    private async getShopBusinessId(productId: string): Promise<string> {
+    // Option 1: Get from product's SPU relation
+    const product = await this.prismaService.sku.findUnique({
+        where: { id: productId },
+        include: {
+        spu: {
+            select: { shopBusinessId: true }
+        }
+        }
+    });
+    
+    return product?.spu?.shopBusinessId;
+    
+    // Option 2: Get from authenticated user context
+    // return this.authService.getCurrentShopBusinessId();
+    }
+
+    async addStockToInventory({ stock, productId, location = '17A, Conghoa' }: InventoryDTO) {
         const product = await this.productService.findProduct(productId);
-        if(!product) throw new BadRequestException('the product is not existed!!!');
+
+        if (!product) throw new BadRequestException('the product is not existed!!!');
+
+        // Get the shopBusinessId - you'll need to determine how to get this
+        // This could come from the authenticated user, product relation, or passed as parameter
+        const shopBusinessId = await this.getShopBusinessId(productId); // You need to implement this
 
         const existedInventory = await this.prismaService.inventory.findUnique({
-            where: {
-                inventoryProductId: product.id
-            }
-        })
+            where: {inventoryProductId: product.id}
+        });
 
-        if(existedInventory){
+        if (existedInventory) {
             return await this.prismaService.inventory.update({
-                where:{ id: existedInventory.id},
-                data:{
-                    inventoryStock: {increment: stock},
+                where: { id: existedInventory.id },
+                data: {
+                    inventoryStock: { increment: stock },
                     updatedAt: Date.now()
                 }
-            })
+            });
         }
-        
-        //To make upsert() behave like a findOrCreate() method, provide an empty update parameter to upsert().
+
+        // Fixed upsert with required shopBusinessId
         return await this.prismaService.inventory.upsert({
-            where:{
-                inventoryProductId: productId
+            where: { inventoryProductId: productId },
+            update: {
+                inventoryStock: { increment: stock },
+                updatedAt: Date.now()
             },
-            update:{},
-            create:{
+            create: {
                 inventoryStock: stock,
                 inventoryLocation: location,
-                inventoryProductId: productId
+                inventoryProductId: productId,
+                shopBusinessId: shopBusinessId, // Add this required field
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             }
-        })
+        });
     }
+
 
     async subtractStockToInventory({ stock, productId }: InventoryDTO){
         if(stock <= 0) throw new BadRequestException('Stock to subtract must be greater than 0');

@@ -1,12 +1,10 @@
 import { Iapikey } from 'src/shared/interfaces/apikey.interface';
-import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
+import { KeyToken } from '@prisma/client';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { ShopKeyToken } from '@prisma/client';
 import { JwtShop } from './jwt.shop';
 
 export interface ShopAuthRequest {
-    keyStore: ShopKeyToken;
+    keyStore: KeyToken;
     account: JwtShop;
     refreshToken: string;
     apiKey: Iapikey;

@@ -30,8 +30,8 @@ export class PaymentController {
     @Post('webhook')
     async handleWebhook(
         @Headers('stripe-signature') signature: string,
-        @Req() req: RawBodyRequest<Request>,
+        @Req() req: any,
     ) {
-        return this.paymentService.handleWebhookEvent(signature, req.rawBody);
+        return this.paymentService.handleWebhookEvent(signature, req);
     }
 }

@@ -1,4 +1,3 @@
-import { CustomExcelJsRowProperties } from './exceljs-custom.types';
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 export type RequiredFields<T> = {
@@ -61,11 +60,6 @@ export type ExcelSheetExtendValue<T> = {
       }
     : { name: string; width?: number; idx: number };
 };
-
-export type ExcelRowJustin<T> = {
-  [K in keyof T]?: CustomExcelJsRowProperties<T[K]> | null | undefined;
-};
-
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P];
 };
