@@ -141,7 +141,7 @@ model UserBehavior {
   
   // Engagement
   loyaltyPoints Int        @default(0) @map("loyalty_points")
-  membershipTier String?   @map("membership_tier")
+  membershipTier String?   @map("membership_tier")@default("bronze")
   sex           Sex   @default(FEMALE)
   preferences   Json?      // Shopping preferences
   dateOfBirth   DateTime    @map("date_of_birth")

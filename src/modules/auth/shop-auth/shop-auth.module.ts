@@ -6,11 +6,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWTGuard } from '../auth-jwt.guard';
 import { ShopModule } from 'src/modules/shop/shop.module';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
+import { KeyTokenModule } from 'src/modules/keytoken/keytoken.module';
 
 @Module({
-  imports: [PrismaModule, JwtModule.register({}), ShopModule, KafkaModule],
+  imports: [PrismaModule, JwtModule.register({}), KafkaModule, KeyTokenModule],
   controllers: [ShopAuthController],
-  providers: [ShopAuthService, JWTGuard],
-  exports: [ShopAuthService, JWTGuard, JwtModule]
+  providers: [ShopAuthService, ],
+  exports: [ShopAuthService, ]
 })
 export class ShopAuthModule {}

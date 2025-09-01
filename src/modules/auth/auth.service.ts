@@ -79,4 +79,33 @@ export class AuthService {
         )
         return {accessToken, refreshToken}
     };
+
+    protected async upsertKeyStore(
+        accountId: string, 
+        deviceId: string,
+        publicKey: string, 
+        refreshToken: string
+    ) {
+        return await this.prismaService.keyToken.upsert({
+            where: {
+                authId_deviceId: {
+                    authId: accountId,
+                    deviceId: deviceId
+                }
+            },
+            update: {
+                publicKey,
+                refreshToken,
+                updatedAt: BigInt(Date.now())
+            },
+            create: {
+                authId: accountId,
+                deviceId,
+                publicKey,
+                refreshToken,
+                createdAt: BigInt(Date.now()),
+                updatedAt: BigInt(Date.now())
+            }
+        });
+    }
 } 

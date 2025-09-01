@@ -6,8 +6,9 @@ import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { PrismaModule } from 'src/services/prisma/prisma.module';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
 import { ShopAuthModule } from '../auth/shop-auth/shop-auth.module';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
-  imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, ],
+  imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, JwtModule],
   controllers: [ProductController],
   providers: [ ProductService ],
   exports: [ ProductService ]

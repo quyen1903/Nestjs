@@ -6,36 +6,38 @@ import { getInfoData } from 'src/shared/utils';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { EmailService } from 'src/services/email/email.service';
 import { JwtService } from '@nestjs/jwt';
-import { AccountType } from '@prisma/client';
-
+import { AccountType, AuthMethod } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
+import { ProducerService } from 'src/services/kafka/services/producer.service';
+
 @Injectable()
-export class UserService {
+export class UserService extends AuthService{
     constructor(
-        private readonly jwtService: JwtService,
-        private readonly prismaService: PrismaService,
-        private readonly keyTokenService: KeyTokenService,
-        private readonly emailService: EmailService,
-        private readonly authService: AuthService
-    ) {};
+        jwtService: JwtService,
+        prismaService: PrismaService,
+        producerService: ProducerService,
+        
+    ) {
+            super(prismaService, jwtService, producerService);
+    };
 
     async registerManual(register: RegisterUserDTO) {
         // Check if user already exists
-        const userHolder = await this.prismaService.account.findUnique({
-                    where: {
-                        accountType: AccountType.USER,
-                        authentication: {
-                            email: register.email
-                        }
-                    },
-                    include: {
-                        authentication: true,
-                        profile: true,
-                        userBehavior: true,
-                        security: true
-                    }
-                });
-    //===================================
+        const userHolder = await this.prismaService.account.findFirst({
+            where: {
+                accountType: AccountType.USER,
+                authentication: {
+                    email: register.email
+                }
+            },
+            include: {
+                authentication: true,
+                profile: true,
+                userBehavior: true,
+                security: true
+            }
+        });
+
         if(userHolder) throw new BadGatewayException('User already exists');
 
         const currentTime = BigInt(Date.now());
@@ -88,6 +90,9 @@ export class UserService {
                 data: {
                     accountId: newAccount.id,
                     loyaltyPoints: 0,
+                    membershipTier:"bronze",
+                    preferences: {},
+                    dateOfBirth: register.dateOfBirth,
                     createdAt: currentTime,
                     updatedAt: currentTime
                 }

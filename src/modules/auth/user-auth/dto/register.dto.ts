@@ -1,8 +1,8 @@
 import { Sex } from "@prisma/client";
 import { PasswordValidator } from "src/shared/validators/password.validator";
-import { IsOptional, IsPhoneNumber, IsString, IsNotEmpty, IsEmail, IsEnum, MinLength, MaxLength } from "class-validator";
+import { IsOptional, IsPhoneNumber, IsString, IsNotEmpty, IsEmail, IsEnum, MinLength, MaxLength, IsDateString, IsDate } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 
 export class RegisterUserDTO {
     // Authentication Information (AccountAuthentication)
@@ -95,15 +95,39 @@ export class RegisterUserDTO {
     })
     language?: string = 'en';
 
-    // User Behavior Information (Optional for registration)
+    // User Behavior Information
     @IsOptional()
-    @IsString()
+    @IsDateString({}, { message: 'Date of birth must be a valid date string (YYYY-MM-DD)' })
+    @Type(() => Date)
+    @Transform(({ value }) => {
+        if (value) {
+            const date = new Date(value);
+            if (date > new Date()) {
+                throw new Error('Date of birth cannot be in the future');
+            }
+            return date;
+        }
+        return value;
+    })
     @ApiProperty({ 
-        example: 'BRONZE',
-        description: 'Initial membership tier',
+        example: '1995-08-15',
+        description: 'Date of birth in YYYY-MM-DD format',
+        type: 'string',
+        format: 'date',
         required: false
     })
-    membershipTier?: string;
+    dateOfBirth?: Date;
+
+    @IsOptional()
+    @IsEnum(Sex, { message: 'Sex must be MALE or FEMALE' })
+    @ApiProperty({ 
+        example: 'FEMALE',
+        enum: Sex,
+        description: 'User gender',
+        required: false,
+        default: 'FEMALE'
+    })
+    sex?: Sex = Sex.FEMALE;
 
     // Preferences (AccountPreferences)
     @IsOptional()

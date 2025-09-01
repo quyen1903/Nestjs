@@ -47,15 +47,17 @@ export class ShopService extends AuthService {
     return { accessToken, refreshToken };
   }
 
-  /**
-   * Find shop account with all related data
-   */
-  private async findShopAccount(email: string) {
-    return this.prismaService.account.findFirst({
+  async register(register: RegisterShopDTO): Promise<{
+    shop: object;
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    // Check if shop already exists
+    const shopHolder = await this.prismaService.account.findFirst({
       where: {
         accountType: AccountType.SHOP,
         authentication: {
-          email: email
+          email: register.email
         }
       },
       include: {
@@ -65,44 +67,6 @@ export class ShopService extends AuthService {
         security: true
       }
     });
-  }
-
-  private async upsertKeyStore(
-    accountId: string, 
-    deviceId: string,
-    publicKey: string, 
-    refreshToken: string
-  ) {
-    return await this.prismaService.keyToken.upsert({
-      where: {
-        authId_deviceId: {
-          authId: accountId,
-          deviceId: deviceId
-        }
-      },
-      update: {
-        publicKey,
-        refreshToken,
-        updatedAt: BigInt(Date.now())
-      },
-      create: {
-        authId: accountId,
-        deviceId,
-        publicKey,
-        refreshToken,
-        createdAt: BigInt(Date.now()),
-        updatedAt: BigInt(Date.now())
-      }
-    });
-  }
-
-  async register(register: RegisterShopDTO): Promise<{
-    shop: object;
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    // Check if shop already exists
-    const shopHolder = await this.findShopAccount(register.email);
     if (shopHolder) throw new BadRequestException('Shop already exists');
 
     const currentTime = BigInt(Date.now());

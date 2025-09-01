@@ -5,8 +5,9 @@ import { AuthModule } from '../auth/auth.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { ProductModule } from '../product/product.module';
 import { PrismaModule } from 'src/services/prisma/prisma.module';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
-    imports: [AuthModule, KeyTokenModule, ProductModule, PrismaModule, InventoryModule],
+    imports: [AuthModule, KeyTokenModule, ProductModule, PrismaModule, JwtModule],
     controllers: [InventoryController,],
     providers: [InventoryService],
 })

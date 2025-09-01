@@ -52,33 +52,6 @@ export class UserAuthService extends AuthService{
     }
 
     /**
-     * Upsert key store using the new KeyToken model
-     */
-    private async upsertKeyStore(accountId: string, deviceId: string, publicKey: string, refreshToken: string){
-        return await this.prismaService.keyToken.upsert({
-            where: {
-                authId_deviceId: {
-                    authId: accountId,
-                    deviceId: deviceId
-                }
-            },
-            update: {
-                publicKey,
-                refreshToken,
-                updatedAt: BigInt(Date.now())
-            },
-            create: {
-                authId: accountId,
-                deviceId,
-                publicKey,
-                refreshToken,
-                createdAt: BigInt(Date.now()),
-                updatedAt: BigInt(Date.now())
-            }
-        });
-    };
-
-    /**
      * Find user account by email with all related data
      */
     private async findUserAccount(email: string) {
