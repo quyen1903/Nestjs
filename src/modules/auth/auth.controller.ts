@@ -7,17 +7,31 @@ import 'express';
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
+    /**
+     * #1st route
+     * this method triggered when we click sign-in with google\
+     * after user successfully login, we redirect to second route
+     */
     @Get('google')
     @UseGuards(AuthGuard('google'))
     async googleAuth() {
         // This route initiates the Google OAuth flow
     }
 
+    /**
+     * #2nd route
+     * after user successfully login, googel redirect to this route
+     * this time authguard handle response from google
+     * @param req 
+     * @param res 
+     * @returns 
+     */
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
         const { accessToken, refreshToken } = (req as any).user;
 
+        console.log("req", req)
         res.cookie('access_token', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

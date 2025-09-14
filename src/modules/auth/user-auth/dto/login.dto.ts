@@ -1,6 +1,7 @@
 import { IsEmail, IsString, IsOptional, MinLength } from "class-validator";
 import { Transform } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+import { PasswordValidator } from "src/shared/validators/password.validator";
 
 export class LoginUserManualDTO {
     @IsEmail({}, { message: 'Invalid email format' })
@@ -12,7 +13,7 @@ export class LoginUserManualDTO {
     email: string;
 
     @IsString()
-    @MinLength(1, { message: 'Password is required' })
+    @PasswordValidator()
     @ApiProperty({ 
         example: 'SecurePass123!',
         description: 'User password'
