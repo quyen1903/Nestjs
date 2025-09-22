@@ -1,14 +1,12 @@
 import { UserAuthService } from './user-auth.service';
 import { Body, Controller, Post, Get, Query, UseGuards, Req } from "@nestjs/common";
-import { RegisterUserDTO } from "./dto/register.dto";
 import { LoginUserManualDTO } from "./dto/login.dto";
-import { Authentication, AuthRequest } from "../dto/auth-request.dto";
 import { IKeyToken } from "src/shared/interfaces/keyToken.interface";
 import { ForgotPasswordDTO } from "./dto/forgot-password.dto";
 import { ResetPasswordDTO } from "./dto/reset-password.dto";
-import { JWTGuard } from '../auth-jwt.guard';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-
+import { AccessTokenGuard } from '../access-token.guard';
+import { RefreshTokenGuard } from '../refresh-token.guard';
 @Controller('user-auth')
 export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}
@@ -20,13 +18,13 @@ export class UserAuthController {
     
     @ApiBearerAuth()
     @Post('logout')
-    @UseGuards(JWTGuard)
+    @UseGuards(AccessTokenGuard)
     logoutUser(@Req() req: IKeyToken){
         return this.userAuthService.logout(req)
     }
 
     @Post('handlerRefreshToken')
-    @UseGuards(JWTGuard)
+    @UseGuards(RefreshTokenGuard)
     handleRefreshToken(@Req() req: any){
         return this.userAuthService.handleRefreshToken(req.authId, req.deviceId, req.refreshToken)
     }

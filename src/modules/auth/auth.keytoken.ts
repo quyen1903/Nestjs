@@ -3,7 +3,7 @@ import { PrismaService } from "src/services/prisma/prisma.service";
 import { KeyToken, RefreshTokenUsed } from "@prisma/client";
 
 @Injectable()
-export class ShopKeyTokenService {
+export abstract class ShopKeyTokenService {
     constructor(private readonly prismaService: PrismaService){}
         
     /**

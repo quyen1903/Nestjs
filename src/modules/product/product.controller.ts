@@ -7,20 +7,23 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
 import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
 import { ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { JWTGuard } from '../auth/auth-jwt.guard';
+import { AccessTokenGuard } from '../auth/access-token.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+
 // Add this DTO for update operations
 export class UpdateProductDTO extends CreateSpuDTO {
     // Inherits all fields from CreateSpuDTO but makes them optional for updates
 }
 
 @Controller('product')
+@ApiBearerAuth('access')
 export class ProductController {
     constructor(
         private readonly productService: ProductService
     ) {}
 
     @Post('create_product')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     @ApiOperation({ summary: 'Create a new product with SPU and SKU' })
     @ApiResponse({ status: 201, description: 'Product created successfully' })
@@ -37,14 +40,14 @@ export class ProductController {
 
 
     @Post('create_brand')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     createBrand(@Body() body: CreateBrandDTO) {
         return this.productService.createBrand(body);
     }
 
     @Post('create_category')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
         return this.productService.createCategory(
@@ -55,7 +58,7 @@ export class ProductController {
 
 
     @Patch(':productId')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     updateProduct(
         @Param('productId') productId: string,
@@ -66,7 +69,7 @@ export class ProductController {
     }
 
     @Post('publish/:id')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     publishProduct(
         @Param('id') productId: string,
@@ -79,7 +82,7 @@ export class ProductController {
     }
 
     @Post('unpublish/:id')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     unpublishProduct(
         @Param('id') productId: string,
@@ -92,7 +95,7 @@ export class ProductController {
     }
 
     @Get('drafts/all')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     getAllDraftForShop(
         @AuthRequest('account') account: JWTdecode,
@@ -107,7 +110,7 @@ export class ProductController {
     }
 
     @Get('published/all')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.Shop)
     getAllPublishForShop(
         @AuthRequest('account') account: JWTdecode,

@@ -7,7 +7,8 @@ import {
     Req, 
 } from "@nestjs/common";
 import { LoginShopDTO } from "./dto/login.dto";
-import { JWTGuard } from '../auth-jwt.guard';
+import { AccessTokenGuard } from '../access-token.guard';
+import { RefreshTokenGuard } from '../refresh-token.guard';
 import { RoleGuard } from "../auth-role.guard";
 import { Roles } from "../roles.decorator";
 import { Role } from "src/shared/enums/role.enum";
@@ -23,7 +24,7 @@ export class ShopAuthController {
     }
 
     @Post('logout')
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @ApiBearerAuth()
     @Roles(Role.Shop)
     logoutShop(@Req() req: any){
@@ -31,7 +32,7 @@ export class ShopAuthController {
     }
 
     @Post('handlerRefreshToken')
-    @UseGuards(JWTGuard)
+    @UseGuards(RefreshTokenGuard)
     handleRefreshToken(@Req() req: any){
         console.log("request", req)
         return this.shopAuthService.handleRefreshToken( req.accountId, req.deviceId, req.refreshToken)

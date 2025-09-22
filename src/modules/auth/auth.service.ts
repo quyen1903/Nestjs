@@ -55,9 +55,10 @@ export class AuthService {
         return {publicKey, privateKey}
     };
 
-    protected createTokenPair(id: string, email: string, privateKey: string){
+    protected createTokenPair(id: string, deviceId: string, email: string, privateKey: string){
         const payload = {                
             accountId:id, 
+            deviceId,
             email,
             role: 'USER'
         };

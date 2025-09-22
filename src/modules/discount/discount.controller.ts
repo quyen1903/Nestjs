@@ -4,13 +4,13 @@ import { CreateDiscountDTO } from './dto/createDiscount.dto';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
-import { JWTGuard } from '../auth/auth-jwt.guard';
+import { AccessTokenGuard } from '../auth/access-token.guard';
 @Controller('discount')
 export class DiscountController {
     constructor(private readonly discountService: DiscountService) {}
 
     @Post('')
-    @UseGuards(JWTGuard)
+    @UseGuards(AccessTokenGuard)
     createDiscountCode(@Body() payload:CreateDiscountDTO, @AuthRequest('account') account:JWTdecode){
         return this.discountService.createDiscountCode(payload, account.accountId)
     }
@@ -31,7 +31,7 @@ export class DiscountController {
     }
 
     @Get('')
-    @UseGuards(JWTGuard)
+    @UseGuards(AccessTokenGuard)
     getAllDiscountCodes(
         @AuthRequest('account') account: JWTdecode,
         @Query('limit') limit : number,
@@ -47,7 +47,7 @@ export class DiscountController {
     }
 
     @Delete('')
-    @UseGuards(JWTGuard)
+    @UseGuards(AccessTokenGuard)
     deleteDiscountCode(@Body() payload){
         return this.discountService.deleteDiscountCode(payload)
     }

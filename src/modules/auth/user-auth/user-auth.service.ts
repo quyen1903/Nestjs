@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
 import crypto from 'crypto';
-import { RegisterUserDTO } from './dto/register.dto';
 import { LoginUserManualDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
@@ -26,28 +25,33 @@ export class UserAuthService extends AuthService{
         super(prismaService,jwtService, producerService);
     };
 
-    protected override createTokenPair(accountId: string, email: string, privateKey: string){
-        const payload = {                
+    // Updated to match your guard expectations
+    protected override createTokenPair(accountId: string, deviceId: string, email: string, privateKey: string){
+        const accessPayload = {                
             accountId, 
+            deviceId,  // Added for guard compatibility
             email,
             role: 'USER'
         };
         
-        const accessToken = this.jwtService.sign(payload,  
-            {
-                privateKey,              
-                algorithm: 'RS256',      
-                expiresIn: '1h',         
-            }
-        )
+        const refreshPayload = {
+            accountId,  
+            deviceId,
+            email,
+            role: 'USER'
+        };
+        
+        const accessToken = this.jwtService.sign(accessPayload, {
+            privateKey,              
+            algorithm: 'RS256',      
+            expiresIn: '1h',         
+        })
 
-        const refreshToken = this.jwtService.sign(payload,  
-            {
-                privateKey,              
-                algorithm: 'RS256',      
-                expiresIn: '6h',         
-            }
-        )
+        const refreshToken = this.jwtService.sign(refreshPayload, {
+            privateKey,              
+            algorithm: 'RS256',      
+            expiresIn: '6h',         
+        })
         return {accessToken, refreshToken}
     }
 
@@ -99,66 +103,74 @@ export class UserAuthService extends AuthService{
         update: KeyToken;
         createUsedToken: RefreshTokenUsed; 
     }>{
-        // Check if token has been used before
-        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
-            where:{
-                token: storedRefreshToken
+        return await this.prismaService.$transaction(async (tx) => {
+            // Check if token has been used before
+            const duplicateJWT = await tx.refreshTokenUsed.findFirst({
+                where: { token: storedRefreshToken }
+            });
+
+            if(duplicateJWT) {
+                // Invalidate all tokens for this account (security measure)
+                await tx.keyToken.updateMany({
+                    where: { authId: accountId },
+                    data: { isActive: false, updatedAt: BigInt(Date.now()) }
+                });
+                throw new ForbiddenException('Token reuse detected, please login again');
             }
-        })
 
-        if(duplicateJWT) throw new ForbiddenException('Something wrong happened, please relogin')
+            // Find the key token
+            const keyStore = await tx.keyToken.findFirst({
+                where: {
+                    authId: accountId,
+                    deviceId: deviceId,
+                    refreshToken: storedRefreshToken,
+                    isActive: true
+                }
+            });
 
-        // Find the key token
-        const keyStore = await this.prismaService.keyToken.findFirst({
-            where: {
-                authId: accountId,
-                deviceId: deviceId,
-                refreshToken: storedRefreshToken,
-                isActive: true
-            }
-        });
+            if(!keyStore) throw new UnauthorizedException('Invalid refresh token');
 
-        if(!keyStore) throw new UnauthorizedException('Something was wrong happened, please relogin')
+            const foundUser = await this.findUserAccountById(accountId);
+            if(!foundUser) throw new UnauthorizedException('User not registered');
 
-        const foundUser = await this.findUserAccountById(accountId)
-        if(!foundUser) throw new UnauthorizedException('User not registered');
+            // Generate new key pair
+            const { publicKey, privateKey } = this.generateKeyPair();
+            
+            // Updated call signature to match new createTokenPair
+            const {accessToken, refreshToken} = this.createTokenPair(
+                foundUser.id, 
+                deviceId,  // Now includes deviceId
+                foundUser.authentication.email, 
+                privateKey
+            );
 
-        // Generate new key pair
-        const { publicKey, privateKey } = this.generateKeyPair()
-        const {accessToken, refreshToken} = this.createTokenPair(
-            foundUser.id, 
-            foundUser.authentication.email, 
-            privateKey
-        )
+            // Update key token
+            const update = await tx.keyToken.update({
+                where: { id: keyStore.id },
+                data: {
+                    publicKey,
+                    refreshToken,
+                    updatedAt: BigInt(Date.now())
+                }
+            });
 
-        // Update key token
-        const update = await this.prismaService.keyToken.update({
-            where:{
-                id: keyStore.id
-            },
-            data:{
-                publicKey,
+            // Create used token record
+            const createUsedToken = await tx.refreshTokenUsed.create({
+                data: {
+                    keyTokenId: keyStore.id,
+                    token: storedRefreshToken,
+                    reason: 'refresh',
+                    createdAt: BigInt(Date.now())
+                }
+            });
+
+            return {
+                accessToken,
                 refreshToken,
-                updatedAt: BigInt(Date.now())
-            }
-        })
-
-        // Create used token record
-        const createUsedToken = await this.prismaService.refreshTokenUsed.create({
-            data:{
-                keyTokenId: keyStore.id,
-                token: storedRefreshToken,
-                reason: 'refresh',
-                createdAt: BigInt(Date.now())
-            }
-        })
-
-        return {
-            accessToken,
-            refreshToken,
-            update,
-            createUsedToken
-        }
+                update,
+                createUsedToken
+            };
+        });
     };
 
     async logout ( keyStore: IKeyToken ): Promise<any>{
@@ -179,48 +191,92 @@ export class UserAuthService extends AuthService{
         accessToken: string;
         refreshToken: string;
     }>{
-        // Find user by email
-        const foundUser = await this.findUserAccount(login.email);
-        if(!foundUser) throw new BadRequestException('User not registered');
-
-        // Verify password
-        const passwordHashed = await this.hashPassword(login.password, foundUser.authentication.passwordSalt);
-        if (passwordHashed !== foundUser.authentication.passwordHash) {
-            throw new UnauthorizedException('Wrong password!!!');
-        }
-
-        // Update login metadata
-        await this.prismaService.accountAuthentication.update({
-            where: {
-                accountId: foundUser.id
-            },
-            data: {
-                lastLoginAt: BigInt(Date.now()),
-                loginCount: {
-                    increment: 1
+        const result = await this.prismaService.$transaction(async (tx) => {
+            // Find user by email
+            const foundUser = await tx.account.findFirst({
+                where: {
+                    accountType: AccountType.USER,
+                    authentication: { email: login.email }
                 },
-                updatedAt: BigInt(Date.now())
+                include: {
+                    authentication: true,
+                    profile: true,
+                    userBehavior: true,
+                    security: true
+                }
+            });
+            
+            if(!foundUser) throw new BadRequestException('User not registered');
+
+            // Verify password
+            const passwordHashed = await this.hashPassword(login.password, foundUser.authentication.passwordSalt);
+            if (passwordHashed !== foundUser.authentication.passwordHash) {
+                throw new UnauthorizedException('Wrong password!!!');
+            }
+
+            // Generate tokens
+            const { publicKey, privateKey } = this.generateKeyPair();
+            
+            // Updated call signature to include deviceId
+            const {accessToken, refreshToken} = this.createTokenPair(
+                foundUser.id, 
+                deviceId,  // Now includes deviceId
+                foundUser.authentication.email, 
+                privateKey
+            );
+            
+            if(!accessToken || !refreshToken) throw new BadGatewayException('Create tokens error!!!!!!');
+
+            // Create/update key store within transaction
+            const keyStore = await tx.keyToken.upsert({
+                where: {
+                    authId_deviceId: {
+                        authId: foundUser.id,
+                        deviceId
+                    }
+                },
+                update: {
+                    publicKey,
+                    refreshToken,
+                    updatedAt: BigInt(Date.now())
+                },
+                create: {
+                    authId: foundUser.id,
+                    deviceId,
+                    publicKey,
+                    refreshToken,
+                    createdAt: BigInt(Date.now()),
+                    updatedAt: BigInt(Date.now())
+                }
+            });
+
+            return {
+                user: getInfoData(['id'], foundUser),
+                accessToken, 
+                refreshToken,
+                userId: foundUser.id // Keep for async operations
+            };
+        });
+
+        // Fire-and-forget metadata update
+        setImmediate(async () => {
+            try {
+                await this.prismaService.accountAuthentication.update({
+                    where: { accountId: result.userId },
+                    data: {
+                        lastLoginAt: BigInt(Date.now()),
+                        loginCount: { increment: 1 },
+                        updatedAt: BigInt(Date.now())
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to update login metadata:', error);
             }
         });
 
-        // Generate tokens
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const {accessToken, refreshToken} = this.createTokenPair(
-            foundUser.id, 
-            foundUser.authentication.email, 
-            privateKey
-        );
-        if(!accessToken || !refreshToken) throw new BadGatewayException('Create tokens error!!!!!!');
-
-        // Create/update key store
-        const keyStore = await this.upsertKeyStore(foundUser.id, deviceId, publicKey, refreshToken);
-        if(!keyStore) throw new Error('Cannot generate keytoken');
-
-        return{
-            user: getInfoData(['id'], foundUser),
-            accessToken, 
-            refreshToken
-        };
+        // Remove userId from response
+        const { userId, ...response } = result;
+        return response;
     };
 
     async forgotPassword(forgotPasswordDto: ForgotPasswordDTO): Promise<{ message: string }> {
@@ -251,7 +307,7 @@ export class UserAuthService extends AuthService{
                 updatedAt: BigInt(Date.now())
             }
         });
-    
+
         const emailSent = await this.emailService.sendPasswordResetEmail(email, resetToken);        
         if (!emailSent) throw new BadRequestException('Failed to send reset email');
         
@@ -261,54 +317,46 @@ export class UserAuthService extends AuthService{
     async resetPasswordManual(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
         const { token, password } = resetPasswordDto;
         
-        const passwordReset = await this.prismaService.passwordReset.findFirst({
-            where: {
-                token,
-                isUsed: false,
-                expiresAt: {
-                    gt: new Date()
+        return await this.prismaService.$transaction(async (tx) => {
+            const passwordReset = await tx.passwordReset.findFirst({
+                where: {
+                    token,
+                    isUsed: false,
+                    expiresAt: { gt: new Date() }
                 }
-            }
-        });
-    
-        if (!passwordReset) {
-            throw new BadRequestException('Invalid or expired token');
-        }
+            });
 
-        // Increment attempt count
-        await this.prismaService.passwordReset.update({
-            where: { id: passwordReset.id },
-            data: {
-                attemptCount: {
-                    increment: 1
-                }
+            if (!passwordReset) {
+                throw new BadRequestException('Invalid or expired token');
             }
+
+            // Generate new salt and hash password
+            const salt = randomBytes(32).toString('hex');
+            const passwordHashed = await this.hashPassword(password, salt);
+
+            // Update token and password in single transaction
+            await Promise.all([
+                tx.passwordReset.update({
+                    where: { id: passwordReset.id },
+                    data: {
+                        isUsed: true,
+                        usedAt: new Date(),
+                        attemptCount: { increment: 1 },
+                        updatedAt: BigInt(Date.now())
+                    }
+                }),
+                tx.accountAuthentication.update({
+                    where: { accountId: passwordReset.authId },
+                    data: {
+                        passwordHash: passwordHashed,
+                        passwordSalt: salt,
+                        updatedAt: BigInt(Date.now())
+                    }
+                })
+            ]);
+
+            return { message: 'Password reset successful' };
         });
-    
-        // Update the token as used
-        await this.prismaService.passwordReset.update({
-            where: { id: passwordReset.id },
-            data: {
-                isUsed: true,
-                usedAt: new Date(),
-                updatedAt: BigInt(Date.now())
-            }
-        });
-    
-        // Hash the new password and update the user
-        const salt = randomBytes(32).toString('hex');
-        const passwordHashed = await this.hashPassword(password, salt);
-    
-        await this.prismaService.accountAuthentication.update({
-            where: { accountId: passwordReset.authId },
-            data: {
-                passwordHash: passwordHashed,
-                passwordSalt: salt,
-                updatedAt: BigInt(Date.now())
-            }
-        });
-    
-        return { message: 'Password reset successful' };
     }
     
     async validatePasswordResetToken(token: string): Promise<{ valid: boolean }> {
@@ -438,12 +486,12 @@ export class UserAuthService extends AuthService{
 
             account = result.newAccount;
 
-            // Create notification thread
+            // Create notification thread (outside transaction to avoid complexity)
             await this.prismaService.notificationThread.create({
                 data: { 
                     accountId: result.newAccount.id,
-                    createdAt: currentTime,
-                    updatedAt: currentTime
+                    createdAt: BigInt(Date.now()),
+                    updatedAt: BigInt(Date.now())
                 }
             });
         } else {
@@ -453,8 +501,12 @@ export class UserAuthService extends AuthService{
 
         // Generate Token Pair
         const { publicKey, privateKey } = this.generateKeyPair();
+        const deviceId = crypto.randomUUID();
+        
+        // Updated call signature to include deviceId
         const { accessToken, refreshToken } = this.createTokenPair(
             account.id, 
+            deviceId,  // Now includes deviceId
             socialData.email, 
             privateKey
         );
@@ -464,7 +516,6 @@ export class UserAuthService extends AuthService{
         }
 
         // Create key store
-        const deviceId = crypto.randomUUID();
         const keyStore = await this.upsertKeyStore(account.id, deviceId, publicKey, refreshToken);
         if (!keyStore) {
             throw new BadGatewayException('Failed to create key store');

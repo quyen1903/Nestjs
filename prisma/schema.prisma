@@ -60,6 +60,7 @@ model AccountAuthentication {
   lastLoginAt  BigInt?        @map("last_login_at")
   loginCount   Int            @default(0) @map("login_count")
   
+  isActive     Boolean     @default(true) @map("is_active")
   createdAt    BigInt         @default(0) @map("created_at")
   updatedAt    BigInt         @default(0) @map("updated_at")
 
@@ -121,10 +122,13 @@ model AccountSecurity {
 model DeviceSession{
   id           String   @id @default(uuid())
   accountId String  //reference to account
-  deviceId  String  //UUID
-  refreshToken String
+  deviceId  String  @unique
   deviceName   String?
   lastLogin    DateTime @default(now())
+
+  isActive  Boolean @default(true) @map("is_active")
+  createdAt BigInt  @default(0) @map("created_at")
+  updatedAt BigInt  @default(0) @map("updated_at")
 
   account Account @relation(fields: [accountId], references: [id])
 }

@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
 import crypto from 'crypto';
-import { RegisterUserDTO } from '../auth/user-auth/dto/register.dto';
+import { RegisterUserDTO } from './dto/register.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { KeyTokenService } from '../keytoken/keytoken.service';
@@ -126,7 +126,8 @@ export class UserService extends AuthService{
         if(result){
             const { privateKey, publicKey } = this.generateKeyPair();
             const {accessToken, refreshToken} = this.createTokenPair(
-                result.newAccount.id, 
+                result.newAccount.id,
+                crypto.randomUUID(),
                 result.newAuth.email, 
                 privateKey
             )

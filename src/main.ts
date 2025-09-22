@@ -94,7 +94,11 @@ async function bootstrap() {
                 .setTitle('E-Commerce API')
                 .setDescription('The API documentation')
                 .setVersion('1.0')
-                .addBearerAuth() //for bear token
+                .addBearerAuth({
+                    type:'http',
+                    scheme:'bearer',
+                    bearerFormat:'JWT'
+                },'access')
                 .build();
 
             const document = SwaggerModule.createDocument(app, config);

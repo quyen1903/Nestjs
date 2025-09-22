@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import crypto from 'crypto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { KeyTokenService } from 'src/modules/keytoken/keytoken.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginShopDTO } from './dto/login.dto';
@@ -12,16 +11,17 @@ import { getInfoData } from 'src/shared/utils';
 @Injectable()
 export class ShopAuthService extends AuthService {
     constructor(
-            prismaService: PrismaService,
-            jwtService: JwtService,
-            producerService: ProducerService,
+        prismaService: PrismaService,
+        jwtService: JwtService,
+        producerService: ProducerService,
     ) {
         super(prismaService, jwtService, producerService);
     }
 
-    protected override createTokenPair(accountId: string, email: string, privateKey: string) {
+    protected override createTokenPair(accountId: string, deviceId: string, email: string, privateKey: string) {
         const payload = {
             accountId,
+            deviceId,
             email,
             role: 'SHOP',
             permissions: ['order:read', 'order:write']
@@ -52,77 +52,88 @@ export class ShopAuthService extends AuthService {
         update: any;
         createUsedToken: any;
     }> {
-        // Check if token has been used before
-        const duplicateJWT = await this.prismaService.refreshTokenUsed.findFirst({
-            where: { token: requestRefreshToken }
-        });
-    
-        const foundShop = await this.prismaService.account.findFirst({
-            where: {
-                id: shopId,
-                accountType: AccountType.SHOP
-            },
-            include: {
-                authentication: true,
-                profile: true,
-                shopBusiness: true,
-                security: true
+        return await this.prismaService.$transaction(async (tx) => {
+            // Check if token has been used before
+            const duplicateJWT = await tx.refreshTokenUsed.findFirst({
+                where: { token: requestRefreshToken }
+            });
+
+            if (duplicateJWT) {
+                // Invalidate all tokens for this account (security measure)
+                await tx.keyToken.updateMany({
+                    where: { authId: shopId },
+                    data: { isActive: false, updatedAt: BigInt(Date.now()) }
+                });
+                throw new ForbiddenException('Token reuse detected, please login again');
             }
-        });
-        if (!foundShop) throw new UnauthorizedException('Shop not registered');
 
-        if (duplicateJWT) throw new ForbiddenException('Something wrong happened, please relogin');
+            // Find the key token
+            const keyStore = await tx.keyToken.findFirst({
+                where: {
+                    authId: shopId,
+                    deviceId: deviceId,
+                    refreshToken: requestRefreshToken,
+                    isActive: true
+                }
+            });
 
-        // Find the key token
-        const keyStore = await this.prismaService.keyToken.findFirst({
-            where: {
-                authId: shopId,
-                deviceId: deviceId,
-                refreshToken: requestRefreshToken,
-                isActive: true
-            }
-        });
+            if (!keyStore) throw new UnauthorizedException('Invalid refresh token');
 
-        if (!keyStore) throw new UnauthorizedException('Something was wrong happened, please relogin');
+            const foundShop = await tx.account.findFirst({
+                where: {
+                    id: shopId,
+                    accountType: AccountType.SHOP
+                },
+                include: {
+                    authentication: true,
+                    profile: true,
+                    shopBusiness: true,
+                    security: true
+                }
+            });
+            
+            if (!foundShop) throw new UnauthorizedException('Shop not registered');
 
-        // Generate new key pair
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const { accessToken, refreshToken } = this.createTokenPair(
-            foundShop.id, 
-            foundShop.authentication.email, 
-            privateKey
-        );
-    
-        // Update key token
-        const update = await this.prismaService.keyToken.update({
-            where: { id: keyStore.id},
-            data: {
-                publicKey,
+            // Generate new key pair
+            const { publicKey, privateKey } = this.generateKeyPair();
+            const { accessToken, refreshToken } = this.createTokenPair(
+                foundShop.id,
+                deviceId,
+                foundShop.authentication.email, 
+                privateKey
+            );
+
+            // Update key token
+            const update = await tx.keyToken.update({
+                where: { id: keyStore.id },
+                data: {
+                    publicKey,
+                    refreshToken,
+                    updatedAt: BigInt(Date.now())
+                }
+            });
+
+            // Create used token record
+            const createUsedToken = await tx.refreshTokenUsed.create({
+                data: {
+                    keyTokenId: keyStore.id,
+                    token: requestRefreshToken,
+                    reason: 'refresh',
+                    createdAt: BigInt(Date.now())
+                }
+            });
+
+            return {
+                accessToken,
                 refreshToken,
-                updatedAt: BigInt(Date.now())
-            }
+                update,
+                createUsedToken
+            };
         });
-    
-        // Create used token record
-        const createUsedToken = await this.prismaService.refreshTokenUsed.create({
-            data: {
-                keyTokenId: keyStore.id,
-                token: requestRefreshToken,
-                reason: 'refresh',
-                createdAt: BigInt(Date.now())
-            }
-        });
-  
-        return {
-            accessToken,
-            refreshToken,
-            update,
-            createUsedToken
-        };
     }
-  
+
     async logout(keyStore: KeyToken): Promise<any> {
-      // Remove all key tokens for this account
+        // Remove all key tokens for this account
         return await this.prismaService.keyToken.updateMany({
             where: {
                 authId: keyStore.authId,
@@ -135,87 +146,134 @@ export class ShopAuthService extends AuthService {
         });
     };
 
-    async login(login: LoginShopDTO, deviceId: string = crypto.randomUUID()): Promise<{
+    /**
+     * 1 check whether shop existed or not
+     * 2 verify password
+     * 3 handle device
+     * 4 update login metadata
+     * 
+     * @param login please check logins shop data transfer object
+     * @returns 
+     */
+    async login(login: LoginShopDTO): Promise<{
         shop: object;
         accessToken: string;
         refreshToken: string;
     }> {
-        // Check if shop exists
-        const foundShop = await this.prismaService.account.findFirst({
-            where: {
-                accountType: AccountType.SHOP,
-                authentication: {
-                email: login.email
+        const result = await this.prismaService.$transaction(async (tx) => {
+            // 1. Check if shop exists
+            const foundShop = await tx.account.findFirst({
+                where: {
+                    accountType: AccountType.SHOP,
+                    authentication: { email: login.email }
+                },
+                include: {
+                    authentication: true,
+                    profile: true,
+                    security: true,
+                    deviceSession: true
                 }
-            },
-            include: {
-                authentication: true,
-                profile: true,
-                shopBusiness: true,
-                security: true
+            });
+
+            if (!foundShop) throw new BadRequestException('Shop not registered');
+
+            // 2. Verify password
+            const passwordHashed = await this.hashPassword(login.password, foundShop.authentication.passwordSalt);
+            if (passwordHashed !== foundShop.authentication.passwordHash) {
+                throw new UnauthorizedException('Wrong password!!!');
             }
-        });
 
-        if (!foundShop) throw new BadRequestException('Shop not registered');
+            // 3. Handle device data (simplified with upsert)
+            let deviceId = login.deviceId || crypto.randomUUID();
+            
+            await tx.deviceSession.upsert({
+                where: { deviceId },
+                update: { 
+                    updatedAt: BigInt(Date.now()) 
+                },
+                create: {
+                    deviceId,
+                    accountId: foundShop.id,
+                    createdAt: BigInt(Date.now()),
+                    updatedAt: BigInt(Date.now())
+                }
+            });
 
-        // Verify password
-        const passwordHashed = await this.hashPassword(login.password, foundShop.authentication.passwordSalt);
-        if (passwordHashed !== foundShop.authentication.passwordHash) throw new UnauthorizedException('Wrong password!!!');
-        
+            // 5. Generate key pair and tokens
+            const { publicKey, privateKey } = this.generateKeyPair();
+            const { accessToken, refreshToken } = this.createTokenPair(
+                foundShop.id, 
+                deviceId, 
+                foundShop.authentication.email, 
+                privateKey
+            );
 
-        // Update login metadata
-        await this.prismaService.accountAuthentication.update({
-        where: {
-            accountId: foundShop.id
-        },
-        data: {
-            lastLoginAt: BigInt(Date.now()),
-            loginCount: { increment: 1 },
-            updatedAt: BigInt(Date.now())
-        }
-        });
-
-        // Generate key pair and tokens
-        const { publicKey, privateKey } = this.generateKeyPair();
-        const { accessToken, refreshToken } = this.createTokenPair(foundShop.id, foundShop.authentication.email, privateKey );
-
-        // Create/update key store
-        const keyStore = await this.prismaService.keyToken.upsert({
-            where: {
-                authId_deviceId: {
+            // 6. Create/update key store (per device)
+            const keyStore = await tx.keyToken.upsert({
+                where: {
+                    authId_deviceId: {
+                        authId: foundShop.id,
+                        deviceId
+                    }
+                },
+                update: {
+                    publicKey,
+                    refreshToken,
+                    updatedAt: BigInt(Date.now())
+                },
+                create: {
                     authId: foundShop.id,
-                    deviceId
+                    deviceId,
+                    publicKey,
+                    refreshToken,
+                    createdAt: BigInt(Date.now()),
+                    updatedAt: BigInt(Date.now())
                 }
-            },
-            update: {
-                publicKey,
+            });
+
+            if (!keyStore) throw new Error('Cannot generate keytoken');
+
+            return {
+                shop: getInfoData(['id'], foundShop),
+                accessToken,
                 refreshToken,
-                updatedAt: BigInt(Date.now())
-            },
-            create: {
-                authId: foundShop.id,
-                deviceId,
-                publicKey,
-                refreshToken,
-                createdAt: BigInt(Date.now()),
-                updatedAt: BigInt(Date.now())
+                shopId: foundShop.id,
+                shopName: foundShop.profile?.name || 'Shop'
+            };
+        });
+
+        // 4. Fire-and-forget metadata update (async)
+        setImmediate(async () => {
+            try {
+                await this.prismaService.accountAuthentication.update({
+                    where: { accountId: result.shopId },
+                    data: {
+                        lastLoginAt: BigInt(Date.now()),
+                        loginCount: { increment: 1 },
+                        updatedAt: BigInt(Date.now())
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to update shop login metadata:', error);
             }
         });
 
-        if (!keyStore) throw new Error('Cannot generate keytoken');
-
-        // Send notification
-        await this.producerService.produce({
-            topic: 'login',
-            messages: [{
-                value: `${foundShop.profile?.name || 'Shop'} has logged into our system`
-            }]
+        // 7. Fire-and-forget notification
+        setImmediate(async () => {
+            try {
+                await this.producerService.produce({
+                    topic: 'login',
+                    messages: [{
+                        value: `${result.shopName} has logged into our system`
+                    }]
+                });
+            } catch (error) {
+                console.error('Failed to send login notification:', error);
+            }
         });
 
-        return {
-            shop: getInfoData(['id'], foundShop),
-            accessToken,
-            refreshToken
-        };
+        // Remove internal fields from response
+        const { shopId, shopName, ...response } = result;
+        return response;
     }
 }

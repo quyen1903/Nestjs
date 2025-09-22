@@ -4,19 +4,19 @@ import { RoleGuard } from '../auth/auth-role.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/shared/enums/role.enum';
 import { CreateCommentDTO, DeleteCommentDTO } from './dto/comment.dto';
-import { JWTGuard } from '../auth/auth-jwt.guard';
+import { AccessTokenGuard } from '../auth/access-token.guard';
 @Controller('comment')
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.User)
     @Post('')
     createComment(@Body() payload: CreateCommentDTO){
         return this.commentService.createComment(payload)
     }
 
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.User)
     @Get('')
     getComment(
@@ -26,7 +26,7 @@ export class CommentController {
         return this.commentService.getCommentsByParentId({commentProductId, commentParentId})
     }
 
-    @UseGuards(JWTGuard, RoleGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(Role.User)
     @Delete('')
     deleteComment(@Body() payload: DeleteCommentDTO){

@@ -8,12 +8,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './user-auth/strategies/google.strategy';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
-import { JWTGuard } from './auth-jwt.guard';
-import { RoleGuard } from './auth-role.guard';
 @Module({
     imports:[JwtModule, PrismaModule, KeyTokenModule, ShopAuthModule, UserAuthModule, KafkaModule],
-    providers:[AuthService, GoogleStrategy, JWTGuard],
+    providers:[AuthService, GoogleStrategy],
     controllers:[AuthController],
-    exports: [AuthService, JWTGuard]
+    exports: [AuthService]
 })
 export class AuthModule {}

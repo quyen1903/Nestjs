@@ -18,4 +18,11 @@ export class LoginShopDTO{
         description: 'Shop password'
     })
     password: string;
+
+    @ApiProperty({
+        example: 'SecurePass123!',
+        description: 'deviceID'
+    })
+    @IsString()
+    deviceId: string;
 }
