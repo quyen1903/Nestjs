@@ -679,6 +679,10 @@ model Category {
   name      String?   @db.VarChar(50)
   sort      Int?
 
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
+
   ancestors CategoryClosureTable[]  @relation("ancestor")
   descendants CategoryClosureTable[]  @relation("descendant")
 
@@ -695,7 +699,10 @@ model CategoryClosureTable {
   ancestor   Category @relation("ancestor", fields: [ancestorId], references: [id])
   descendant Category @relation("descendant",fields: [descendantId], references: [id])
 
-
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
+  
   @@id([ancestorId, descendantId])
 }
 
@@ -705,6 +712,10 @@ model Brand {
   image    String  @default("") @db.VarChar(1000)
   initial  String  @default("") @db.VarChar(1)
   sort     Int?    @default(10)
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt BigInt   @default(0) @map("created_at")
+  updatedAt BigInt   @default(0) @map("updated_at")
 
   // relations
   spu     Spu[]

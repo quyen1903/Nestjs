@@ -4,11 +4,10 @@ import { RoleGuard } from '../auth/auth-role.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from 'src/shared/enums/role.enum';
+import { AccountType } from '@prisma/client';
 import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
-import { ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiResponse, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/access-token.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
 
 // Add this DTO for update operations
 export class UpdateProductDTO extends CreateSpuDTO {
@@ -24,13 +23,14 @@ export class ProductController {
 
     @Post('create_product')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     @ApiOperation({ summary: 'Create a new product with SPU and SKU' })
     @ApiResponse({ status: 201, description: 'Product created successfully' })
     createProduct(
         @Body() createProductDto: CreateProductDTO,
         @AuthRequest('account') account: JWTdecode
     ) {
+        console.log("product account",account)
         return this.productService.createProduct(
             createProductDto.spu, 
             createProductDto.sku, 
@@ -41,14 +41,14 @@ export class ProductController {
 
     @Post('create_brand')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     createBrand(@Body() body: CreateBrandDTO) {
         return this.productService.createBrand(body);
     }
 
     @Post('create_category')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
         return this.productService.createCategory(
             createCategoryDto.name, 
@@ -59,7 +59,7 @@ export class ProductController {
 
     @Patch(':productId')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     updateProduct(
         @Param('productId') productId: string,
         @Body() updateProductDTO: Partial<CreateSpuDTO & CreateSkuDTO>,
@@ -70,7 +70,7 @@ export class ProductController {
 
     @Post('publish/:id')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     publishProduct(
         @Param('id') productId: string,
         @AuthRequest('account') account: JWTdecode
@@ -83,7 +83,7 @@ export class ProductController {
 
     @Post('unpublish/:id')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     unpublishProduct(
         @Param('id') productId: string,
         @AuthRequest('account') account: JWTdecode
@@ -96,7 +96,7 @@ export class ProductController {
 
     @Get('drafts/all')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     getAllDraftForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
@@ -111,7 +111,7 @@ export class ProductController {
 
     @Get('published/all')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     getAllPublishForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
@@ -147,8 +147,13 @@ export class ProductController {
         });
     }
 
-    @Get(':productId')
+    @Get('productById/:productId')
     findProduct(@Param('productId') productId: string) {
         return this.productService.findUniqueProduct(productId);
+    }
+
+    @Get('productByName/:name')
+    findProductByname(@Param('name') name: string) {
+        return this.productService.findProductByname(name);
     }
 }

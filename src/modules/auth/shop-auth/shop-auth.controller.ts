@@ -11,7 +11,7 @@ import { AccessTokenGuard } from '../access-token.guard';
 import { RefreshTokenGuard } from '../refresh-token.guard';
 import { RoleGuard } from "../auth-role.guard";
 import { Roles } from "../roles.decorator";
-import { Role } from "src/shared/enums/role.enum";
+import { AccountType } from '@prisma/client';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('shop-auth')
 export class ShopAuthController {
@@ -26,7 +26,7 @@ export class ShopAuthController {
     @Post('logout')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @ApiBearerAuth()
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     logoutShop(@Req() req: any){
         return this.shopAuthService.logout(req)
     }

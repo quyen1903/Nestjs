@@ -14,18 +14,21 @@ export interface Authentication {
   requestId: string;
 }
 
-export const AuthRequest = createParamDecorator(
-    (data: keyof jwt.JwtPayload | undefined, ctx: ExecutionContext) => {
-            const request = ctx.switchToHttp().getRequest();
-            const authData: Partial<jwt.JwtPayload> = {
-            keyStore: request.keyStore,
-            account: request.account,
-            refreshToken: request.refreshToken,
-            apiKey: request.apiKey,
-            requestId: request.requestId,
-        };
 
-        return data ? authData[data] : authData;
-    },
+export const AuthRequest = createParamDecorator(
+  (data: keyof Authentication | undefined, ctx: ExecutionContext): any => {
+    const request = ctx.switchToHttp().getRequest();
+
+    const authData: Authentication = {
+      keyStore: request.keyStore,
+      account: request.account,
+      refreshToken: request.refreshToken,
+      apiKey: request.apiKey,
+      requestId: request.requestId,
+    };
+
+    return data ? authData[data] : authData;
+  },
 );
+
 

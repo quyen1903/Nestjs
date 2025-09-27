@@ -2,22 +2,22 @@ import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/c
 import { CommentService } from './comment.service';
 import { RoleGuard } from '../auth/auth-role.guard';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from 'src/shared/enums/role.enum';
+import { AccountType } from '@prisma/client';
 import { CreateCommentDTO, DeleteCommentDTO } from './dto/comment.dto';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+
 @Controller('comment')
+@Roles(AccountType.USER)
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.User)
     @Post('')
     createComment(@Body() payload: CreateCommentDTO){
         return this.commentService.createComment(payload)
     }
 
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.User)
     @Get('')
     getComment(
         @Query('commentProductId') commentProductId: string,
@@ -27,7 +27,6 @@ export class CommentController {
     }
 
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.User)
     @Delete('')
     deleteComment(@Body() payload: DeleteCommentDTO){
         return this.commentService.deleteComments(payload)

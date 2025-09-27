@@ -17,7 +17,6 @@ export class AccessTokenGuard implements CanActivate {
     async canActivate(context: ExecutionContext) {
         const request = context.switchToHttp().getRequest();
         const token = request.headers['authorization']?.split(' ')[1];
-        console.log('AUTH HEADER:', request.headers['authorization']);
 
         if (!token) throw new UnauthorizedException('Missing access token');
         const decoded = this.jwtService.decode(token) as any;
@@ -26,9 +25,10 @@ export class AccessTokenGuard implements CanActivate {
         const keyStore = await this.keyTokenService.findByAccountId(decoded.accountId, decoded.deviceId);
         if (!keyStore) throw new UnauthorizedException('KeyStore not found');
 
-        const user = this.jwtService.verify(token, { publicKey: keyStore.publicKey });
-        request.user = user;
+        const account = this.jwtService.verify(token, { publicKey: keyStore.publicKey });
+        request.account = account;
         request.keyStore = keyStore;
+        console.log(request)
         return true;
     }
 }

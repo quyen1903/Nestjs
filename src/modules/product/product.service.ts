@@ -65,6 +65,15 @@ export class ProductService {
     };
 
 
+    /**
+     * check if we already have spu
+     * if spu already existed, we create sku
+     * if spu is newly created, we create spu and sku
+     * @param spu standard product unit
+     * @param sku stock keeping unit
+     * @param shopBusinessId shopId
+     * @returns base on spu existed or not
+     */
     async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO, shopBusinessId: string){
         // we check spu existed or not
         const spuExisted =await this.prismaService.spu.findUnique({
@@ -118,7 +127,7 @@ export class ProductService {
             const newSPU = await tx.spu.create({
                 data:{ ...spu, shopBusinessId }
             });
-            const newSKU = await tx.sku.create({ data: {...sku} });
+            const newSKU = await tx.sku.create({ data: {spuId: newSPU.id,...sku} });
 
             return { spu: newSPU, sku: newSKU };
         })
@@ -126,7 +135,6 @@ export class ProductService {
     }
 
     async createBrand(body: CreateBrandDTO){
-
         try {
             return await this.prismaService.brand.create({
                 data:{...body}
@@ -134,7 +142,6 @@ export class ProductService {
         } catch (error) {
             throw new BadRequestException('Failed to create brand');
         }
-
     }
 
     async findProduct(id: string){
@@ -162,7 +169,7 @@ export class ProductService {
 
     async updateProduct(productId: string, payload: Partial<CreateSpuDTO & CreateSkuDTO>){
         const product = await this.prismaService.spu.findUnique({ where: { id: productId }, include: { skus: true } });
-        if (!product) { throw new NotFoundException('Product not found'); };
+        if (!product) throw new NotFoundException('Product not found'); 
 
         return this.prismaService.$transaction(async(tx)=>{
             const spuFields = ['name', 'intro', 'brandId', 'categoryId', 'images', 'content', 'attributeList'];
@@ -442,6 +449,7 @@ export class ProductService {
                     orderBy: { createdAt: 'desc' }
                 }
             }
+            
         });
 
         if (!product) {
@@ -451,5 +459,38 @@ export class ProductService {
         return product;
     }
 
+    /**
+     * remember here we using full text search
+     * inside database, we already index name and intro for faster query.
+     * @param keyword keyword to searchj
+     * @returns 
+     */
+    async findProductByname(keyword: string){
+        console.log("keyword", keyword)
+        const product = await this.prismaService.spu.findMany({
+            where:{
+                OR:[
+                    {
+                        name:{ search: keyword}
+                    },
+                    {
+                        intro:{ search: keyword}
+                    }
+                ]
+            },
+            select:{
+                name: true,
+                intro: true,
+                images: true,
+                content: true
+            },
+            take: 10,//limit
+            skip: 0//pagination
+        });
+
+        if(!product) throw new BadRequestException ("product you are looking for are not existed");
+        
+        return product
+    }
 
 }

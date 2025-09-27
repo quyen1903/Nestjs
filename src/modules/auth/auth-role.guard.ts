@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
-import { Role } from 'src/shared/enums/role.enum';
+import { AccountType } from "@prisma/client";
 import { ROLES_KEY } from "./roles.decorator";
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
@@ -16,7 +16,7 @@ export class RoleGuard implements CanActivate{
      * @returns boolean
      */
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+        const requiredRoles = this.reflector.getAllAndOverride<AccountType[]>(ROLES_KEY, [
             context.getHandler(),//Returns the *type* of the controller class which the current handler belongs to
             context.getClass(),//Returns a reference to the handler (method) that will be invoked next in the request pipeline
 

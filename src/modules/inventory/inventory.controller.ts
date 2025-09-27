@@ -1,7 +1,7 @@
 import { Controller, UseGuards, Body, Post } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { RoleGuard } from '../auth/auth-role.guard';
-import { Role } from 'src/shared/enums/role.enum';
+import { AccountType } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { InventoryDTO } from './dto/inventory.dto';
 import { AccessTokenGuard } from '../auth/access-token.guard';
@@ -11,7 +11,7 @@ export class InventoryController {
 
     @Post('')
     @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(Role.Shop)
+    @Roles(AccountType.SHOP)
     addStockToInventory(@Body() payload: InventoryDTO){
         return this.inventoryService.addStockToInventory(payload)
     }
