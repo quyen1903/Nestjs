@@ -152,6 +152,10 @@ export class ShopAuthService extends AuthService {
      * 3 handle device
      * 4 update login metadata
      * 
+     * the beauty behind the scense is we first return User processed data via http
+     * then we update on the internal database
+     * this help us archieve system design real-time backend
+     * 
      * @param login please check logins shop data transfer object
      * @returns 
      */
