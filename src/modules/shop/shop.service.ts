@@ -11,7 +11,7 @@ import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterShopDTO } from './dto/register.dto';
 import { AuthService } from '../auth/auth.service';
-import { AccountType, AuthMethod, KeyToken } from '@prisma/client';
+import { AccountType, AuthMethod } from 'prisma/generated/prisma';
 import { getInfoData } from 'src/shared/utils';
 
 @Injectable()
@@ -67,6 +67,7 @@ export class ShopService extends AuthService {
         security: true
       }
     });
+    
     if (shopHolder) throw new BadRequestException('Shop already exists');
 
     const currentTime = BigInt(Date.now());

@@ -1,10 +1,25 @@
-import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
+import { 
+    Injectable,
+    UnauthorizedException, 
+    BadRequestException, 
+    ForbiddenException, 
+    BadGatewayException
+} from '@nestjs/common';
+
+import { 
+    KeyToken,
+    RefreshTokenUsed,
+    Account,
+    AccountType,
+    AuthMethod,
+    Sex
+} from 'prisma/generated/prisma';
 import crypto from 'crypto';
 import { LoginUserManualDTO } from './dto/login.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { getInfoData } from 'src/shared/utils';
 import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
-import { KeyToken, RefreshTokenUsed, Account, AccountAuthentication, AccountProfile, SocialAuthentication, AccountType, AuthMethod, Sex } from '@prisma/client';
+
 import { EmailService } from 'src/services/email/email.service';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { randomBytes } from 'node:crypto';

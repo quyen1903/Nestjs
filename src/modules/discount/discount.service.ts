@@ -5,7 +5,7 @@ import { CreateDiscountDTO } from './dto/createDiscount.dto';
 import { GetListDiscountDTO } from './dto/getListDiscount.dto';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 import { getSelectData } from 'src/shared/utils';
-import { Discount } from '@prisma/client';
+import { Discount } from 'prisma/generated/prisma';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class DiscountService {

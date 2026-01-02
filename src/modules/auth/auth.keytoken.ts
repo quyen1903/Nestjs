@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
-import { KeyToken, RefreshTokenUsed } from "@prisma/client";
-
+import { KeyToken, RefreshTokenUsed } from "prisma/generated/prisma";
 @Injectable()
 export abstract class ShopKeyTokenService {
     constructor(private readonly prismaService: PrismaService){}

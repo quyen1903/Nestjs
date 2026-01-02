@@ -1,5 +1,5 @@
 import { Iapikey } from 'src/shared/interfaces/apikey.interface';
-import { KeyToken } from '@prisma/client';
+import { KeyToken } from 'prisma/generated/prisma';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { JwtShop } from './jwt.shop';
 

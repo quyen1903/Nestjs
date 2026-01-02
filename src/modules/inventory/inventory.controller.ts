@@ -1,7 +1,7 @@
 import { Controller, UseGuards, Body, Post } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { RoleGuard } from '../auth/auth-role.guard';
-import { AccountType } from '@prisma/client';
+import { AccountType } from 'prisma/generated/prisma';
 import { Roles } from '../auth/roles.decorator';
 import { InventoryDTO } from './dto/inventory.dto';
 import { AccessTokenGuard } from '../auth/access-token.guard';

@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { NotificationType } from '@prisma/client';
-
+import { NotificationType } from 'prisma/generated/prisma';
 @Injectable()
 export class NotificationFactoryService {
     private readonly logger = new Logger(NotificationFactoryService.name);

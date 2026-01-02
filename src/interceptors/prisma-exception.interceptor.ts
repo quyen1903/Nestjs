@@ -1,5 +1,10 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+// import { PrismaClientKnownRequestError,PrismaClientValidationError } from 'prisma/generated/prisma/internal/prismaNamespace';
+// import { 
+//   PrismaClientKnownRequestError,
+//   PrismaClientValidationError 
+// } from '../../prisma/generated/prisma/internal/prismaNamespace';
+import { Prisma } from 'prisma/generated/prisma';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EntityNotFoundException } from '../shared/exceptions/entity-not-found.exception';
@@ -14,8 +19,8 @@ export class PrismaExceptionInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) => {
         this.logger.debug('PrismaExceptionInterceptor:', error);
-        if (error instanceof PrismaClientValidationError) throw new PrismaClientValidationException(error.name);
-        else if (error instanceof PrismaClientKnownRequestError) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) throw new PrismaClientValidationException(error.name);
+        else if (error instanceof Prisma.PrismaClientKnownRequestError) {
           console.log(error);
           if (error.code === 'P2002')
             throw new KeyDuplicationException(error.meta!.modelName as string, `${error.meta!.target}` as string);

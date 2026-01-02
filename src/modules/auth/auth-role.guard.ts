@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
-import { AccountType } from "@prisma/client";
+import { AccountType } from "prisma/generated/prisma";
 import { ROLES_KEY } from "./roles.decorator";
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";

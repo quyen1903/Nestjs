@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/c
 import { CommentService } from './comment.service';
 import { RoleGuard } from '../auth/auth-role.guard';
 import { Roles } from '../auth/roles.decorator';
-import { AccountType } from '@prisma/client';
+import { AccountType } from 'prisma/generated/prisma';
 import { CreateCommentDTO, DeleteCommentDTO } from './dto/comment.dto';
 import { AccessTokenGuard } from '../auth/access-token.guard';
 

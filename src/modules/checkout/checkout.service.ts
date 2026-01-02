@@ -5,7 +5,10 @@ import { DiscountService } from '../discount/discount.service';
 import { CheckoutDTO, ItemProductDTO, ShopOrderIdDTO } from './dto/checkout.dto';
 import { ProductService } from '../product/product.service';
 import { ShopCheckout } from './interface';
-import { Cart, OrderStatus, OrderItem } from '@prisma/client';
+import { 
+    Cart, 
+    OrderStatus
+ } from 'prisma/generated/prisma';
 
 @Injectable()
 export class CheckoutService {

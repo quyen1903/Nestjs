@@ -6,19 +6,19 @@ import {
     UseGuards, 
     Req, 
 } from "@nestjs/common";
-import { LoginShopDTO } from "./dto/login.dto";
+import { LoginManualDTO } from '../dto/loginManual.dto';
 import { AccessTokenGuard } from '../access-token.guard';
 import { RefreshTokenGuard } from '../refresh-token.guard';
 import { RoleGuard } from "../auth-role.guard";
 import { Roles } from "../roles.decorator";
-import { AccountType } from '@prisma/client';
+import { AccountType } from 'prisma/generated/prisma';
 import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('shop-auth')
 export class ShopAuthController {
     constructor(private readonly shopAuthService: ShopAuthService) {}
 
     @Post('login')
-    loginShop(@Body() body: LoginShopDTO){
+    loginShop(@Body() body: LoginManualDTO){
         console.log("body",body)
         return this.shopAuthService.login(body)
     }

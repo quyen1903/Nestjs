@@ -6,7 +6,10 @@ import { getInfoData } from 'src/shared/utils';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { EmailService } from 'src/services/email/email.service';
 import { JwtService } from '@nestjs/jwt';
-import { AccountType, AuthMethod } from '@prisma/client';
+import { 
+    AccountType, 
+    AuthMethod 
+} from 'prisma/generated/prisma';
 import { AuthService } from '../auth/auth.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 

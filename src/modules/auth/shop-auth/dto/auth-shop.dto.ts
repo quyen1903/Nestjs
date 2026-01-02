@@ -1,5 +1,4 @@
-import { AccountAuthentication, KeyToken, Prisma } from "@prisma/client";
-
+import { AccountAuthentication, KeyToken, Prisma } from "prisma/generated/prisma";
 import { StrictBuilder } from "builder-pattern";
 
 export class AuthSHopDTO{

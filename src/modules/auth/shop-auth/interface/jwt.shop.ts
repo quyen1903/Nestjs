@@ -1,4 +1,4 @@
-import { RoleShop } from "@prisma/client"
+import { RoleShop } from "prisma/generated/prisma"
 export interface JwtShop{
   sub: string,
   email: string,

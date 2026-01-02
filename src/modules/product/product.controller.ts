@@ -4,7 +4,7 @@ import { RoleGuard } from '../auth/auth-role.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
-import { AccountType } from '@prisma/client';
+import { AccountType } from 'prisma/generated/prisma';
 import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
 import { ApiResponse, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/access-token.guard';

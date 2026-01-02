@@ -6,6 +6,9 @@
 /.idea
 /.vscode
 /report
+/prisma/generated
+/prisma/migrations
+
 # Logs
 logs
 *.log
