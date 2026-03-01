@@ -46,15 +46,15 @@ export class ProductController {
         return this.productService.createBrand(body);
     }
 
-    @Post('create_category')
-    @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(AccountType.SHOP)
-    createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
-        return this.productService.createCategory(
-            createCategoryDto.name, 
-            createCategoryDto.parentId
-        );
-    }
+    // @Post('create_category')
+    // @UseGuards(AccessTokenGuard, RoleGuard)
+    // @Roles(AccountType.SHOP)
+    // createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
+    //     return this.productService.createCategory(
+    //         createCategoryDto.name, 
+    //         createCategoryDto.parentId
+    //     );
+    // }
 
 
     @Patch(':productId')

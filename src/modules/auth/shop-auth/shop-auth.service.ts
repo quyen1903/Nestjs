@@ -16,7 +16,7 @@ import { getInfoData } from 'src/shared/utils';
 import { RegisterUserDTO } from 'src/modules/user/dto/register.dto';
 
 @Injectable()
-export class ShopAuthService extends AuthService implements AuthService {
+export class ShopAuthService extends AuthService {
     constructor(
         prismaService: PrismaService,
         jwtService: JwtService,

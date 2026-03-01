@@ -26,6 +26,8 @@ async function bootstrap() {
     */
     if (cluster.isPrimary) {
         console.log(`Primary ${process.pid} is running`);
+        console.log(process.env.DATABASE_URL);
+
         
         // Get the number of available CPU cores
         let cpuCores = os.availableParallelism();

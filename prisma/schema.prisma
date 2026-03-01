@@ -2,6 +2,7 @@ generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
   output   = "./generated/prisma"
+  accelerateUrl = envenv("DATABASE_URL")
 }
 
 datasource db {
@@ -61,7 +62,7 @@ model AccountAuthentication {
   lastLoginAt  BigInt?        @map("last_login_at")
   loginCount   Int            @default(0) @map("login_count")
   
-  isActive     Boolean     @default(true) @map("is_active")
+  isActive     Boolean        @default(true) @map("is_active")
   createdAt    BigInt         @default(0) @map("created_at")
   updatedAt    BigInt         @default(0) @map("updated_at")
 

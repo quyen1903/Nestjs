@@ -8,61 +8,9 @@ import { ProductSearchResult, ProductWithSkus } from "./interfaces/product.inter
 @Injectable()
 export class ProductService {
     constructor( 
-        protected readonly prismaService: PrismaService,
+        private readonly prismaService: PrismaService,
         private readonly producerService: ProducerService
     ){}
-
-    /**
-     * A closure table is a table that stores all the paths 
-     * between all elements in a hierarchical data structure.
-     * The table includes two columns for the IDs of the related 
-     * elements and a third column that represents the distance between them.
-     * 
-     */
-    async createCategory(name: string, parentId?: string){
-        return await this.prismaService.$transaction(async (tx)=>{
-
-            //1 create the new category
-            const newCategory = await tx.category.create({
-                data: { name },
-            });
-            // 2. Always insert self-reference
-            await tx.categoryClosureTable.create({
-                data:{
-                    ancestorId: newCategory.id,
-                    descendantId: newCategory.id,
-                    depth: 0
-                }
-            })
-
-            if(parentId){
-                //3 get all ancestors of parent
-                const ancestors = await tx.categoryClosureTable.findMany({
-                    where:{ descendantId: parentId}
-                });
-
-                //4 insert new paths (ancestor -> newCategory)
-                const newPaths = ancestors.map((accumulator)=>({
-                    ancestorId: accumulator.ancestorId,
-                    descendantId: newCategory.id,
-                    depth: accumulator.depth + 1
-                }));
-
-                newPaths.push({
-                    ancestorId: parentId,
-                    descendantId: newCategory.id,
-                    depth: 1,
-                });
-
-                await tx.categoryClosureTable.createMany({
-                    data: newPaths,
-                });
-
-                return newCategory;
-            }
-
-        })
-    };
 
 
     /**
@@ -392,25 +340,25 @@ export class ProductService {
         return await this.prismaService.spu.findMany({
             where: whereCondition,
             select: {
-            id: true,
-            name: true, // productName equivalent
-            images: true, // productThumb equivalent (first image)
-            shopBusinessId: true,
-            createdAt: true,
-            updatedAt: true,
-            skus: {
-                where: { isActive: true },
-                select: {
-                    price: true // productPrice equivalent
+                id: true,
+                name: true, // productName equivalent
+                images: true, // productThumb equivalent (first image)
+                shopBusinessId: true,
+                createdAt: true,
+                updatedAt: true,
+                skus: {
+                    where: { isActive: true },
+                    select: {
+                        price: true // productPrice equivalent
+                    },
+                    take: 1
                 },
-                take: 1
-            },
-            brand: {
-                select: { name: true }
-            },
-            category: {
-                select: { name: true }
-            }
+                brand: {
+                    select: { name: true }
+                },
+                category: {
+                    select: { name: true }
+                }
             },
             take,
             skip,
