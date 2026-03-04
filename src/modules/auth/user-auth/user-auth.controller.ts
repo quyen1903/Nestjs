@@ -7,7 +7,7 @@ import { ResetPasswordDTO } from "./dto/reset-password.dto";
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../access-token.guard';
 import { RefreshTokenGuard } from '../refresh-token.guard';
-@Controller('user-auth')
+@Controller()
 export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}
 

@@ -13,7 +13,9 @@ import { RoleGuard } from "../auth-role.guard";
 import { Roles } from "../roles.decorator";
 import { AccountType } from 'prisma/generated/prisma';
 import { ApiBearerAuth } from '@nestjs/swagger';
-@Controller('shop-auth')
+import { RegisterShopDTO } from './dto/register.dto';
+
+@Controller()
 export class ShopAuthController {
     constructor(private readonly shopAuthService: ShopAuthService) {}
 
@@ -36,5 +38,10 @@ export class ShopAuthController {
     handleRefreshToken(@Req() req: any){
         console.log("request", req)
         return this.shopAuthService.handleRefreshToken( req.accountId, req.deviceId, req.refreshToken)
+    }
+
+    @Post('register')
+    registerShop(@Body() body: RegisterShopDTO){
+        return this.shopAuthService.register(body)
     }
 }

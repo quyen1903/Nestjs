@@ -20,11 +20,12 @@ import { EmailModule } from './services/email/email.module';
 import { AppController } from './app.controller';
 import { PaymentModule } from './modules/payment/payment.module';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+
 @Module({
     imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
         AuthModule,
         ShopModule,
         PrismaModule,
@@ -37,7 +38,6 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
         KafkaModule,
         CheckoutModule,
         CommentModule,
-        ConfigModule.forRoot(),
         DiscordModule,
         NotificationModule,
         EmailModule,
