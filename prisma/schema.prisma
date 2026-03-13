@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres"]
+  // previewFeatures = ["fullTextSearchPostgres"]
   output   = "./generated/prisma"
   accelerateUrl = envenv("DATABASE_URL")
 }
@@ -609,9 +609,9 @@ model Spu {
   brandId            String
   categoryId         String
   images             String[]  @db.VarChar(1000) //list of picture 
-  afterSalesService  String?  @db.VarChar(50)
-  content            String?  @db.Text  //introduce
-  attributeList      String?  @db.VarChar(3000) //Specifications
+  afternt            String?  @db.Text  //introduce
+  attriSalesService  String?  @db.VarChar(50)
+  contebuteList      String?  @db.VarChar(3000) //Specifications
   isMarketable       Boolean  @default(false) //Unsaleable or not
   status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
   shopBusinessId    String

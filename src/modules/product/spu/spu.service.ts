@@ -1,7 +1,4 @@
+import { Injectable } from '@nestjs/common';
 
-
-class SPUService{
-    constructor() {
-
-    }
-}
+@Injectable()
+export class SpuService {}

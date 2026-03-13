@@ -7,15 +7,13 @@ export class AuthSHopDTO{
     publicKey: KeyToken['publicKey'];
     refreshToken: KeyToken['refreshToken'];
     static fromEntity(
-        a: Prisma.KeyTokenGetPayload<{
-
-        }>,
-
+        a: Prisma.KeyTokenGetPayload<{}>,
     ){
         return StrictBuilder<AuthSHopDTO>()
             .accountId(a.authId)
-            .deviceId(a.authId)
+            .deviceId(a.deviceId)
             .publicKey(a.publicKey)
             .refreshToken(a.refreshToken)
+            .build()    
     }
 }

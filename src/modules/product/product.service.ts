@@ -167,9 +167,9 @@ export class ProductService {
                     { isMarketable: true },
                     {
                         OR: [
-                            { name: { search: keySearch } },
-                            { intro: { search: keySearch } },
-                            { content: { search: keySearch } }
+                            { name: keySearch },
+                            { intro: keySearch },
+                            { content: keySearch }
                         ]
                     }
                 ]
@@ -418,12 +418,8 @@ export class ProductService {
         const product = await this.prismaService.spu.findMany({
             where:{
                 OR:[
-                    {
-                        name:{ search: keyword}
-                    },
-                    {
-                        intro:{ search: keyword}
-                    }
+                    { name: keyword },
+                    { intro: keyword }
                 ]
             },
             select:{

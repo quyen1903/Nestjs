@@ -12,7 +12,7 @@ export class PaymentService {
         private configService: ConfigService,
     ) {
         this.stripe = new Stripe(this.configService.get<string>('stripe.secretKey'), {
-            apiVersion: '2025-08-27.basil', // Use the latest API version
+            apiVersion: '2026-02-25.clover', // Use the latest API version
         });
     }
     

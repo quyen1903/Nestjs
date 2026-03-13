@@ -1,59 +1,26 @@
-import { PrismaService } from "src/services/prisma/prisma.service";
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+
 @Injectable()
-export class CategoryService{
-    constructor(private readonly prismaService: PrismaService){}
+export class CategoryService {
+    create(createCategoryDto: CreateCategoryDto) {
+        return 'This action adds a new category';
+    }
 
-    /**
-     * A closure table is a table that stores all the paths 
-     * between all elements in a hierarchical data structure.
-     * The table includes two columns for the IDs of the related 
-     * elements and a third column that represents the distance between them.
-     * 
-     */
-    async createCategory(name: string, parentId?: string){
-        return await this.prismaService.$transaction(async (tx)=>{
+    findAll() {
+        return `This action returns all category`;
+    }
 
-            //1 create the new category
-            const newCategory = await tx.category.create({
-                data: { name },
-            });
-            // 2. Always insert self-reference
-            await tx.categoryClosureTable.create({
-                data:{
-                    ancestorId: newCategory.id,
-                    descendantId: newCategory.id,
-                    depth: 0
-                }
-            })
+    findOne(id: number) {
+        return `This action returns a #${id} category`;
+    }
 
-            if(parentId){
-                //3 get all ancestors of parent
-                const ancestors = await tx.categoryClosureTable.findMany({
-                    where:{ descendantId: parentId}
-                });
+    update(id: number, updateCategoryDto: UpdateCategoryDto) {
+        return `This action updates a #${id} category`;
+    }
 
-                //4 insert new paths (ancestor -> newCategory)
-                const newPaths = ancestors.map((accumulator)=>({
-                    ancestorId: accumulator.ancestorId,
-                    descendantId: newCategory.id,
-                    depth: accumulator.depth + 1
-                }));
-
-                newPaths.push({
-                    ancestorId: parentId,
-                    descendantId: newCategory.id,
-                    depth: 1,
-                });
-
-                await tx.categoryClosureTable.createMany({
-                    data: newPaths,
-                });
-
-                return newCategory;
-            }
-
-        })
-
+    remove(id: number) {
+        return `This action removes a #${id} category`;
     }
 }

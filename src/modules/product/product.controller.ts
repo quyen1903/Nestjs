@@ -26,7 +26,7 @@ export class ProductController {
     @Roles(AccountType.SHOP)
     @ApiOperation({ summary: 'Create a new product with SPU and SKU' })
     @ApiResponse({ status: 201, description: 'Product created successfully' })
-    createProduct(
+    async createProduct(
         @Body() createProductDto: CreateProductDTO,
         @AuthRequest('account') account: JWTdecode
     ) {
@@ -42,7 +42,7 @@ export class ProductController {
     @Post('create_brand')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    createBrand(@Body() body: CreateBrandDTO) {
+    async createBrand(@Body() body: CreateBrandDTO) {
         return this.productService.createBrand(body);
     }
 
@@ -60,7 +60,7 @@ export class ProductController {
     @Patch(':productId')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    updateProduct(
+    async updateProduct(
         @Param('productId') productId: string,
         @Body() updateProductDTO: Partial<CreateSpuDTO & CreateSkuDTO>,
         @AuthRequest('account') account: JWTdecode
@@ -84,7 +84,7 @@ export class ProductController {
     @Post('unpublish/:id')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    unpublishProduct(
+    async unpublishProduct(
         @Param('id') productId: string,
         @AuthRequest('account') account: JWTdecode
     ) {
@@ -97,7 +97,7 @@ export class ProductController {
     @Get('drafts/all')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    getAllDraftForShop(
+    async getAllDraftForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
         @Query('take') take?: string
@@ -112,7 +112,7 @@ export class ProductController {
     @Get('published/all')
     @UseGuards(AccessTokenGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    getAllPublishForShop(
+    async getAllPublishForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
         @Query('take') take?: string
@@ -125,7 +125,7 @@ export class ProductController {
     }
 
     @Get('search/:keySearch')
-    getListSearchProduct(@Param('keySearch') keySearch: string) {
+    async getListSearchProduct(@Param('keySearch') keySearch: string) {
         return this.productService.getListSearchProduct(keySearch);
     }
 
@@ -148,12 +148,12 @@ export class ProductController {
     }
 
     @Get('productById/:productId')
-    findProduct(@Param('productId') productId: string) {
+    async findProduct(@Param('productId') productId: string) {
         return this.productService.findUniqueProduct(productId);
     }
 
     @Get('productByName/:name')
-    findProductByname(@Param('name') name: string) {
+    async findProductByname(@Param('name') name: string) {
         return this.productService.findProductByname(name);
     }
 }

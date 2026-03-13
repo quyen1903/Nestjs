@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
+import { promisify } from 'util';
+import { randomBytes } from 'node:crypto';
+import { buffer } from 'node:stream/consumers';
+
 @Injectable()
 export class AuthService {
+    protected readonly logger = new Logger(this.constructor.name);
+
     constructor(
         protected readonly prismaService: PrismaService,
         protected readonly jwtService: JwtService,
-        // private readonly userKeyTokenService: UserKeyTokenService,
         protected readonly producerService: ProducerService
     ) {};
 
@@ -18,13 +23,16 @@ export class AuthService {
      * @param salt random string
      * @returns hashed password, which had been add salt to hash, almost impossible to brute force
     */
+    private readonly hashPasswordAsync = promisify(crypto.argon2);
     protected hashPassword(password:string, salt:string):Promise<string> {
-        return new Promise((resolve, reject) => {
-            crypto.pbkdf2(password, salt, 100,64,'sha512', (err, key) => {
-                if (err) return  reject(err)
-                resolve(key.toString('hex'));
-            })
-        });
+        return this.hashPasswordAsync('argon2id',{
+            message:password,
+            nonce: salt,
+            parallelism: 4,
+            tagLength: 64,
+            memory: 65536,
+            passes: 3,
+        }).then(buffer => buffer.toString('hex')); 
     };
 
     /**
@@ -36,24 +44,26 @@ export class AuthService {
      * public key are store in database, we drop private key
      * 
      * in both user case, anybody can see public key, it's ok. But dont let any one know your private key
+     * create one generateKeyPairAsync function, which return promise, to generate key pair asynchronously, 
+     * because crypto.generateKeyPair is callback-based, we need to promisify it to use async/await syntax
      */
-    protected generateKeyPair(): {
+    private readonly generateKeyPairAsync = promisify(crypto.generateKeyPair);
+    protected generateKeyPair(): Promise<{
         publicKey: string;
         privateKey: string;
-    }{
-        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',{
-            modulusLength:4096,
-            publicKeyEncoding:{
-                type:'pkcs1',
-                format:'pem'
+    }> {
+        return this.generateKeyPairAsync('rsa', {
+            modulusLength: 2048,
+            publicKeyEncoding: {
+                type: 'pkcs1',
+                format: 'pem'
             },
-            privateKeyEncoding:{
-                type:'pkcs1',
-                format:'pem'
+            privateKeyEncoding: {
+                type: 'pkcs1',
+                format: 'pem'
             }
-        })
-        return {publicKey, privateKey}
-    };
+        });
+    }
 
     protected createTokenPair(id: string, deviceId: string, email: string, privateKey: string){
         const payload = {                

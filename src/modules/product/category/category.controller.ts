@@ -1,22 +1,34 @@
-import { Controller, Req, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
-import { CategoryService } from "./category.service";
-import { Roles } from 'src/modules/auth/roles.decorator';
-import { RoleGuard } from 'src/modules/auth/auth-role.guard';
-import { AccessTokenGuard } from 'src/modules/auth/access-token.guard';
-import { AccountType } from 'prisma/generated/prisma';
-import { CreateCategoryDTO } from './dto/category.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { CategoryService } from './category.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+
 @Controller('category')
 export class CategoryController {
-    constructor(
-        private readonly categoryService: CategoryService
-    ) {}
-    @Post('create_category')
-    @UseGuards(AccessTokenGuard, RoleGuard)
-    @Roles(AccountType.SHOP)
-    createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
-        return this.categoryService.createCategory(
-            createCategoryDto.name, 
-            createCategoryDto.parentId
-        );
-    }
+  constructor(private readonly categoryService: CategoryService) {}
+
+  @Post()
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.create(createCategoryDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.categoryService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.categoryService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return this.categoryService.update(+id, updateCategoryDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.categoryService.remove(+id);
+  }
 }

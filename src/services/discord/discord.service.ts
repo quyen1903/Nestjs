@@ -20,8 +20,7 @@ export class DiscordService implements OnModuleInit{
             ]
         })
 
-        this.channelId = process.env.CHANNELID_DISCORD as string
-        this.client.login(process.env.TOKEN_DISCORD)
+        this.channelId = this.configService.get<string>('CHANNELID_DISCORD')!;
     }
 
     onModuleInit() {

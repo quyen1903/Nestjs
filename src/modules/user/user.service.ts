@@ -127,7 +127,7 @@ export class UserService extends AuthService{
         });
 
         if(result){
-            const { privateKey, publicKey } = this.generateKeyPair();
+            const { privateKey, publicKey } = await this.generateKeyPair();
             const {accessToken, refreshToken} = this.createTokenPair(
                 result.newAccount.id,
                 crypto.randomUUID(),

@@ -149,7 +149,7 @@ export class UserAuthService extends AuthService{
             if(!foundUser) throw new UnauthorizedException('User not registered');
 
             // Generate new key pair
-            const { publicKey, privateKey } = this.generateKeyPair();
+            const { publicKey, privateKey } = await this.generateKeyPair();
             
             // Updated call signature to match new createTokenPair
             const {accessToken, refreshToken} = this.createTokenPair(
@@ -230,7 +230,7 @@ export class UserAuthService extends AuthService{
             }
 
             // Generate tokens
-            const { publicKey, privateKey } = this.generateKeyPair();
+            const { publicKey, privateKey } = await this.generateKeyPair();
             
             // Updated call signature to include deviceId
             const {accessToken, refreshToken} = this.createTokenPair(
@@ -515,7 +515,7 @@ export class UserAuthService extends AuthService{
         }
 
         // Generate Token Pair
-        const { publicKey, privateKey } = this.generateKeyPair();
+        const { publicKey, privateKey } = await this.generateKeyPair();
         const deviceId = crypto.randomUUID();
         
         // Updated call signature to include deviceId

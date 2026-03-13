@@ -7,8 +7,12 @@ import { PrismaModule } from 'src/services/prisma/prisma.module';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
 import { ShopAuthModule } from '../auth/shop-auth/shop-auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { SpuModule } from './spu/spu.module';
+import { BrandModule } from './brand/brand.module';
+import { CategoryModule } from './category/category.module';
+
 @Module({
-  imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, JwtModule],
+  imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, JwtModule, SpuModule, BrandModule, CategoryModule],
   controllers: [ProductController],
   providers: [ ProductService ],
   exports: [ ProductService ]
