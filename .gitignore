@@ -60,3 +60,58 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# Frontend - Next.js
+.next/
+out/
+.vercel/
+*.phar
+
+# Frontend - Build outputs
+/build
+/dist
+/.cache
+/.parcel-cache
+/.turbo
+
+# Frontend - Dependencies
+node_modules/
+/.pnp
+.pnp.js
+*.pnp
+
+# Frontend - Package manager lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Frontend - Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Frontend - IDE/Editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Frontend - Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Frontend - Deployment
+.vercel
+.netlify
+
+# Frontend - OS & Misc
+.DS_Store
+Thumbs.db
+.eslintcache
+.stylelintcache
