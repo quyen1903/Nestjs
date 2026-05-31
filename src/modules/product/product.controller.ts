@@ -30,7 +30,6 @@ export class ProductController {
         @Body() createProductDto: CreateProductDTO,
         @AuthRequest('account') account: JWTdecode
     ) {
-        console.log("product account",account)
         return this.productService.createProduct(
             createProductDto.spu, 
             createProductDto.sku, 
@@ -65,7 +64,11 @@ export class ProductController {
         @Body() updateProductDTO: Partial<CreateSpuDTO & CreateSkuDTO>,
         @AuthRequest('account') account: JWTdecode
     ) {
-        return this.productService.updateProduct(productId, updateProductDTO);
+        return this.productService.updateProduct(
+            productId,
+            account.accountId,
+            updateProductDTO
+        );
     }
 
     @Post('publish/:id')
