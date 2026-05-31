@@ -604,14 +604,14 @@ model Notification {
 
 model Spu {
   id                 String   @id @default(uuid())
-  name               String   @db.VarChar(100)@unique()
+  name               String   @db.VarChar(100)
   intro              String?  @db.VarChar(200)
   brandId            String
   categoryId         String
   images             String[]  @db.VarChar(1000) //list of picture 
-  afternt            String?  @db.Text  //introduce
-  attriSalesService  String?  @db.VarChar(50)
-  contebuteList      String?  @db.VarChar(3000) //Specifications
+  content            String?  @db.Text  //introduce
+  afterSalesService  String?  @db.VarChar(50)
+  attributeList      String?  @db.VarChar(3000) //Specifications
   isMarketable       Boolean  @default(false) //Unsaleable or not
   status             Int      @default(0) //Review status, 0: Unaudited, 1: Reviewed, 2: Review does not pass
   shopBusinessId    String
@@ -634,7 +634,6 @@ model Spu {
   comment            Comment[]
   shopBusiness       ShopBusiness   @relation(fields: [shopBusinessId],references: [accountId])
 
-  @@unique([name, brandId])
 }
 
 /*
@@ -646,13 +645,13 @@ model Sku {
   id           String       @id @default(uuid())
   name         String       @db.VarChar(200)  //SKU name
   price        Int          @default(1)
-  num          Int?         @default(100) // quantity
+  stock        Int?         @default(100) // quantity
   image        String?      @db.VarChar(200)  ////Product Image
   images       String[]     @db.VarChar(2000) ////Product Image list
 
   spuId        String       @db.VarChar(60)
   brandName    String?      @db.VarChar(100)
-  skuAttribute String?      @db.VarChar(200) ////Specification
+  attributes   String?      @db.VarChar(200) ////Specification
   status       Int?         @default(1)
   inventoryId  String?    @map("inventory_id")
 

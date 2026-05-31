@@ -26,7 +26,7 @@ export class UserAuthController {
 
     @Post('handlerRefreshToken')
     @UseGuards(RefreshTokenGuard)
-    handleRefreshToken(@Req() req: any){
+    handleRefreshToken(@Req() req: AuthenticatedRequest){
         return this.userAuthService.handleRefreshToken(req.accountId, req.deviceId, req.refreshToken)
     }
 

@@ -24,22 +24,24 @@ export class ProductService {
      */
     async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO, shopBusinessId: string){
         // we check spu existed or not
-        const spuExisted =await this.prismaService.spu.findUnique({
+        const spuExisted =await this.prismaService.spu.findFirst({
             where:{
                 name:spu.name,
                 categoryId: spu.categoryId,
-                brandId: spu.brandId
+                brandId: spu.brandId,
+                shopBusinessId,
+                isActive: true
             }
         });
 
         // 1.1 once spu existed, we use transaction
         if(spuExisted) {
 
-            return this.prismaService.$transaction(async(tx)=>{
+            const result = await this.prismaService.$transaction(async(tx)=>{
                 const skuExists = await tx.sku.findFirst({
                     where: {
                         spuId: spuExisted.id,
-                        skuAttribute: sku.skuAttribute
+                        attributes: sku.attributes,
                     }
                 });
 
@@ -48,37 +50,58 @@ export class ProductService {
 
                 //1.3 create sku
                 const newSKU = await tx.sku.create({ 
-                    data: {...sku}
+                    data: {
+                        spuId: spuExisted.id,
+                        ...sku
+                    }
                 });
-
-                const topics = this.producerService.getTopics()
-
-                await this.producerService.produce({
-                    topic: topics.PRODUCT_CREATED,
-                    messages:[
-                        {
-                            value:JSON.stringify({
-                                spuId: newSKU.id,
-                                productName: spuExisted.name
-                            })
-                        }
-                    ]
-                })
 
                 //return spu and sku
                 return { spu: spuExisted, sku: newSKU };
-            })
+            });
+
+            const topics = this.producerService.getTopics();
+            
+            await this.producerService.produce({
+                topic: topics.PRODUCT_CREATED,
+                messages:[
+                    {
+                        value:JSON.stringify({
+                            skuId: result.sku.id,
+                            productName: spuExisted.name
+                        })
+                    }
+                ]
+            });
+
+            return {spu: result.spu, sku: result.sku};
         }
 
         // 2 spu are not existed, we create new spu and sku
-        return this.prismaService.$transaction(async (tx)=>{
+        const result = await this.prismaService.$transaction(async (tx)=>{
             const newSPU = await tx.spu.create({
                 data:{ ...spu, shopBusinessId }
             });
-            const newSKU = await tx.sku.create({ data: {spuId: newSPU.id,...sku} });
+            const newSKU = await tx.sku.create({data: {spuId: newSPU.id,...sku} });
 
-            return { spu: newSPU, sku: newSKU };
+            return { newSPU, newSKU };
         })
+
+        const topics = this.producerService.getTopics();
+
+        await this.producerService.produce({
+            topic: topics.PRODUCT_CREATED,
+            messages:[
+                {
+                    value:JSON.stringify({
+                        skuId: result.newSKU.id,
+                        productName: result.newSPU.name
+                    })
+                }
+            ]
+        });
+        return { spu: result.newSPU, sku: result.newSKU };
+
 
     }
 
@@ -107,7 +130,7 @@ export class ProductService {
                 if(foundProduct){
                     return{
                         price:foundProduct.price,
-                        quantity:foundProduct.num,
+                        quantity:foundProduct.stock,
                         productId:sku.productId
                     }
                 }
@@ -115,12 +138,24 @@ export class ProductService {
         ))
     }
 
-    async updateProduct(productId: string, payload: Partial<CreateSpuDTO & CreateSkuDTO>){
-        const product = await this.prismaService.spu.findUnique({ where: { id: productId }, include: { skus: true } });
+    async updateProduct(
+        productId: string,
+        shopBusinessId: string,
+        payload: Partial<CreateSpuDTO & CreateSkuDTO>
+    ){
+        const product = await this.prismaService.spu.findFirst(
+            {
+                where: { 
+                    id: productId,
+                    shopBusinessId,
+                    isActive: true
+                },
+                include: { skus: true },
+            });
         if (!product) throw new NotFoundException('Product not found'); 
 
         return this.prismaService.$transaction(async(tx)=>{
-            const spuFields = ['name', 'intro', 'brandId', 'categoryId', 'images', 'content', 'attributeList'];
+            const spuFields = ['name', 'intro', 'brandId', 'categoryId', 'images', 'content', 'attributeList', 'afterSalesService'];
             const spuUpdates = Object.keys(payload)
             .filter(key => spuFields.includes(key))
             .reduce((obj, key) => ({ ...obj, [key]: payload[key] }), {});
@@ -138,7 +173,7 @@ export class ProductService {
             }
 
             // Update first SKU if SKU fields are provided 
-            const skuFields = ['name', 'price', 'num', 'image', 'images', 'skuAttribute'];
+            const skuFields = ['name', 'price', 'stock', 'image', 'images', 'attributes'];
             const skuUpdates = Object.keys(payload) 
             .filter(key => skuFields.includes(key))
             .reduce((obj, key) => ({ ...obj, [key]: payload[key] }), {});
@@ -208,7 +243,7 @@ export class ProductService {
                         name: true,
                         price: true,
                         image: true,
-                        num: true
+                        stock: true
                     }
                 },
                 brand: {
@@ -240,7 +275,7 @@ export class ProductService {
                     name: true,
                     price: true,
                     image: true,
-                    num: true
+                    stock: true
                 }
             },
             brand: {
@@ -346,10 +381,12 @@ export class ProductService {
                 shopBusinessId: true,
                 createdAt: true,
                 updatedAt: true,
+                isMarketable: true,
                 skus: {
                     where: { isActive: true },
                     select: {
-                        price: true // productPrice equivalent
+                        price: true, // productPrice equivalent
+                        status: true
                     },
                     take: 1
                 },

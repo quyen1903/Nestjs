@@ -137,7 +137,7 @@ export class CreateSkuDTO {
     })
     @IsOptional()
     @IsNumber()
-    num?: number;
+    stock?: number;
 
     @ApiPropertyOptional({
         description: 'Main SKU image URL',
@@ -175,7 +175,7 @@ export class CreateSkuDTO {
     })
     @IsString()
     @IsOptional()
-    skuAttribute?: string;
+    attributes?: string;
 
     @ApiPropertyOptional({
         description: 'SKU status (0: inactive, 1: active)',
