@@ -4,6 +4,7 @@ import {
     Injectable, 
     UnauthorizedException, 
     BadRequestException, 
+    ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { KeyTokenService } from 'src/modules/keytoken/keytoken.service';
@@ -21,11 +22,34 @@ export class RefreshTokenGuard implements CanActivate {
     if (!refreshToken) throw new UnauthorizedException('Missing refresh token');
 
     const decoded = this.jwtService.decode(refreshToken) as any;
+    if (!decoded?.accountId || !decoded?.deviceId) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const duplicateJWT = await this.keyTokenService.findByUsedRefreshToken(refreshToken);
+    if (duplicateJWT) {
+      await this.keyTokenService.removeKeyByAccountID(decoded.accountId);
+      throw new ForbiddenException('Token reuse detected, please login again');
+    }
+
     const keyStore = await this.keyTokenService.findByAccountId(decoded.accountId, decoded.deviceId);
     if (!keyStore) throw new UnauthorizedException('KeyStore not found');
 
-    const user = this.jwtService.verify(refreshToken, { publicKey: keyStore.publicKey });
-    request.user = user;
+    let user: any;
+    try {
+      user = this.jwtService.verify(refreshToken, {
+        publicKey: keyStore.publicKey,
+        algorithms: ['RS256'],
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    // request.user = user;
+    // request.keyStore = keyStore;
+    // request.refreshToken = refreshToken;
+    request.account = user;
+    request.accountId = user.accountId;
+    request.deviceId = user.deviceId;
     request.keyStore = keyStore;
     request.refreshToken = refreshToken;
     return true;

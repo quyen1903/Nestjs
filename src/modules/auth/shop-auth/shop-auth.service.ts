@@ -15,7 +15,7 @@ import { LoginManualDTO } from '../dto/loginManual.dto';
 import { AuthService } from '../auth.service';
 import { AccountType, KeyToken, Prisma } from 'prisma/generated/prisma';
 import { getInfoData } from 'src/shared/utils';
-import { RegisterUserDTO } from 'src/modules/user/dto/register.dto';
+import { RegisterShopDTO } from './dto/register.dto';
 
 @Injectable()
 export class ShopAuthService extends AuthService {
@@ -174,6 +174,7 @@ export class ShopAuthService extends AuthService {
         accessToken: string;
         refreshToken: string;
     }> {
+        const email = login.email.toLowerCase().trim();
 
         try {
 
@@ -191,7 +192,7 @@ export class ShopAuthService extends AuthService {
                 const foundShop = await tx.account.findFirst({
                     where: {
                         accountType: AccountType.SHOP,
-                        authentication: { email: login.email }
+                        authentication: { email }
                     },
                     include: {
                         authentication: true,
@@ -210,7 +211,7 @@ export class ShopAuthService extends AuthService {
                 }
 
                 // 3. Handle device data (simplified with upsert)
-                let deviceId = login.deviceId || crypto.randomUUID();
+                let deviceId = login.deviceId?.trim() || crypto.randomUUID();
                 
                 await tx.deviceSession.upsert({
                     where: { deviceId },
@@ -317,12 +318,13 @@ export class ShopAuthService extends AuthService {
         }
     }
 
-    async register(register: RegisterUserDTO): Promise<{
+    async register(register: RegisterShopDTO): Promise<{
         shop: object;
         accessToken: string;
         refreshToken: string;
     }>{
         try {
+            const email = register.email.toLowerCase().trim();
             const currentTime = Date.now();
             const salt = crypto.randomBytes(32).toString('hex');
             const passwordHashed = await this.hashPassword(register.password, salt);
@@ -344,7 +346,7 @@ export class ShopAuthService extends AuthService {
                 await tx.accountAuthentication.create({
                     data:{
                         accountId: newAccount.id,
-                        email: register.email,
+                        email,
                         passwordHash: passwordHashed,
                         passwordSalt: salt,
                         authMethod: 'EMAIL_PASSWORD',
@@ -358,12 +360,29 @@ export class ShopAuthService extends AuthService {
                     data:{
                         accountId: newAccount.id,
                         name: register.name,
+                        phone: register.phone,
+                        address: register.address,
+                        timezone: register.timezone,
+                        language: register.language || 'en',
                         createdAt: currentTime,
                         updatedAt: currentTime
                     }
                 });
 
-                // 4. Create security settings
+                //4. create shop business table
+                await tx.shopBusiness.create({
+                    data: {
+                        accountId: newAccount.id,
+                        businessName: register.businessName,
+                        businessType: register.businessType,
+                        taxId: register.taxId,
+                        businessAddress: register.businessAddress,
+                        createdAt: currentTime,
+                        updatedAt: currentTime
+                    }
+                });
+
+                // 5. Create security settings
                 await tx.accountSecurity.create({
                     data: {
                         accountId: newAccount.id,
@@ -374,10 +393,16 @@ export class ShopAuthService extends AuthService {
                     }
                 });
 
-                // 5. Create preferences
+                // 6. Create preferences
                 await tx.accountPreferences.create({
                     data: {
                         accountId: newAccount.id,
+                        language: register.language || 'en',
+                        currency: register.currency || 'USD',
+                        theme: register.theme || 'light',
+                        emailNotifications: register.emailNotifications ?? true,
+                        smsNotifications: register.smsNotifications ?? false,
+                        pushNotifications: register.pushNotifications ?? true,
                         createdAt: currentTime,
                         updatedAt: currentTime
                     }
@@ -393,7 +418,7 @@ export class ShopAuthService extends AuthService {
             const { accessToken, refreshToken } = this.createTokenPair(
                 result.id,
                 deviceId,
-                register.email, 
+                email,
                 privateKey
             );
 
@@ -404,15 +429,14 @@ export class ShopAuthService extends AuthService {
             const keyStore = await this.upsertKeyStore(result.id, deviceId, publicKey, refreshToken);
             if (!keyStore) throw new Error('Cannot generate keytoken');
 
-            await this.producerService.produce({
-                topic: 'registration',
-                messages: [{
-                    value: `${register.name} shop has been created in our system`
-                }]
-            });
-
             setImmediate(async () => {
                 try {
+                    await this.producerService.produce({
+                        topic: 'registration',
+                        messages: [{
+                            value: `${register.name} shop has been created in our system`
+                        }]
+                    });
                     await this.producerService.produce({
                         topic: 'shop account-created',
                         messages:[{
@@ -437,6 +461,7 @@ export class ShopAuthService extends AuthService {
             if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
                 throw error; 
             }
+            this.logger.error('Failed to register shop', error instanceof Error ? error.stack : error);
             throw new InternalServerErrorException('Failed to register shop'); // 500
         }
     }

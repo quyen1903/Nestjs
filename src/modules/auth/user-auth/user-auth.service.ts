@@ -74,11 +74,12 @@ export class UserAuthService extends AuthService{
      * Find user account by email with all related data
      */
     private async findUserAccount(email: string) {
+        const normalizedEmail = email.toLowerCase().trim();
         return this.prismaService.account.findFirst({
             where: {
                 accountType: AccountType.USER,
                 authentication: {
-                    email: email
+                    email: normalizedEmail
                 }
             },
             include: {
@@ -188,11 +189,12 @@ export class UserAuthService extends AuthService{
         });
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<any>{
+    async logout ( keyStore: KeyToken ): Promise<any>{
         // Deactivate all key tokens for this account
         return await this.prismaService.keyToken.updateMany({
             where: {
-                authId: keyStore.accountId
+                authId: keyStore.authId,
+                deviceId: keyStore.deviceId
             },
             data: {
                 isActive: false,
@@ -206,12 +208,15 @@ export class UserAuthService extends AuthService{
         accessToken: string;
         refreshToken: string;
     }>{
+        const email = login.email.toLowerCase().trim();
+        const sessionDeviceId = login.deviceId?.trim() || deviceId;
+
         const result = await this.prismaService.$transaction(async (tx) => {
             // Find user by email
             const foundUser = await tx.account.findFirst({
                 where: {
                     accountType: AccountType.USER,
-                    authentication: { email: login.email }
+                    authentication: { email }
                 },
                 include: {
                     authentication: true,
@@ -235,7 +240,7 @@ export class UserAuthService extends AuthService{
             // Updated call signature to include deviceId
             const {accessToken, refreshToken} = this.createTokenPair(
                 foundUser.id, 
-                deviceId,  // Now includes deviceId
+                sessionDeviceId,  // Now includes deviceId
                 foundUser.authentication.email, 
                 privateKey
             );
@@ -247,7 +252,7 @@ export class UserAuthService extends AuthService{
                 where: {
                     authId_deviceId: {
                         authId: foundUser.id,
-                        deviceId
+                        deviceId: sessionDeviceId
                     }
                 },
                 update: {
@@ -257,7 +262,7 @@ export class UserAuthService extends AuthService{
                 },
                 create: {
                     authId: foundUser.id,
-                    deviceId,
+                    deviceId: sessionDeviceId,
                     publicKey,
                     refreshToken,
                     createdAt: BigInt(Date.now()),
@@ -295,7 +300,7 @@ export class UserAuthService extends AuthService{
     };
 
     async forgotPassword(forgotPasswordDto: ForgotPasswordDTO): Promise<{ message: string }> {
-        const { email } = forgotPasswordDto;
+        const email = forgotPasswordDto.email.toLowerCase().trim();
         
         // Find the user by email
         const user = await this.findUserAccount(email);
@@ -389,6 +394,8 @@ export class UserAuthService extends AuthService{
     }
 
     async findOrCreateGoogleUser(socialData: any, profileData: any) {
+        const email = socialData.email.toLowerCase().trim();
+
         const existingSocial = await this.prismaService.socialAuthentication.findUnique({
             where: { 
                 provider_providerId: {
@@ -425,7 +432,7 @@ export class UserAuthService extends AuthService{
                 const newAuth = await tx.accountAuthentication.create({
                     data: {
                         accountId: newAccount.id,
-                        email: socialData.email,
+                        email,
                         authMethod: AuthMethod.OAUTH2_ONLY,
                         isVerified: true, // OAuth accounts are pre-verified
                         createdAt: currentTime,
@@ -439,7 +446,7 @@ export class UserAuthService extends AuthService{
                         authId: newAccount.id,
                         provider: 'google',
                         providerId: socialData.providerId,
-                        providerEmail: socialData.email,
+                        providerEmail: email,
                         accessToken: socialData.accessToken,
                         refreshToken: socialData.refreshToken,
                         expiresAt: socialData.expiresAt ? BigInt(socialData.expiresAt) : null,
@@ -522,7 +529,7 @@ export class UserAuthService extends AuthService{
         const { accessToken, refreshToken } = this.createTokenPair(
             account.id, 
             deviceId,  // Now includes deviceId
-            socialData.email, 
+            email,
             privateKey
         );
 

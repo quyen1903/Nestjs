@@ -8,7 +8,8 @@ import { EmailService } from 'src/services/email/email.service';
 import { JwtService } from '@nestjs/jwt';
 import { 
     AccountType, 
-    AuthMethod 
+    AuthMethod,
+    Sex
 } from 'prisma/generated/prisma';
 import { AuthService } from '../auth/auth.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
@@ -25,12 +26,14 @@ export class UserService extends AuthService{
     };
 
     async registerManual(register: RegisterUserDTO) {
+        const email = register.email.toLowerCase().trim();
+
         // Check if user already exists
         const userHolder = await this.prismaService.account.findFirst({
             where: {
                 accountType: AccountType.USER,
                 authentication: {
-                    email: register.email
+                    email
                 }
             },
             include: {
@@ -66,7 +69,7 @@ export class UserService extends AuthService{
                 data:{
                     accountId: newAccount.id,
                     username: register.username,
-                    email: register.email,
+                    email,
                     passwordHash: passwordHashed,
                     passwordSalt: salt,
                     authMethod: AuthMethod.EMAIL_PASSWORD,
@@ -94,8 +97,9 @@ export class UserService extends AuthService{
                     accountId: newAccount.id,
                     loyaltyPoints: 0,
                     membershipTier:"bronze",
+                    sex: register.sex ?? Sex.FEMALE,
                     preferences: {},
-                    dateOfBirth: register.dateOfBirth,
+                    dateOfBirth: register.dateOfBirth ?? new Date(0),
                     createdAt: currentTime,
                     updatedAt: currentTime
                 }
@@ -128,15 +132,15 @@ export class UserService extends AuthService{
 
         if(result){
             const { privateKey, publicKey } = await this.generateKeyPair();
+            const deviceId = crypto.randomUUID();
             const {accessToken, refreshToken} = this.createTokenPair(
                 result.newAccount.id,
-                crypto.randomUUID(),
-                result.newAuth.email, 
+                deviceId,
+                email,
                 privateKey
             )
             if(!accessToken || !refreshToken) throw new BadGatewayException('Create tokens error!!!!!!')
 
-            const deviceId = crypto.randomUUID();
             const keyStore = await this.upsertKeyStore(result.newAccount.id, deviceId, publicKey, refreshToken)
             if(!keyStore) throw new Error('Cannot generate keytoken');
 

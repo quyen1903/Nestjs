@@ -7,6 +7,7 @@ import { ResetPasswordDTO } from "./dto/reset-password.dto";
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../access-token.guard';
 import { RefreshTokenGuard } from '../refresh-token.guard';
+import { AuthenticatedRequest } from '../dto/auth-request.dto';
 @Controller()
 export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}
@@ -19,14 +20,14 @@ export class UserAuthController {
     @ApiBearerAuth()
     @Post('logout')
     @UseGuards(AccessTokenGuard)
-    logoutUser(@Req() req: IKeyToken){
-        return this.userAuthService.logout(req)
+    logoutUser(@Req() req: AuthenticatedRequest){
+        return this.userAuthService.logout(req.keyStore)
     }
 
     @Post('handlerRefreshToken')
     @UseGuards(RefreshTokenGuard)
     handleRefreshToken(@Req() req: any){
-        return this.userAuthService.handleRefreshToken(req.authId, req.deviceId, req.refreshToken)
+        return this.userAuthService.handleRefreshToken(req.accountId, req.deviceId, req.refreshToken)
     }
 
     @Post('forgot-password')

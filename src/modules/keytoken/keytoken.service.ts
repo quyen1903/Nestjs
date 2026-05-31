@@ -56,12 +56,10 @@ export class KeyTokenService {
      * Find key token by account ID (returns all active tokens for the account)
      */
     async findByAccountId(accountId: string, deviceId: string): Promise<KeyToken> {
-        return this.prismaService.keyToken.findUnique({
+        return this.prismaService.keyToken.findFirst({
             where: {
-                authId_deviceId:{
-                    authId: accountId,
-                    deviceId,
-                },
+                authId: accountId,
+                deviceId,
                 isActive: true
             }
         });

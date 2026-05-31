@@ -5,19 +5,36 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { KeyToken } from 'prisma/generated/prisma';
 import jwt from 'jsonwebtoken';
 
-export type AuthJWTPayloadDTO = jwt.JwtPayload
+export type AuthAccountPayload = {
+  accountId: string;
+  deviceId: string;
+  email: string;
+  role: string;
+  permissions?: string[];
+};
+
+export type AuthenticatedRequest = Request & {
+  account: AuthAccountPayload;
+  accountId: string;
+  deviceId: string;
+  keyStore: KeyToken;
+  refreshToken?: string;
+  apiKey?: Iapikey;
+  requestId?: string;
+};
+
 export interface Authentication {
   keyStore: KeyToken;
-  account: JwtUser;
-  refreshToken: string;
-  apiKey: Iapikey;
-  requestId: string;
+  account: AuthAccountPayload;
+  refreshToken?: string;
+  apiKey?: Iapikey;
+  requestId?: string;
 }
 
 
 export const AuthRequest = createParamDecorator(
   (data: keyof Authentication | undefined, ctx: ExecutionContext): any => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
 
     const authData: Authentication = {
       keyStore: request.keyStore,
@@ -30,5 +47,4 @@ export const AuthRequest = createParamDecorator(
     return data ? authData[data] : authData;
   },
 );
-
 

@@ -14,6 +14,7 @@ import { Roles } from "../roles.decorator";
 import { AccountType } from 'prisma/generated/prisma';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RegisterShopDTO } from './dto/register.dto';
+import { AuthenticatedRequest } from '../dto/auth-request.dto';
 
 @Controller()
 export class ShopAuthController {
@@ -29,14 +30,13 @@ export class ShopAuthController {
     @UseGuards(AccessTokenGuard, RoleGuard)
     @ApiBearerAuth()
     @Roles(AccountType.SHOP)
-    logoutShop(@Req() req: any){
-        return this.shopAuthService.logout(req)
+    logoutShop(@Req() req: AuthenticatedRequest){
+        return this.shopAuthService.logout(req.keyStore)
     }
 
     @Post('handlerRefreshToken')
     @UseGuards(RefreshTokenGuard)
     handleRefreshToken(@Req() req: any){
-        console.log("request", req)
         return this.shopAuthService.handleRefreshToken( req.accountId, req.deviceId, req.refreshToken)
     }
 
