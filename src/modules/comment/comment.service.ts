@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { ProductService } from '../product/product.service';
 import { 
     CreateCommentDTO, 
@@ -10,7 +10,7 @@ import {
 @Injectable()
 export class CommentService {
     constructor(
-        private readonly prismaService: PrismaService,
+        private readonly drizzleService: DrizzleService,
         private readonly productService: ProductService,
     ){}
 
@@ -25,7 +25,7 @@ export class CommentService {
 
         // If replying to a comment, verify parent exists (outside transaction - read-only)
         if (commentParentId) {
-            const parentComment = await this.prismaService.comment.findFirst({
+            const parentComment = await this.drizzleService.comment.findFirst({
                 where: { 
                     id: commentParentId,
                     isActive: true 
@@ -35,7 +35,7 @@ export class CommentService {
         }
 
         // Use transaction for all write operations
-        return await this.prismaService.$transaction(async (tx) => {
+        return await this.drizzleService.$transaction(async (tx) => {
             // 1. Create the comment
             const comment = await tx.comment.create({
                 data: {
@@ -114,13 +114,13 @@ export class CommentService {
         if (!foundProduct) throw new NotFoundException('Product not found');
         
         // Verify comment exists (outside transaction - read-only)
-        const comment = await this.prismaService.comment.findUnique({
+        const comment = await this.drizzleService.comment.findUnique({
             where: { id: deleted.id, isActive: true }
         });
         if (!comment) throw new NotFoundException('Comment not found');
 
         // Use transaction for all write operations
-        return await this.prismaService.$transaction(async (tx) => {
+        return await this.drizzleService.$transaction(async (tx) => {
             // 1. Get all descendants (children) that will also be soft deleted
             const descendants = await tx.comment.findMany({
                 where: {
@@ -182,7 +182,7 @@ export class CommentService {
      * Bulk operations with transaction
      */
     async moveCommentToNewParent(commentId: string, newParentId: string) {
-        return await this.prismaService.$transaction(async (tx) => {
+        return await this.drizzleService.$transaction(async (tx) => {
             // 1. Remove old closure table entries for the subtree
             const subtreeIds = await tx.commentClosureTable.findMany({
                 where: { ancestorId: commentId },
@@ -224,7 +224,7 @@ export class CommentService {
     async getCommentsByParentId(comment: GetCommentDTO) {
         if (comment.commentParentId) {
             // Get all descendants of a specific parent
-            const parent = await this.prismaService.comment.findFirst({
+            const parent = await this.drizzleService.comment.findFirst({
                 where: { 
                     id: comment.commentParentId,
                     isActive: true 
@@ -233,7 +233,7 @@ export class CommentService {
 
             if (!parent) throw new NotFoundException('Parent comment not found');
 
-            const comments = await this.prismaService.comment.findMany({
+            const comments = await this.drizzleService.comment.findMany({
                 where: {
                     spuId: comment.commentProductId,
                     ancestors: {
@@ -269,7 +269,7 @@ export class CommentService {
         }
 
         // Get root comments (comments with no parent - depth 0 only)
-        const rootComments = await this.prismaService.comment.findMany({
+        const rootComments = await this.drizzleService.comment.findMany({
             where: {
                 spuId: comment.commentProductId,
                 ancestors: {
@@ -301,7 +301,7 @@ export class CommentService {
      * Get direct children of a comment (depth = 1)
      */
     async getDirectReplies(parentId: string) {
-        const directReplies = await this.prismaService.comment.findMany({
+        const directReplies = await this.drizzleService.comment.findMany({
             where: {
                 ancestors: {
                     some: { 
@@ -339,7 +339,7 @@ export class CommentService {
      * Get full comment thread starting from root
      */
     async getFullThread(threadId: string) {
-        const threadComments = await this.prismaService.comment.findMany({
+        const threadComments = await this.drizzleService.comment.findMany({
             where: {
                 OR: [
                     { id: threadId }, // Root comment
@@ -482,7 +482,7 @@ export class CommentService {
         const skip = (page - 1) * limit;
         
         const [comments, total] = await Promise.all([
-            this.prismaService.comment.findMany({
+            this.drizzleService.comment.findMany({
                 where: {
                     spuId: productId,
                     ancestors: {
@@ -509,7 +509,7 @@ export class CommentService {
                 skip,
                 take: limit
             }),
-            this.prismaService.comment.count({
+            this.drizzleService.comment.count({
                 where: {
                     spuId: productId,
                     ancestors: {
@@ -537,7 +537,7 @@ export class CommentService {
      * Search comments by content
      */
     async searchComments(productId: string, searchTerm: string) {
-        return await this.prismaService.comment.findMany({
+        return await this.drizzleService.comment.findMany({
             where: {
                 spuId: productId,
                 content: {

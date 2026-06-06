@@ -30,10 +30,10 @@ cp .env.example .env
 # DATABASE_URL=postgresql://user:password@localhost:5432/ecommerce_db
 
 # Run migrations
-npx prisma migrate dev --name init
+npm run db:migrate
 
 # Optional: Seed sample data
-npx prisma db seed
+npm run db:push
 ```
 
 ### Step 3: Start Development Server (1 minute)
@@ -97,7 +97,7 @@ curl -X POST http://localhost:3056/api/auth/login \
 ### View API Documentation
 Open in browser:
 ```
-http://localhost:3056/api/docs
+http://localhost:3056/v1/api/docs
 ```
 
 ---
@@ -109,10 +109,10 @@ http://localhost:3056/api/docs
 npm run start:dev              # Start dev server with auto-reload
 
 # Database
-npx prisma studio             # GUI database browser
-npx prisma migrate status      # Check migration status
-npx prisma db seed             # Seed with sample data
-npx prisma migrate reset       # ⚠️ Wipes database
+npm run db:studio             # GUI database browser
+npm run db:generate      # Check migration status
+npm run db:push             # Seed with sample data
+npm run db:push       # ⚠️ Wipes database
 
 # Testing
 npm test                       # Run unit tests
@@ -157,8 +157,8 @@ src/
 │   ├── keytoken/           # Token management
 │   └── order-cronjob/      # Scheduled tasks
 ├── services/               # Shared services
-│   ├── prisma/             # Database ORM
-│   ├── kafka/              # Event streaming
+│   ├── drizzle/             # Database ORM
+│   ├── kafka/              # Disabled no-op event services
 │   ├── email/              # Email sender
 │   └── discord/            # Discord notifications
 ├── shared/                 # Shared utilities
@@ -166,8 +166,8 @@ src/
 │   ├── interceptors/       # Response formatting
 │   ├── pipes/              # Validation
 │   └── middleware/         # Request processing
-└── prisma/                 # Database schema
-    └── schema.prisma
+└── drizzle/                 # Database schema
+    └── schema.ts
 ```
 
 ---
@@ -242,8 +242,8 @@ MAIL_FROM=noreply@yourdomain.com
 DISCORD_BOT_TOKEN=token
 DISCORD_WEBHOOK_URL=webhook-url
 
-# Kafka (Optional)
-KAFKA_BROKER=localhost:9092
+# Swagger
+SWAGGER_URL=http://localhost:3056/v1/api/docs
 
 # Frontend URL (CORS)
 FRONTEND_URL=http://localhost:3000
@@ -332,10 +332,10 @@ psql -U postgres -d postgres -c "SELECT 1"
 **Solution:**
 ```bash
 # Run migrations
-npx prisma migrate dev
+npm run db:migrate
 
 # Or reset (⚠️ loses all data)
-npx prisma migrate reset
+npm run db:push
 ```
 
 ### Problem: "Port 3056 already in use"
@@ -353,10 +353,10 @@ kill -9 <PID>
 PORT=3057 npm run start:dev
 ```
 
-### Problem: Prisma studio won't open
+### Problem: Drizzle studio won't open
 **Solution:**
 ```bash
-npx prisma studio --browser=none
+npm run db:studio
 # Then open http://localhost:5555 manually
 ```
 
@@ -406,12 +406,12 @@ git commit -m "test: add unit tests"
 ### 1. Use Select to Avoid Fetching Unnecessary Fields
 ```typescript
 // ❌ Fetches all fields
-const user = await prisma.account.findUnique({
+const user = await drizzleService.account.findUnique({
   where: { id: userId }
 });
 
 // ✅ Only fetch needed fields
-const user = await prisma.account.findUnique({
+const user = await drizzleService.account.findUnique({
   where: { id: userId },
   select: { id: true, email: true, name: true }
 });
@@ -420,10 +420,10 @@ const user = await prisma.account.findUnique({
 ### 2. Use Pagination on Large Result Sets
 ```typescript
 // ❌ Danger: Loads millions of records
-const allProducts = await prisma.sku.findMany();
+const allProducts = await drizzleService.sku.findMany();
 
 // ✅ Use pagination
-const products = await prisma.sku.findMany({
+const products = await drizzleService.sku.findMany({
   skip: (page - 1) * limit,
   take: limit,
   orderBy: { createdAt: 'desc' }
@@ -431,7 +431,7 @@ const products = await prisma.sku.findMany({
 ```
 
 ### 3. Add Database Indexes for Frequently Queried Fields
-```prisma
+```ts
 model Product {
   id    String  @id @default(uuid())
   name  String  @db.VarChar(200)
@@ -474,9 +474,9 @@ psql -d ecommerce_db -c "
 "
 ```
 
-### Monitor Prisma Queries
+### Monitor Drizzle Queries
 ```typescript
-// Enable query logging in prisma/schema.prisma
+// Enable query logging in src/database/schema.ts
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -546,7 +546,7 @@ DATABASE_URL=postgresql://prod-user:prod-pass@prod-host:5432/prod-db
 ## Resources
 
 - **NestJS Docs:** https://docs.nestjs.com
-- **Prisma Docs:** https://www.prisma.io/docs
+- **Drizzle Docs:** https://www.drizzleService.io/docs
 - **Stripe API:** https://stripe.com/docs/api
 - **Socket.io:** https://socket.io/docs
 - **PostgreSQL:** https://www.postgresql.org/docs

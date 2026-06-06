@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import cluster from 'node:cluster';
 import os from 'node:os';
-import { PrismaExceptionInterceptor } from './interceptors/prisma-exception.interceptor';
+import { DatabaseExceptionInterceptor } from './interceptors/database-exception.interceptor';
 import { SuccessInterceptor } from './interceptors/response.interceptor';
 import { ValidationCustomPipe } from './pipes/validation-custom.pipe';
 import { HttpExceptionFilter } from './exception-filter/http.exception-filter';
@@ -83,18 +83,18 @@ async function bootstrap() {
                 extended: true,
                 parameterLimit: 50000,
             }));
-            // app.useGlobalInterceptors(new PrismaExceptionInterceptor());
+            // app.useGlobalInterceptors(new DatabaseExceptionInterceptor());
 
 
             // Global prefix for all routes
             app.setGlobalPrefix('v1/api');
-            app.useGlobalInterceptors(new PrismaExceptionInterceptor());
+            app.useGlobalInterceptors(new DatabaseExceptionInterceptor());
             app.useGlobalInterceptors(new SuccessInterceptor())
             app.useGlobalPipes(ValidationCustomPipe.compactVersion());
             app.useGlobalFilters(new HttpExceptionFilter());
             const config = new DocumentBuilder()
                 .setTitle('E-Commerce API')
-                .setDescription('The API documentation')
+                .setDescription('API documentation for the e-commerce backend')
                 .setVersion('1.0')
                 .addBearerAuth({
                     type:'http',
@@ -104,10 +104,15 @@ async function bootstrap() {
                 .build();
 
             const document = SwaggerModule.createDocument(app, config);
-            SwaggerModule.setup('api-docs', app, document);
+            SwaggerModule.setup('v1/api/docs', app, document, {
+                swaggerOptions: {
+                    persistAuthorization: true,
+                },
+            });
             // Start listening
             await app.listen(port);
             console.log(`Worker ${process.pid} started on port ${port}`);
+            console.log(`Swagger docs available at: http://localhost:${port}/v1/api/docs`);
         } catch (error) {
             console.error('Error starting worker process:', error);
             process.exit(1);

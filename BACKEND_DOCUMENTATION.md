@@ -21,7 +21,7 @@
 
 **Project Name:** E-Commerce Backend Platform
 
-**Description:** A production-grade e-commerce backend built with NestJS, PostgreSQL, and Prisma ORM. Supports multi-tenant architecture with user, shop, and admin roles. Features real-time updates via Socket.io, payment processing with Stripe, event-driven workflows with Kafka, and comprehensive inventory management.
+**Description:** A production-grade e-commerce backend built with NestJS, PostgreSQL, and Drizzle ORM. Supports multi-tenant architecture with user, shop, and admin roles. Features real-time updates via Socket.io, payment processing with Stripe, Swagger API documentation, and comprehensive inventory management.
 
 **Key Features:**
 - ✅ Multi-tenant support (Users, Shops, Admins)
@@ -29,7 +29,7 @@
 - ✅ Shopping cart & checkout with inventory validation
 - ✅ Payment processing (Stripe + Cash on Delivery)
 - ✅ Real-time order & inventory updates via Socket.io
-- ✅ Event-driven architecture with Kafka
+- ✅ Event hooks are currently disabled with no-op services
 - ✅ Comprehensive notification system (Email, Discord, In-app)
 - ✅ Role-based access control (RBAC)
 - ✅ JWT authentication with refresh tokens
@@ -47,8 +47,8 @@
 
 ### Database & ORM
 - **PostgreSQL** - Primary relational database
-- **Prisma** v7.4.2 - Modern ORM with type safety
-- **Prisma Adapter for PostgreSQL** v7.4.2
+- **Drizzle** v7.4.2 - Modern ORM with type safety
+- **Drizzle PostgreSQL driver** v7.4.2
 
 ### Authentication & Security
 - **JWT (@nestjs/jwt)** - Token-based authentication
@@ -64,9 +64,8 @@
 ### Payment Processing
 - **Stripe** v20.4.1 - Payment gateway
 
-### Event Streaming
-- **Apache Kafka** v3.x - Event-driven architecture
-- **KafkaJS** v2.2.4 - Kafka client
+### API Documentation
+- **Swagger/OpenAPI** - API documentation and migration support
 
 ### Email & Notifications
 - **@nestjs-modules/mailer** v2.0.2 - Email service
@@ -110,8 +109,8 @@
 │   ├── Notification Module
 │   └── KeyToken Module
 ├── 🔄 Infrastructure Layer
-│   ├── Prisma ORM + Database
-│   ├── Kafka Event Bus
+│   ├── Drizzle ORM + Database
+│   ├── No-op Event Bus
 │   ├── Socket.io Real-time
 │   ├── Email Service
 │   └── Discord Service
@@ -134,15 +133,14 @@
    - All services are singletons by default
    - Easy testing and mocking
 
-3. **Repository Pattern** (via Prisma)
-   - Database operations abstracted through Prisma Client
+3. **Repository Pattern** (via Drizzle)
+   - Database operations abstracted through DrizzleService
    - No raw SQL queries in services
    - Type-safe queries with TypeScript
 
-4. **Event-Driven Architecture**
-   - Kafka for async event processing
-   - Order confirmation, payment processing async
-   - Notification dispatching via events
+4. **Event Hooks**
+   - Event publisher/consumer services are currently no-op
+   - Order confirmation, payment processing, and notification events can be re-enabled later
 
 5. **Guard-based Authorization**
    - JWT Guard for authentication
@@ -322,7 +320,7 @@ GET    /checkout/orders/:id     - Get order details
    Performance: 5-10 seconds per order (should be <100ms)
    
    Example of problematic query:
-   const order = await this.prisma.order.findUnique({
+   const order = await this.drizzleService.order.findUnique({
      where: { id: orderId },
      include: {
        orderItems: {
@@ -346,7 +344,7 @@ GET    /checkout/orders/:id     - Get order details
    })
    ```
    
-   **Fix:** Use separate queries or Prisma relation filters
+   **Fix:** Use separate queries or Drizzle relation filters
 
 2. **Race Condition in Inventory** (DATA INTEGRITY ISSUE)
    ```
@@ -567,7 +565,7 @@ Authorization: Bearer {accessToken}
 ### Core Models
 
 #### **Account** (User/Shop/Admin)
-```prisma
+```ts
 model Account {
   id           String
   accountType  enum(USER|SHOP|ADMIN)
@@ -588,7 +586,7 @@ model Account {
 ```
 
 #### **Product Hierarchy** (SPU/SKU)
-```prisma
+```ts
 model Spu {  // Standard Product Unit
   id           String
   name         String
@@ -616,7 +614,7 @@ model Sku {  // Stock Keeping Unit (variants)
 ```
 
 #### **Cart & Checkout**
-```prisma
+```ts
 model Cart {
   id           String
   accountId    String
@@ -641,7 +639,7 @@ model Order {
 ```
 
 #### **Inventory & Reservation**
-```prisma
+```ts
 model Inventory {
   id           String
   skuId        String
@@ -660,7 +658,7 @@ model InventoryReservation {
 ```
 
 #### **Payments**
-```prisma
+```ts
 model Payment {
   id           String
   orderId      String
@@ -675,7 +673,7 @@ model Payment {
 ```
 
 #### **Comments & Ratings**
-```prisma
+```ts
 model Comment {
   id           String
   spuId        String
@@ -792,7 +790,6 @@ sequenceDiagram
 - **npm** v9+ or **yarn** v3+
 - **PostgreSQL** v15+ (with createdb privilege)
 - **Docker** (optional, for PostgreSQL)
-- **Apache Kafka** v3+ (optional, for events)
 
 ### Step 1: Clone Repository
 
@@ -836,21 +833,21 @@ cp .env.example .env
 ### Step 5: Run Database Migrations
 
 ```bash
-# Generate Prisma Client
-npx prisma generate
+# Generate DrizzleService
+npm run db:generate
 
 # Run migrations
-npx prisma migrate dev --name init
+npm run db:migrate
 
 # (Optional) Seed database with sample data
-npx prisma db seed
+npm run db:push
 ```
 
-### Step 6: Prepare Kafka (Optional)
+### Step 6: Open Swagger
 
-For local development without Kafka:
+After starting the app, open:
 ```bash
-# Comment out Kafka modules in src/app.module.ts
+http://localhost:3056/v1/api/docs
 ```
 
 For production with Docker Compose:
@@ -889,13 +886,13 @@ npm run start:prod
 
 ```
 [Nest] XX:XX:XX     LOG [NestFactory] Initializing NestApplication ...
-[Nest] XX:XX:XX     LOG [InstanceLoader] PrismaModule dependencies initialized
+[Nest] XX:XX:XX     LOG [InstanceLoader] DrizzleModule dependencies initialized
 [Nest] XX:XX:XX     LOG [InstanceLoader] ConfigModule dependencies initialized
 [Nest] XX:XX:XX     LOG [InstanceLoader] AuthModule dependencies initialized
 ...
 [Nest] XX:XX:XX     LOG [NestApplication] Nest application successfully started
 [Nest] XX:XX:XX     LOG Server is running on: http://localhost:3056/api
-[Nest] XX:XX:XX     LOG Swagger docs available at: http://localhost:3056/api/docs
+[Nest] XX:XX:XX     LOG Swagger docs available at: http://localhost:3056/v1/api/docs
 ```
 
 ### Testing
@@ -952,9 +949,6 @@ MAIL_FROM=noreply@yourdomain.com
 DISCORD_BOT_TOKEN=your-discord-bot-token
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxxxx/xxxxx
 
-# Kafka
-KAFKA_BROKER=localhost:9092
-KAFKA_GROUP_ID=ecommerce_consumer_group
 
 # Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:3000
@@ -975,7 +969,7 @@ REDIS_URL=redis://localhost:6379
 
 **Current Code (SLOW):**
 ```typescript
-const order = await this.prisma.order.findUnique({
+const order = await this.drizzleService.order.findUnique({
   where: { id: orderId },
   include: {
     orderItems: {
@@ -1001,14 +995,14 @@ const order = await this.prisma.order.findUnique({
 
 **Fix Option 1: Separate Queries**
 ```typescript
-const order = await this.prisma.order.findUnique({
+const order = await this.drizzleService.order.findUnique({
   where: { id: orderId },
   include: {
     orderItems: { select: { id: true, skuId: true, quantity: true } }
   }
 });
 
-const skus = await this.prisma.sku.findMany({
+const skus = await this.drizzleService.sku.findMany({
   where: { id: { in: order.orderItems.map(i => i.skuId) } },
   include: { spu: true }
 });
@@ -1016,7 +1010,7 @@ const skus = await this.prisma.sku.findMany({
 
 **Fix Option 2: Field Selection**
 ```typescript
-const order = await this.prisma.order.findUnique({
+const order = await this.drizzleService.order.findUnique({
   where: { id: orderId },
   include: {
     orderItems: {
@@ -1044,7 +1038,7 @@ const order = await this.prisma.order.findUnique({
 
 **Fix: Use Database Transactions**
 ```typescript
-const order = await this.prisma.$transaction(async (tx) => {
+const order = await this.drizzleService.$transaction(async (tx) => {
   // Step 1: Lock inventory row
   const inventory = await tx.inventory.findUnique(
     { where: { skuId } },
@@ -1068,9 +1062,9 @@ const order = await this.prisma.$transaction(async (tx) => {
 });
 ```
 
-**Note:** Prisma doesn't support `WITH (LOCK)` natively. Alternative: Use raw query
+**Note:** Drizzle doesn't support `WITH (LOCK)` natively. Alternative: Use raw query
 ```typescript
-await this.prisma.$queryRaw`
+await this.drizzleService.$queryRaw`
   SELECT * FROM inventory WHERE sku_id = ${skuId} FOR UPDATE;
 `;
 ```
@@ -1229,11 +1223,11 @@ docker-compose up -d
 
 ## Troubleshooting
 
-### Q: Prisma migration fails
+### Q: Drizzle migration fails
 
 ```bash
 # Reset database (data will be lost!)
-npx prisma migrate reset
+npm run db:push
 
 # Or manually drop all tables
 psql ecommerce_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
@@ -1242,8 +1236,8 @@ psql ecommerce_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 ### Q: "Cannot find module" error
 
 ```bash
-# Regenerate Prisma Client
-npx prisma generate
+# Regenerate DrizzleService
+npm run db:generate
 
 # Or reinstall all dependencies
 rm -rf node_modules
@@ -1307,7 +1301,7 @@ test: Add tests
 ## Support & Resources
 
 - 📖 **NestJS Docs:** https://docs.nestjs.com
-- 🔍 **Prisma Docs:** https://www.prisma.io/docs
+- 🔍 **Drizzle Docs:** https://www.drizzleService.io/docs
 - 🛡️ **OWASP:** https://owasp.org/www-community/attacks
 - 📊 **REST API Best Practices:** https://restfulapi.net
 
@@ -1328,9 +1322,9 @@ For issues or questions, please open a GitHub issue or contact the development t
 npm run start:dev
 
 # Database
-npx prisma studio              # GUI database explorer
-npx prisma migrate dev         # Apply migrations
-npx prisma db seed             # Seed sample data
+npm run db:studio              # GUI database explorer
+npm run db:migrate         # Apply migrations
+npm run db:push             # Seed sample data
 
 # Testing
 npm test                       # Run tests

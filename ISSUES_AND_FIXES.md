@@ -19,11 +19,11 @@ This document details the critical and non-critical issues found during code rev
 
 #### Problem Description
 
-The checkout service performs deeply nested Prisma queries that trigger multiple sequential database queries:
+The checkout service performs deeply nested Drizzle queries that trigger multiple sequential database queries:
 
 ```typescript
 // CURRENT (BAD) - Triggers 100+ queries
-const order = await this.prisma.order.findUnique({
+const order = await this.drizzleService.order.findUnique({
   where: { id: orderId },
   include: {
     orderItems: {
@@ -84,7 +84,7 @@ With 10 order items: 100+ queries
 // FIXED - Separate queries with selective fields
 async createOrder(createOrderDto: CreateOrderDTO) {
   // 1. Get cart with minimal nesting
-  const cart = await this.prisma.cart.findUnique({
+  const cart = await this.drizzleService.cart.findUnique({
     where: { id: cartId },
     include: {
       items: {
@@ -101,7 +101,7 @@ async createOrder(createOrderDto: CreateOrderDTO) {
 
   // 2. Get SKU/products separately
   const skuIds = cart.items.map(i => i.productId);
-  const skus = await this.prisma.sku.findMany({
+  const skus = await this.drizzleService.sku.findMany({
     where: { id: { in: skuIds } },
     include: {
       spu: true,
@@ -118,7 +118,7 @@ async createOrder(createOrderDto: CreateOrderDTO) {
   }
 
   // 4. Create order (transaction)
-  const order = await this.prisma.$transaction(async (tx) => {
+  const order = await this.drizzleService.$transaction(async (tx) => {
     // Create order
     const newOrder = await tx.order.create({
       data: {
@@ -152,7 +152,7 @@ async createOrder(createOrderDto: CreateOrderDTO) {
 // Get order details (optimized)
 async getOrderDetails(orderId: string) {
   // Get order with minimal includes
-  const order = await this.prisma.order.findUnique({
+  const order = await this.drizzleService.order.findUnique({
     where: { id: orderId },
     include: {
       items: {
@@ -169,7 +169,7 @@ async getOrderDetails(orderId: string) {
   });
 
   // Get SKUs in one query
-  const skus = await this.prisma.sku.findMany({
+  const skus = await this.drizzleService.sku.findMany({
     where: { id: { in: order.items.map(i => i.skuId) } },
     include: { spu: true }
   });
@@ -187,11 +187,11 @@ async getOrderDetails(orderId: string) {
 }
 ```
 
-**Option 2: Prisma Relation Filters**
+**Option 2: Drizzle Relations? Filters**
 
 ```typescript
-// Alternative using relation filters (Prisma 5+)
-const order = await this.prisma.order.findUnique({
+// Alternative using relation filters (Drizzle 5+)
+const order = await this.drizzleService.order.findUnique({
   where: { id: orderId },
   include: {
     items: {
@@ -212,7 +212,7 @@ const order = await this.prisma.order.findUnique({
 **Option 3: Raw SQL Query (Maximum Performance)**
 
 ```typescript
-const order = await this.prisma.$queryRaw`
+const order = await this.drizzleService.$queryRaw`
   SELECT 
     o.*,
     json_agg(
@@ -282,7 +282,7 @@ Stock is checked and decremented in separate operations without atomicity:
 
 ```typescript
 // CURRENT (BAD) - Race condition
-const inventory = await this.prisma.inventory.findUnique({
+const inventory = await this.drizzleService.inventory.findUnique({
   where: { skuId }
 });
 
@@ -292,7 +292,7 @@ if (inventory.available < quantity) {
 }
 
 // Deduct stock
-await this.prisma.inventory.update({
+await this.drizzleService.inventory.update({
   where: { skuId },
   data: { available: { decrement: quantity } }
 });
@@ -319,11 +319,11 @@ Result: **Negative Stock!**
 
 ```typescript
 // FIXED - Atomic operation
-const order = await this.prisma.$transaction(async (tx) => {
+const order = await this.drizzleService.$transaction(async (tx) => {
   // Step 1: Lock inventory row and check stock
   const inventory = await tx.inventory.findUnique({
     where: { skuId },
-    // Note: Prisma doesn't support explicit locking,
+    // Note: Drizzle doesn't support explicit locking,
     // but transaction isolation helps
   });
 
@@ -364,7 +364,7 @@ const order = await this.prisma.$transaction(async (tx) => {
 **Option 2: Raw SQL with Row Lock (Maximum Safety)**
 
 ```typescript
-const order = await this.prisma.$transaction(async (tx) => {
+const order = await this.drizzleService.$transaction(async (tx) => {
   // Explicit row lock with SELECT FOR UPDATE
   const lockedInventory = await tx.$queryRaw`
     SELECT * FROM "inventory"
@@ -404,7 +404,7 @@ model Inventory {
 // Implementation
 async createOrder() {
   try {
-    await this.prisma.$transaction(async (tx) => {
+    await this.drizzleService.$transaction(async (tx) => {
       const inventory = await tx.inventory.findUnique({
         where: { skuId }
       });
@@ -437,8 +437,8 @@ async createOrder() {
 
 #### Implementation Steps
 
-1. **Update Prisma schema** (if using Option 3):
-   ```prisma
+1. **Update Drizzle schema** (if using Option 3):
+   ```ts
    model Inventory {
      id        String @id @default(uuid())
      skuId     String @unique
@@ -450,7 +450,7 @@ async createOrder() {
 
 2. **Create migration:**
    ```bash
-   npx prisma migrate dev --name add_inventory_version
+   npm run db:generate
    ```
 
 3. **Update checkout.service.ts:**
@@ -467,7 +467,7 @@ async createOrder() {
    await Promise.allSettled(promises);
    
    // Verify stock is never negative
-   const final = await prisma.inventory.findUnique({ where: { skuId } });
+   const final = await drizzleService.inventory.findUnique({ where: { skuId } });
    console.log(final.available); // Should be 0, not negative
    ```
 

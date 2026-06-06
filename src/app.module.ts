@@ -2,7 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShopModule } from './modules/shop/shop.module';
-import { PrismaModule } from './services/prisma/prisma.module';
+import { DrizzleModule } from './database/drizzle.module';
 import { KeyTokenModule } from './modules/keytoken/keytoken.module';
 import { ProductModule } from './modules/product/product.module';
 import { DiscountModule } from './modules/discount/discount.module';
@@ -28,7 +28,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
         }),
         AuthModule,
         ShopModule,
-        PrismaModule,
+        DrizzleModule,
         KeyTokenModule,
         ProductModule,
         DiscountModule,

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'src/services/prisma/prisma.module';
+import { DrizzleModule } from 'src/database/drizzle.module';
 import { ShopController } from './shop.controller';
 import { ShopService } from './shop.service';
 import { AuthModule } from '../auth/auth.module';
@@ -8,7 +8,7 @@ import { KafkaModule } from 'src/services/kafka/kafka.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-    imports:[PrismaModule, KeyTokenModule, KafkaModule, JwtModule, AuthModule],//import prisma module to use prisma's services
+    imports:[DrizzleModule, KeyTokenModule, KafkaModule, JwtModule, AuthModule],
     controllers:[ShopController],//controller to handle http
     providers:[ ShopService],// register these services 
     exports: [ShopService]// services which can be use by another module when import this module

@@ -1,25 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { CreateDiscountDTO } from './dto/createDiscount.dto';
 import { GetListDiscountDTO } from './dto/getListDiscount.dto';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 import { getSelectData } from 'src/shared/utils';
-import { Discount } from 'prisma/generated/prisma';
+import { Discount } from 'src/database/types';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 @Injectable()
 export class DiscountService {
     constructor(
-        private readonly prismaService: PrismaService,
+        private readonly drizzleService: DrizzleService,
         private readonly producerService: ProducerService
     ){}
     
     private async checkDiscountExists(filter: {}): Promise<Discount | null>{
-        return await this.prismaService.discount.findFirst({where:filter})
+        return await this.drizzleService.discount.findFirst({where:filter})
     }
 
     private async findAllDiscountCodesSelect (take: number, skip: number,filter: object,select: string[]): Promise<{}|null>{
-        return await this.prismaService.discount.findMany({
+        return await this.drizzleService.discount.findMany({
             //sort by create decending
             where: filter,
             orderBy:{
@@ -32,7 +32,7 @@ export class DiscountService {
     };
 
     private async findAllProduct (id: string){
-        return await this.prismaService.spu.findMany({
+        return await this.drizzleService.spu.findMany({
             where:{
                 shopBusinessId: id,
                 isMarketable: true
@@ -62,7 +62,7 @@ export class DiscountService {
             throw new BadRequestException('Discount existed!!!');
         }
 
-        const newDiscount = await this.prismaService.discount.create({
+        const newDiscount = await this.drizzleService.discount.create({
             data:{
                 ...payload,
                 discountStartDates: new Date(payload.discountStartDates),
@@ -73,7 +73,7 @@ export class DiscountService {
 
         if(newDiscount){
             const topics = this.producerService.getTopics()
-            const shop = await this.prismaService.spu.findUnique({
+            const shop = await this.drizzleService.spu.findUnique({
                 where:{
                     id: newDiscount.discountShopId
                 }
@@ -129,7 +129,7 @@ export class DiscountService {
     async getAllDiscountCodesByShop( discountLimit: number, discountPage: number, discountShopId: string ): Promise<Discount[]>{
         const limit = Number(discountLimit) || 10;
         const page = Number(discountPage) || 1;
-        return this.prismaService.discount.findMany({
+        return this.drizzleService.discount.findMany({
             where:{
                 discountShopId,
                 discountIsActive:true
@@ -191,7 +191,7 @@ export class DiscountService {
     }
 
     async deleteDiscountCode({discountShopId, discountCode}:AmountDiscountDTO){
-        return this.prismaService.discount.delete({
+        return this.drizzleService.discount.delete({
             where: {
                 discountCode,
                 discountShopId

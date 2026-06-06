@@ -1,18 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'node:crypto';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { promisify } from 'util';
-import { randomBytes } from 'node:crypto';
-import { buffer } from 'node:stream/consumers';
 
 @Injectable()
 export class AuthService {
     protected readonly logger = new Logger(this.constructor.name);
 
     constructor(
-        protected readonly prismaService: PrismaService,
+        protected readonly drizzleService: DrizzleService,
         protected readonly jwtService: JwtService,
         protected readonly producerService: ProducerService
     ) {};
@@ -73,7 +71,7 @@ export class AuthService {
             role: 'USER'
         };
         
-        const accessToken = this.jwtService.sign(payload,  
+        const accessToken = this.jwtService.sign({ ...payload, tokenType: 'access' },  
             {
                 privateKey,              
                 algorithm: 'RS256',      
@@ -81,7 +79,7 @@ export class AuthService {
             }
         )
 
-        const refreshToken = this.jwtService.sign(payload,  
+        const refreshToken = this.jwtService.sign({ ...payload, tokenType: 'refresh' },  
             {
                 privateKey,              
                 algorithm: 'RS256',      
@@ -97,7 +95,11 @@ export class AuthService {
         publicKey: string, 
         refreshToken: string
     ) {
-        return await this.prismaService.keyToken.upsert({
+        if (!accountId || !deviceId || !publicKey || !refreshToken) {
+            throw new BadRequestException('Missing key store data');
+        }
+
+        return await this.drizzleService.keyToken.upsert({
             where: {
                 authId_deviceId: {
                     authId: accountId,

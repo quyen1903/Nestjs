@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
-import { NotificationType } from 'prisma/generated/prisma';
+import { DrizzleService } from 'src/database/drizzle.service';
+import { NotificationType } from 'src/database/types';
 @Injectable()
 export class NotificationFactoryService {
     private readonly logger = new Logger(NotificationFactoryService.name);
 
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly drizzleService: DrizzleService) {}
 
     async createProductNotification(data: {
         productId: string;
@@ -45,7 +45,7 @@ export class NotificationFactoryService {
     }) {
         try {
             // Get all notification threads to notify users
-            const notificationThreads = await this.prismaService.notificationThread.findMany({
+            const notificationThreads = await this.drizzleService.notificationThread.findMany({
                 where: { isActive: true }
             });
 
@@ -65,9 +65,9 @@ export class NotificationFactoryService {
             }));
 
             // Use transaction for atomicity
-            const result = await this.prismaService.$transaction(async (prisma) => {
+            const result = await this.drizzleService.$transaction(async (db) => {
                 for (const notification of notificationsToCreate) {
-                    await prisma.notification.create({ data: notification });
+                    await db.notification.create({ data: notification });
                 }
                 return notificationsToCreate.length;
             });

@@ -5,27 +5,25 @@ import {
     ForbiddenException,
     InternalServerErrorException,
     ConflictException,
-    Logger
 } from '@nestjs/common';
 import crypto from 'crypto';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService, isUniqueViolation } from 'src/database/drizzle.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginManualDTO } from '../dto/loginManual.dto';
 import { AuthService } from '../auth.service';
-import { AccountType, KeyToken, Prisma } from 'prisma/generated/prisma';
+import { AccountType, KeyToken } from 'src/database/types';
 import { getInfoData } from 'src/shared/utils';
 import { RegisterUserDTO } from 'src/modules/user/dto/register.dto';
 
 @Injectable()
 export class ShopAuthService extends AuthService {
 
-    constructor(
-        prismaService: PrismaService,
+    constructor(drizzleService: DrizzleService,
         jwtService: JwtService,
         producerService: ProducerService,
     ) {
-        super(prismaService, jwtService, producerService);
+        super(drizzleService, jwtService, producerService);
     }
 
     protected override createTokenPair(accountId: string, deviceId: string, email: string, privateKey: string) {
@@ -37,13 +35,13 @@ export class ShopAuthService extends AuthService {
             permissions: ['order:read', 'order:write']
         };
 
-        const accessToken = this.jwtService.sign(payload, {
+        const accessToken = this.jwtService.sign({ ...payload, tokenType: 'access' }, {
             privateKey,
             algorithm: 'RS256',
             expiresIn: '1h',
         });
 
-        const refreshToken = this.jwtService.sign(payload, {
+        const refreshToken = this.jwtService.sign({ ...payload, tokenType: 'refresh' }, {
             privateKey,
             algorithm: 'RS256',
             expiresIn: '6h',
@@ -62,7 +60,11 @@ export class ShopAuthService extends AuthService {
         update: any;
         createUsedToken: any;
     }> {
-        return await this.prismaService.$transaction(async (tx) => {
+        if (!shopId || !deviceId || !requestRefreshToken) {
+            throw new UnauthorizedException('Invalid refresh token context');
+        }
+
+        return await this.drizzleService.$transaction(async (tx) => {
             // Check if token has been used before
             const duplicateJWT = await tx.refreshTokenUsed.findFirst({
                 where: { token: requestRefreshToken }
@@ -143,8 +145,12 @@ export class ShopAuthService extends AuthService {
     }
 
     async logout(keyStore: KeyToken): Promise<any> {
+        if (!keyStore?.authId || !keyStore?.deviceId) {
+            throw new UnauthorizedException('Invalid logout context');
+        }
+
         // Remove all key tokens for this account
-        return await this.prismaService.keyToken.updateMany({
+        return await this.drizzleService.keyToken.updateMany({
             where: {
                 authId: keyStore.authId,
                 deviceId: keyStore.deviceId
@@ -186,7 +192,7 @@ export class ShopAuthService extends AuthService {
 
             const { publicKey, privateKey } = await this.generateKeyPair();
 
-            const result = await this.prismaService.$transaction(async (tx) => {
+            const result = await this.drizzleService.$transaction(async (tx) => {
                 // 1. Check if shop exists
                 const foundShop = await tx.account.findFirst({
                     where: {
@@ -273,7 +279,7 @@ export class ShopAuthService extends AuthService {
              *  */ 
             setImmediate(async () => {
                 try {
-                    await this.prismaService.accountAuthentication.update({
+                    await this.drizzleService.accountAuthentication.update({
                         where: { accountId: result.shopId },
                         data: {
                             lastLoginAt: BigInt(Date.now()),
@@ -328,7 +334,7 @@ export class ShopAuthService extends AuthService {
             const passwordHashed = await this.hashPassword(register.password, salt);
             
             //  create account and related data in transaction
-            const result = await this.prismaService.$transaction(async (tx)=>{
+            const result = await this.drizzleService.$transaction(async (tx)=>{
 
                 //1. create main account table
                 const newAccount = await tx.account.create({
@@ -431,7 +437,7 @@ export class ShopAuthService extends AuthService {
                 refreshToken
             };
         } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            if (isUniqueViolation(error)) {
                 throw new ConflictException('Shop with this email already exists'); // 409
             }
             if (error instanceof BadRequestException || error instanceof UnauthorizedException) {

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
-import { PrismaService } from "src/services/prisma/prisma.service";
+import { DrizzleService } from "src/database/drizzle.service";
 import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "./dto/request-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
@@ -8,7 +8,7 @@ import { ProductSearchResult, ProductWithSkus } from "./interfaces/product.inter
 @Injectable()
 export class ProductService {
     constructor( 
-        private readonly prismaService: PrismaService,
+        private readonly drizzleService: DrizzleService,
         private readonly producerService: ProducerService
     ){}
 
@@ -24,7 +24,7 @@ export class ProductService {
      */
     async createProduct(spu: CreateSpuDTO,  sku: CreateSkuDTO, shopBusinessId: string){
         // we check spu existed or not
-        const spuExisted =await this.prismaService.spu.findUnique({
+        const spuExisted =await this.drizzleService.spu.findUnique({
             where:{
                 name:spu.name,
                 categoryId: spu.categoryId,
@@ -35,7 +35,7 @@ export class ProductService {
         // 1.1 once spu existed, we use transaction
         if(spuExisted) {
 
-            return this.prismaService.$transaction(async(tx)=>{
+            return this.drizzleService.$transaction(async(tx)=>{
                 const skuExists = await tx.sku.findFirst({
                     where: {
                         spuId: spuExisted.id,
@@ -71,7 +71,7 @@ export class ProductService {
         }
 
         // 2 spu are not existed, we create new spu and sku
-        return this.prismaService.$transaction(async (tx)=>{
+        return this.drizzleService.$transaction(async (tx)=>{
             const newSPU = await tx.spu.create({
                 data:{ ...spu, shopBusinessId }
             });
@@ -84,7 +84,7 @@ export class ProductService {
 
     async createBrand(body: CreateBrandDTO){
         try {
-            return await this.prismaService.brand.create({
+            return await this.drizzleService.brand.create({
                 data:{...body}
             })
         } catch (error) {
@@ -93,7 +93,7 @@ export class ProductService {
     }
 
     async findProduct(id: string){
-        return await this.prismaService.spu.findUnique({
+        return await this.drizzleService.spu.findUnique({
             where:{id}
         })
     };
@@ -101,7 +101,7 @@ export class ProductService {
     async checkProductByServer(skus: ItemProductDTO[]){
         return await Promise.all(skus.map(
             async (sku)=>{
-                const foundProduct = await this.prismaService.sku.findUnique({
+                const foundProduct = await this.drizzleService.sku.findUnique({
                     where:{id: sku.productId}
                 })
                 if(foundProduct){
@@ -116,10 +116,10 @@ export class ProductService {
     }
 
     async updateProduct(productId: string, payload: Partial<CreateSpuDTO & CreateSkuDTO>){
-        const product = await this.prismaService.spu.findUnique({ where: { id: productId }, include: { skus: true } });
+        const product = await this.drizzleService.spu.findUnique({ where: { id: productId }, include: { skus: true } });
         if (!product) throw new NotFoundException('Product not found'); 
 
-        return this.prismaService.$transaction(async(tx)=>{
+        return this.drizzleService.$transaction(async(tx)=>{
             const spuFields = ['name', 'intro', 'brandId', 'categoryId', 'images', 'content', 'attributeList'];
             const spuUpdates = Object.keys(payload)
             .filter(key => spuFields.includes(key))
@@ -159,7 +159,7 @@ export class ProductService {
     }
 
     async getListSearchProduct(keySearch: string): Promise<ProductSearchResult[]> {
-        const products = await this.prismaService.spu.findMany({
+        const products = await this.drizzleService.spu.findMany({
             where: {
                 AND: [
                     { isActive: true },
@@ -194,7 +194,7 @@ export class ProductService {
     }
 
     async findAllDraftsForShop({ shopBusinessId, skip = 0, take = 10 }) {
-        return await this.prismaService.spu.findMany({
+        return await this.drizzleService.spu.findMany({
             where: {
                 shopBusinessId,
                 status: 0, // Unaudited status indicates draft
@@ -225,7 +225,7 @@ export class ProductService {
     }
 
     async findAllPublishForShop({ shopBusinessId, skip = 0, take = 10 }) {
-        return await this.prismaService.spu.findMany({
+        return await this.drizzleService.spu.findMany({
             where: {
                 shopBusinessId,
                 status: 1, // Reviewed status indicates published
@@ -258,7 +258,7 @@ export class ProductService {
 
     async publishProductByShop({ shopBusinessId, uuid, isDraft = false, isPublished = true }) {
         // Verify the product belongs to the shop
-        const product = await this.prismaService.spu.findFirst({
+        const product = await this.drizzleService.spu.findFirst({
             where: {
                 id: uuid,
                 shopBusinessId,
@@ -270,7 +270,7 @@ export class ProductService {
             throw new NotFoundException('Product not found or does not belong to this shop');
         }
 
-        return await this.prismaService.spu.update({
+        return await this.drizzleService.spu.update({
             where: { id: uuid },
             data: {
                 status: isPublished ? 1 : 0, // 1 = Reviewed/Published, 0 = Draft/Unaudited
@@ -293,7 +293,7 @@ export class ProductService {
 
     async unPublishProductByShop({ shopBusinessId, uuid, isDraft = true, isPublished = false }) {
         // Verify the product belongs to the shop
-        const product = await this.prismaService.spu.findFirst({
+        const product = await this.drizzleService.spu.findFirst({
             where: {
                 id: uuid,
                 shopBusinessId,
@@ -305,7 +305,7 @@ export class ProductService {
             throw new NotFoundException('Product not found or does not belong to this shop');
         }
 
-        return await this.prismaService.spu.update({
+        return await this.drizzleService.spu.update({
             where: { id: uuid },
             data: {
                 status: 0, // Set back to unaudited/draft
@@ -337,7 +337,7 @@ export class ProductService {
             whereCondition.isMarketable = true;
         }
 
-        return await this.prismaService.spu.findMany({
+        return await this.drizzleService.spu.findMany({
             where: whereCondition,
             select: {
                 id: true,
@@ -367,7 +367,7 @@ export class ProductService {
     }
 
     async findUniqueProduct(productId: string) {
-        const product = await this.prismaService.spu.findUnique({
+        const product = await this.drizzleService.spu.findUnique({
             where: {
                     id: productId,
                     isActive: true
@@ -415,7 +415,7 @@ export class ProductService {
      */
     async findProductByname(keyword: string){
         console.log("keyword", keyword)
-        const product = await this.prismaService.spu.findMany({
+        const product = await this.drizzleService.spu.findMany({
             where:{
                 OR:[
                     { name: keyword },

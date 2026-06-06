@@ -6,22 +6,21 @@ import {
     InternalServerErrorException
 } from '@nestjs/common';
 import crypto from 'crypto';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 import { JwtService } from '@nestjs/jwt';
 // import { RegisterShopDTO } from './dto/register.dto';
 import { AuthService } from '../auth/auth.service';
-import { AccountType, AuthMethod } from 'prisma/generated/prisma';
+import { AccountType, AuthMethod } from 'src/database/types';
 import { getInfoData } from 'src/shared/utils';
 
 @Injectable()
 export class ShopService extends AuthService {
-  constructor(
-    prismaService: PrismaService,
+  constructor(drizzleService: DrizzleService,
     jwtService: JwtService,
     producerService: ProducerService,
   ) {
-    super(prismaService, jwtService, producerService);
+    super(drizzleService, jwtService, producerService);
   }
 
   protected override createTokenPair(accountId: string, email: string, privateKey: string) {
@@ -53,7 +52,7 @@ export class ShopService extends AuthService {
   //   refreshToken: string;
   // }> {
   //   // Check if shop already exists
-  //   const shopHolder = await this.prismaService.account.findFirst({
+  //   const shopHolder = await this.drizzleService.account.findFirst({
   //     where: {
   //       accountType: AccountType.SHOP,
   //       authentication: {
@@ -75,7 +74,7 @@ export class ShopService extends AuthService {
   //   const passwordHashed = await this.hashPassword(register.password, salt);
 
   //   // Create account and related data in transaction
-  //   const result = await this.prismaService.$transaction(async (tx) => {
+  //   const result = await this.drizzleService.$transaction(async (tx) => {
   //     // 1. Create main account
   //     const newAccount = await tx.account.create({
   //       data: {

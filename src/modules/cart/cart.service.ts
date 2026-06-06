@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { CreateCartDTO, CreateProductDTO } from './dto/create-cart.dto';
 import { UpdateCartDTO } from './dto/update-cart.dto';
 @Injectable()
 export class CartService {
     constructor(
-        private readonly prismaService:PrismaService
+        private readonly drizzleService:DrizzleService
     ){}
 
     get getCartMethod(){
@@ -13,13 +13,13 @@ export class CartService {
     }
 
     private async getCart(filter:{}){
-        return await this.prismaService.cart.findFirst({
+        return await this.drizzleService.cart.findFirst({
             where:filter
         })
     }
 
     private async createUserCart ({ userId, product }: CreateCartDTO){
-        const cart = await this.prismaService.cart.create({
+        const cart = await this.drizzleService.cart.create({
             data: {
                 userId,
                 countProduct:1
@@ -30,14 +30,14 @@ export class CartService {
     };
 
     private async createCartProduct({ cartId, product }: {cartId: string, product: CreateProductDTO}){
-        const cartExists = await this.prismaService.cart.findUnique({
+        const cartExists = await this.drizzleService.cart.findUnique({
             where: { id: cartId },
         });
         
         if (!cartExists) {
             throw new Error(`Cart with ID ${cartId} does not exist.`);
         }
-        return await this.prismaService.cartProduct.upsert({
+        return await this.drizzleService.cartProduct.upsert({
             where:{
                 cartId_productId: {
                     cartId,
@@ -72,7 +72,7 @@ export class CartService {
         }
 
         //check wheather cart has product or not, if not, add product to cart
-        const countProductInCart = await this.prismaService.cartProduct.count({
+        const countProductInCart = await this.drizzleService.cartProduct.count({
             where: {cartId:cart.id}
         })
 
@@ -81,7 +81,7 @@ export class CartService {
         }
 
         //check wheather product we're passing is cart existed in cart or not
-        const checkCartProduct = await this.prismaService.cartProduct.findUnique({
+        const checkCartProduct = await this.drizzleService.cartProduct.findUnique({
             where:{
                 cartId_productId: {
                     cartId: cart.id,
@@ -94,7 +94,7 @@ export class CartService {
 
         if(!checkCartProduct){
             //increase count product by one
-            await this.prismaService.cart.update({
+            await this.drizzleService.cart.update({
                 where:{
                     id:cart.id
                 },
@@ -120,7 +120,7 @@ export class CartService {
             for(const eachShop of element.itemProducts){
                 if(!eachShop.oldQuantity) eachShop.oldQuantity = 0;
 
-                const result = await this.prismaService.cartProduct.update({
+                const result = await this.drizzleService.cartProduct.update({
                     //composite key means we combine more column to establish the uniqueness
                     where: {
                         cartId_productId: {
@@ -136,7 +136,7 @@ export class CartService {
                 })
 
                 if(result.quantity === 0){
-                    await this.prismaService.cartProduct.delete({
+                    await this.drizzleService.cartProduct.delete({
                         where:{
                             id: result.id
                         }
@@ -152,7 +152,7 @@ export class CartService {
 
         if (!cart) throw new Error("Cart not found for user");
 
-        const result = await this.prismaService.cart.update({
+        const result = await this.drizzleService.cart.update({
             where:{
                 userId
             },
@@ -167,7 +167,7 @@ export class CartService {
     async getListUserCart(userId: string){
         const cart = await this.getCart({userId})
 
-        return await this.prismaService.cartProduct.findMany({
+        return await this.drizzleService.cartProduct.findMany({
             where:{
                 cartId:cart?.id
             }
@@ -177,14 +177,14 @@ export class CartService {
 
     async clearCart(cartId: string) {
         // Delete all cart products
-        await this.prismaService.cartProduct.deleteMany({
+        await this.drizzleService.cartProduct.deleteMany({
             where: {
                 cartId
             }
         });
 
         // Reset cart count
-        await this.prismaService.cart.update({
+        await this.drizzleService.cart.update({
             where: {
                 id: cartId
             },

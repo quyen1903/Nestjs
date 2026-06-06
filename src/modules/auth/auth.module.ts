@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'src/services/prisma/prisma.module';
+import { DrizzleModule } from 'src/database/drizzle.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { ShopAuthModule } from './shop-auth/shop-auth.module';
 import { UserAuthModule } from './user-auth/user-auth.module';
@@ -9,10 +9,14 @@ import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './user-auth/strategies/google.strategy';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
 import { RouterModule } from '@nestjs/core';
+import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { JwtAccessAuthGuard } from './guards/jwt-access-auth.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 @Module({
     imports:[
         JwtModule,
-        PrismaModule,
+        DrizzleModule,
         KeyTokenModule,
         ShopAuthModule,
         UserAuthModule,
@@ -28,8 +32,8 @@ import { RouterModule } from '@nestjs/core';
             }
         ])
     ],
-    providers:[AuthService, GoogleStrategy],
+    providers:[AuthService, GoogleStrategy, JwtAccessStrategy, JwtRefreshStrategy, JwtAccessAuthGuard, JwtRefreshAuthGuard],
     controllers:[AuthController],
-    exports: [AuthService]
+    exports: [AuthService, JwtAccessAuthGuard, JwtRefreshAuthGuard]
 })
 export class AuthModule {}

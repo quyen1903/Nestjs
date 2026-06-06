@@ -1,5 +1,5 @@
 import { Iapikey } from 'src/shared/interfaces/apikey.interface';
-import { KeyToken } from 'prisma/generated/prisma';
+import { KeyToken } from 'src/database/types';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { JwtShop } from './jwt.shop';
 
@@ -14,10 +14,11 @@ export interface ShopAuthRequest {
 export const ShopAuthRequest = createParamDecorator(
     (data: keyof ShopAuthRequest | undefined, ctx: ExecutionContext) => {
             const request = ctx.switchToHttp().getRequest();
+            const user = request.user ?? {};
             const authData: Partial<ShopAuthRequest> = {
-            keyStore: request.keyStore,
-            account: request.account,
-            refreshToken: request.refreshToken,
+            keyStore: request.keyStore ?? user.keyStore,
+            account: request.account ?? user,
+            refreshToken: request.refreshToken ?? user.refreshToken,
             apiKey: request.apiKey,
             requestId: request.requestId,
         };

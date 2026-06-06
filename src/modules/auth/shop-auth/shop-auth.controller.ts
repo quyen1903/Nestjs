@@ -7,40 +7,61 @@ import {
     Req, 
 } from "@nestjs/common";
 import { LoginManualDTO } from '../dto/loginManual.dto';
-import { AccessTokenGuard } from '../access-token.guard';
-import { RefreshTokenGuard } from '../refresh-token.guard';
+import { JwtAccessAuthGuard } from '../guards/jwt-access-auth.guard';
+import { JwtRefreshAuthGuard } from '../guards/jwt-refresh-auth.guard';
 import { RoleGuard } from "../auth-role.guard";
 import { Roles } from "../roles.decorator";
-import { AccountType } from 'prisma/generated/prisma';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { AccountType } from 'src/database/types';
+import { ApiTags } from '@nestjs/swagger';
 import { RegisterShopDTO } from './dto/register.dto';
+import { ApiEndpoint } from 'src/shared/swagger/api-docs.decorator';
 
 @Controller()
+@ApiTags('Shop Auth')
 export class ShopAuthController {
     constructor(private readonly shopAuthService: ShopAuthService) {}
 
     @Post('login')
+    @ApiEndpoint({
+        summary: 'Login shop with email and password',
+        body: { type: LoginManualDTO },
+        responses: [{ status: 201, description: 'Shop login tokens returned' }],
+    })
     loginShop(@Body() body: LoginManualDTO){
-        console.log("body",body)
         return this.shopAuthService.login(body)
     }
 
     @Post('logout')
-    @UseGuards(AccessTokenGuard, RoleGuard)
-    @ApiBearerAuth()
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'Logout authenticated shop',
+        auth: true,
+        responses: [{ status: 201, description: 'Shop logged out' }],
+    })
     logoutShop(@Req() req: any){
-        return this.shopAuthService.logout(req)
+        const auth = req.user ?? req;
+        return this.shopAuthService.logout(auth.keyStore ?? req.keyStore ?? auth)
     }
 
     @Post('handlerRefreshToken')
-    @UseGuards(RefreshTokenGuard)
+    @UseGuards(JwtRefreshAuthGuard)
+    @ApiEndpoint({
+        summary: 'Refresh shop token pair',
+        auth: true,
+        responses: [{ status: 201, description: 'New token pair returned' }],
+    })
     handleRefreshToken(@Req() req: any){
-        console.log("request", req)
-        return this.shopAuthService.handleRefreshToken( req.accountId, req.deviceId, req.refreshToken)
+        const auth = req.user ?? req;
+        return this.shopAuthService.handleRefreshToken(auth.accountId, auth.deviceId, auth.refreshToken)
     }
 
     @Post('register')
+    @ApiEndpoint({
+        summary: 'Register a shop account',
+        body: { type: RegisterShopDTO },
+        responses: [{ status: 201, description: 'Shop registered' }],
+    })
     registerShop(@Body() body: RegisterShopDTO){
         return this.shopAuthService.register(body)
     }

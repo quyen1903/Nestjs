@@ -25,7 +25,7 @@
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-In this project, we need .env and download kafka local then run kafka zookeeper and kafka server
+This project needs a `.env` file and a local PostgreSQL database. Kafka is currently disabled because the event flow is not required yet.
 
 Product module I use factory design pattern
 Comment module I use nested set model
@@ -60,18 +60,11 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-# run kafka zookeeper (in windows)
+Swagger docs are available at:
+
 ```bash
-#in first terminal
-$ cd C:\kafka\
-
-$ .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
-
-# in second terminal
-$ cd C:\kafka\
-
-$ .\bin\windows\kafka-server-start.bat .\config\server.properties
-
+http://localhost:3056/v1/api/docs
+```
 
 ## Run tests
 

@@ -1,15 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "src/services/prisma/prisma.service";
-//import { KeyToken, RefreshTokenUsed } from "@prisma/client";
-// import { KeyToken, RefreshTokenUsed } from "@prisma/client";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { DrizzleService } from "src/database/drizzle.service";
 import { 
     KeyToken, 
     RefreshTokenUsed 
-} from "prisma/generated/prisma";
+} from "src/database/types";
 
 @Injectable()
 export class KeyTokenService {
-    constructor(private readonly prismaService: PrismaService){}
+    constructor(private readonly drizzleService: DrizzleService){}
         
     /**
      * Upsert key token for shop account with device support
@@ -25,9 +23,13 @@ export class KeyTokenService {
         publicKey: string,
         refreshToken: string
     }): Promise<KeyToken> {
+        if (!accountId || !deviceId || !publicKey || !refreshToken) {
+            throw new BadRequestException("Missing key token data");
+        }
+
         const currentTime = BigInt(Date.now());
         
-        return this.prismaService.keyToken.upsert({
+        return this.drizzleService.keyToken.upsert({
             where: { 
                 authId_deviceId: {
                     authId: accountId,
@@ -55,8 +57,12 @@ export class KeyTokenService {
     /**
      * Find key token by account ID (returns all active tokens for the account)
      */
-    async findByAccountId(accountId: string, deviceId: string): Promise<KeyToken> {
-        return this.prismaService.keyToken.findUnique({
+    async findByAccountId(accountId: string, deviceId: string): Promise<KeyToken | null> {
+        if (!accountId || !deviceId) {
+            return null;
+        }
+
+        return this.drizzleService.keyToken.findUnique({
             where: {
                 authId_deviceId:{
                     authId: accountId,
@@ -71,7 +77,11 @@ export class KeyTokenService {
      * Find specific key token by account ID and device ID
      */
     async findByAccountIdAndDeviceId(accountId: string, deviceId: string): Promise<KeyToken | null> {
-        return this.prismaService.keyToken.findFirst({
+        if (!accountId || !deviceId) {
+            return null;
+        }
+
+        return this.drizzleService.keyToken.findFirst({
             where: {
                 authId: accountId,
                 deviceId: deviceId,
@@ -84,9 +94,13 @@ export class KeyTokenService {
      * Remove all key tokens for an account (logout from all devices)
      */
     async removeKeyByAccountID(accountId: string): Promise<{ count: number }> {
+        if (!accountId) {
+            throw new BadRequestException("Missing account ID");
+        }
+
         const currentTime = BigInt(Date.now());
         
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: { 
                 authId: accountId,
                 isActive: true
@@ -102,12 +116,16 @@ export class KeyTokenService {
      * Remove specific key token by device (logout from specific device)
      */
     async removeKeyByAccountIdAndDeviceId(accountId: string, deviceId: string): Promise<KeyToken | null> {
+        if (!accountId || !deviceId) {
+            throw new BadRequestException("Missing account ID or device ID");
+        }
+
         const keyToken = await this.findByAccountIdAndDeviceId(accountId, deviceId);
         if (!keyToken) throw new NotFoundException("KeyToken not found");
 
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.update({
+        return this.drizzleService.keyToken.update({
             where: { id: keyToken.id },
             data: {
                 isActive: false,
@@ -120,7 +138,11 @@ export class KeyTokenService {
      * Find key token by refresh token
      */
     async findByRefreshToken(refreshToken: string): Promise<KeyToken | null> {
-        return this.prismaService.keyToken.findFirst({
+        if (!refreshToken) {
+            return null;
+        }
+
+        return this.drizzleService.keyToken.findFirst({
             where: { 
                 refreshToken,
                 isActive: true
@@ -132,7 +154,7 @@ export class KeyTokenService {
      * Find used refresh token record
      */
     async findByUsedRefreshToken(token: string): Promise<RefreshTokenUsed | null> {
-        return this.prismaService.refreshTokenUsed.findFirst({
+        return this.drizzleService.refreshTokenUsed.findFirst({
             where: { token },
         });
     }
@@ -148,9 +170,13 @@ export class KeyTokenService {
         ipAddress?: string,
         deviceInfo?: string
     ): Promise<RefreshTokenUsed> {
+        if (!keyTokenId || !token) {
+            throw new BadRequestException("Missing key token ID or refresh token");
+        }
+
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.refreshTokenUsed.create({
+        return this.drizzleService.refreshTokenUsed.create({
             data: {
                 keyTokenId,
                 token,
@@ -170,7 +196,7 @@ export class KeyTokenService {
     async cleanupExpiredTokens(): Promise<{ count: number }> {
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: {
                 expiresAt: {
                     lt: currentTime
@@ -188,7 +214,11 @@ export class KeyTokenService {
      * Get active session count for an account
      */
     async getActiveSessionCount(accountId: string): Promise<number> {
-        return this.prismaService.keyToken.count({
+        if (!accountId) {
+            return 0;
+        }
+
+        return this.drizzleService.keyToken.count({
             where: {
                 authId: accountId,
                 isActive: true
@@ -200,7 +230,11 @@ export class KeyTokenService {
      * Get all active sessions for an account with details
      */
     async getActiveSessionsWithDetails(accountId: string): Promise<KeyToken[]> {
-        return this.prismaService.keyToken.findMany({
+        if (!accountId) {
+            return [];
+        }
+
+        return this.drizzleService.keyToken.findMany({
             where: {
                 authId: accountId,
                 isActive: true
@@ -215,9 +249,13 @@ export class KeyTokenService {
      * Revoke all sessions except current one
      */
     async revokeOtherSessions(accountId: string, currentDeviceId: string): Promise<{ count: number }> {
+        if (!accountId || !currentDeviceId) {
+            throw new BadRequestException("Missing account ID or device ID");
+        }
+
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: {
                 authId: accountId,
                 deviceId: {

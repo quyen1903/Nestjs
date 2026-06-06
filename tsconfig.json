@@ -26,8 +26,6 @@
   "include": ["src/**/*"],
   "exclude": [
     "node_modules",
-    "dist",
-    "prisma.config.js",
-    "prisma/generated/**/*"
+    "dist"
   ]
 }

@@ -1,16 +1,23 @@
 import { Module } from '@nestjs/common';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';
-import { PrismaModule } from 'src/services/prisma/prisma.module';
+import { DrizzleModule } from 'src/database/drizzle.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
 import { AuthModule } from '../auth/auth.module';
-import { CartModule } from '../cart/cart.module';
 import { DiscountModule } from '../discount/discount.module';
 import { ProductModule } from '../product/product.module';
+import { CheckoutApplicationService } from './application/checkout.application.service';
+import { CheckoutRepository } from './infrastructure/checkout.repository';
 
 @Module({
-  imports:[ AuthModule, PrismaModule, KeyTokenModule, CartModule, DiscountModule, ProductModule],
+  imports: [
+    AuthModule,
+    DrizzleModule,
+    KeyTokenModule,
+    DiscountModule,
+    ProductModule,
+  ],
   controllers: [CheckoutController],
-  providers: [CheckoutService],
+  providers: [CheckoutService, CheckoutApplicationService, CheckoutRepository],
 })
 export class CheckoutModule {}

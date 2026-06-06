@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { InventoryDTO } from './dto/inventory.dto';
 import { ProductService } from '../product/product.service';
 @Injectable()
 export class InventoryService{
     constructor(
-        private readonly prismaService: PrismaService,
+        private readonly drizzleService: DrizzleService,
         private readonly productService: ProductService
     ){}
 
     private async getShopBusinessId(productId: string): Promise<string> {
     // Option 1: Get from product's SPU relation
-    const product = await this.prismaService.sku.findUnique({
+    const product = await this.drizzleService.sku.findUnique({
         where: { id: productId },
         include: {
         spu: {
@@ -35,12 +35,12 @@ export class InventoryService{
         // This could come from the authenticated user, product relation, or passed as parameter
         const shopBusinessId = await this.getShopBusinessId(productId); // You need to implement this
 
-        const existedInventory = await this.prismaService.inventory.findUnique({
+        const existedInventory = await this.drizzleService.inventory.findUnique({
             where: {inventoryProductId: product.id}
         });
 
         if (existedInventory) {
-            return await this.prismaService.inventory.update({
+            return await this.drizzleService.inventory.update({
                 where: { id: existedInventory.id },
                 data: {
                     inventoryStock: { increment: stock },
@@ -50,7 +50,7 @@ export class InventoryService{
         }
 
         // Fixed upsert with required shopBusinessId
-        return await this.prismaService.inventory.upsert({
+        return await this.drizzleService.inventory.upsert({
             where: { inventoryProductId: productId },
             update: {
                 inventoryStock: { increment: stock },
@@ -71,7 +71,7 @@ export class InventoryService{
     async subtractStockToInventory({ stock, productId }: InventoryDTO){
         if(stock <= 0) throw new BadRequestException('Stock to subtract must be greater than 0');
 
-        const inventory = await this.prismaService.inventory.findUnique({
+        const inventory = await this.drizzleService.inventory.findUnique({
             where:{ inventoryProductId: productId}
         });
 
@@ -79,7 +79,7 @@ export class InventoryService{
 
         if(inventory.inventoryStock < stock) throw new BadRequestException(' not enough stock available');
 
-        return this.prismaService.inventory.update({
+        return this.drizzleService.inventory.update({
             where:{
                 id: inventory.id
             },

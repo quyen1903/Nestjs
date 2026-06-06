@@ -13,12 +13,11 @@ import {
     AccountType,
     AuthMethod,
     Sex
-} from 'prisma/generated/prisma';
+} from 'src/database/types';
 import crypto from 'crypto';
 import { LoginUserManualDTO } from './dto/login.dto';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { getInfoData } from 'src/shared/utils';
-import { IKeyToken } from 'src/shared/interfaces/keyToken.interface';
 
 import { EmailService } from 'src/services/email/email.service';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
@@ -33,11 +32,11 @@ export class UserAuthService extends AuthService{
 
     constructor(
         jwtService: JwtService,
-        prismaService: PrismaService,
+        drizzleService: DrizzleService,
         private readonly emailService: EmailService,
         producerService: ProducerService,
     ) {
-        super(prismaService,jwtService, producerService);
+        super(drizzleService,jwtService, producerService);
     };
 
     // Updated to match your guard expectations
@@ -46,14 +45,16 @@ export class UserAuthService extends AuthService{
             accountId, 
             deviceId,  // Added for guard compatibility
             email,
-            role: 'USER'
+            role: 'USER',
+            tokenType: 'access',
         };
         
         const refreshPayload = {
             accountId,  
             deviceId,
             email,
-            role: 'USER'
+            role: 'USER',
+            tokenType: 'refresh',
         };
         
         const accessToken = this.jwtService.sign(accessPayload, {
@@ -74,7 +75,7 @@ export class UserAuthService extends AuthService{
      * Find user account by email with all related data
      */
     private async findUserAccount(email: string) {
-        return this.prismaService.account.findFirst({
+        return this.drizzleService.account.findFirst({
             where: {
                 accountType: AccountType.USER,
                 authentication: {
@@ -94,7 +95,7 @@ export class UserAuthService extends AuthService{
      * Find user account by ID
      */
     private async findUserAccountById(accountId: string) {
-        return this.prismaService.account.findFirst({
+        return this.drizzleService.account.findFirst({
             where: {
                 id: accountId,
                 accountType: AccountType.USER
@@ -118,7 +119,11 @@ export class UserAuthService extends AuthService{
         update: KeyToken;
         createUsedToken: RefreshTokenUsed; 
     }>{
-        return await this.prismaService.$transaction(async (tx) => {
+        if (!accountId || !deviceId || !storedRefreshToken) {
+            throw new UnauthorizedException('Invalid refresh token context');
+        }
+
+        return await this.drizzleService.$transaction(async (tx) => {
             // Check if token has been used before
             const duplicateJWT = await tx.refreshTokenUsed.findFirst({
                 where: { token: storedRefreshToken }
@@ -188,9 +193,13 @@ export class UserAuthService extends AuthService{
         });
     };
 
-    async logout ( keyStore: IKeyToken ): Promise<any>{
+    async logout ( keyStore: { accountId?: string } ): Promise<any>{
+        if (!keyStore?.accountId) {
+            throw new UnauthorizedException('Invalid logout context');
+        }
+
         // Deactivate all key tokens for this account
-        return await this.prismaService.keyToken.updateMany({
+        return await this.drizzleService.keyToken.updateMany({
             where: {
                 authId: keyStore.accountId
             },
@@ -206,7 +215,7 @@ export class UserAuthService extends AuthService{
         accessToken: string;
         refreshToken: string;
     }>{
-        const result = await this.prismaService.$transaction(async (tx) => {
+        const result = await this.drizzleService.$transaction(async (tx) => {
             // Find user by email
             const foundUser = await tx.account.findFirst({
                 where: {
@@ -276,7 +285,7 @@ export class UserAuthService extends AuthService{
         // Fire-and-forget metadata update
         setImmediate(async () => {
             try {
-                await this.prismaService.accountAuthentication.update({
+                await this.drizzleService.accountAuthentication.update({
                     where: { accountId: result.userId },
                     data: {
                         lastLoginAt: BigInt(Date.now()),
@@ -305,16 +314,16 @@ export class UserAuthService extends AuthService{
         }
         
         const resetToken = randomBytes(32).toString('hex');
-        const tokenHash = await this.hashPassword(resetToken, 'reset_salt'); // Hash the token for storage
+        const tokenHash = await this.hashPassword(resetToken, 'reset_salt');
         
         // Set token expiration (1 hour from now)
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1);
         
-        await this.prismaService.passwordReset.create({
+        await this.drizzleService.passwordReset.create({
             data: {
                 authId: user.id,
-                token: resetToken,
+                token: tokenHash,
                 tokenHash,
                 requestedAt: new Date(),
                 expiresAt,
@@ -331,11 +340,12 @@ export class UserAuthService extends AuthService{
 
     async resetPasswordManual(resetPasswordDto: ResetPasswordDTO): Promise<{ message: string }> {
         const { token, password } = resetPasswordDto;
+        const tokenHash = await this.hashPassword(token, 'reset_salt');
         
-        return await this.prismaService.$transaction(async (tx) => {
+        return await this.drizzleService.$transaction(async (tx) => {
             const passwordReset = await tx.passwordReset.findFirst({
                 where: {
-                    token,
+                    tokenHash,
                     isUsed: false,
                     expiresAt: { gt: new Date() }
                 }
@@ -375,9 +385,10 @@ export class UserAuthService extends AuthService{
     }
     
     async validatePasswordResetToken(token: string): Promise<{ valid: boolean }> {
-        const passwordReset = await this.prismaService.passwordReset.findFirst({
+        const tokenHash = await this.hashPassword(token, 'reset_salt');
+        const passwordReset = await this.drizzleService.passwordReset.findFirst({
             where: {
-                token,
+                tokenHash,
                 isUsed: false,
                 expiresAt: {
                     gt: new Date()
@@ -389,7 +400,7 @@ export class UserAuthService extends AuthService{
     }
 
     async findOrCreateGoogleUser(socialData: any, profileData: any) {
-        const existingSocial = await this.prismaService.socialAuthentication.findUnique({
+        const existingSocial = await this.drizzleService.socialAuthentication.findUnique({
             where: { 
                 provider_providerId: {
                     provider: 'google',
@@ -411,7 +422,7 @@ export class UserAuthService extends AuthService{
             const currentTime = BigInt(Date.now());
             
             // Create new user and related entities if social record does not exist
-            const result = await this.prismaService.$transaction(async (tx) => {
+            const result = await this.drizzleService.$transaction(async (tx) => {
                 // 1. Create main account
                 const newAccount = await tx.account.create({
                     data: {
@@ -502,7 +513,7 @@ export class UserAuthService extends AuthService{
             account = result.newAccount;
 
             // Create notification thread (outside transaction to avoid complexity)
-            await this.prismaService.notificationThread.create({
+            await this.drizzleService.notificationThread.create({
                 data: { 
                     accountId: result.newAccount.id,
                     createdAt: BigInt(Date.now()),

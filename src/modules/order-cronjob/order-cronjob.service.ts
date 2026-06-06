@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { OrderStatus } from 'prisma/generated/prisma';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { OrderStatus } from 'src/database/types';
+import { DrizzleService } from 'src/database/drizzle.service';
 
 @Injectable()
 export class OrderCronjobService {
     constructor(
-        private readonly prismaService:PrismaService
+        private readonly drizzleService:DrizzleService
     ){}
 
     @Cron(' */15 * * * *') //run every 15 minutess
     async handleExpiredOrder(){
-        const expiredOrder = await this.prismaService.order.findMany({
+        const expiredOrder = await this.drizzleService.order.findMany({
             where:{ 
                 status: OrderStatus.PENDING,
                 expiredAt: { lte: new Date}
@@ -22,7 +22,7 @@ export class OrderCronjobService {
         });
 
         for(const order of expiredOrder){
-            await this.prismaService.$transaction(async (tx)=>{
+            await this.drizzleService.$transaction(async (tx)=>{
                 await tx.order.update({
                     where: {id: order.id},
                     data:{ status: OrderStatus.CANCELLED}

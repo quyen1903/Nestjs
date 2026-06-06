@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException, BadGatewayException} from '@nestjs/common';
 import crypto from 'crypto';
 import { RegisterUserDTO } from './dto/register.dto';
-import { PrismaService } from 'src/services/prisma/prisma.service';
+import { DrizzleService } from 'src/database/drizzle.service';
 import { getInfoData } from 'src/shared/utils';
 import { KeyTokenService } from '../keytoken/keytoken.service';
 import { EmailService } from 'src/services/email/email.service';
@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { 
     AccountType, 
     AuthMethod 
-} from 'prisma/generated/prisma';
+} from 'src/database/types';
 import { AuthService } from '../auth/auth.service';
 import { ProducerService } from 'src/services/kafka/services/producer.service';
 
@@ -17,16 +17,16 @@ import { ProducerService } from 'src/services/kafka/services/producer.service';
 export class UserService extends AuthService{
     constructor(
         jwtService: JwtService,
-        prismaService: PrismaService,
+        drizzleService: DrizzleService,
         producerService: ProducerService,
         
     ) {
-            super(prismaService, jwtService, producerService);
+            super(drizzleService, jwtService, producerService);
     };
 
     async registerManual(register: RegisterUserDTO) {
         // Check if user already exists
-        const userHolder = await this.prismaService.account.findFirst({
+        const userHolder = await this.drizzleService.account.findFirst({
             where: {
                 accountType: AccountType.USER,
                 authentication: {
@@ -51,7 +51,7 @@ export class UserService extends AuthService{
          * Use transaction to create user with all related data
          * This ensures user registration creates all necessary records atomically
          */
-        const result = await this.prismaService.$transaction(async(tx) => {
+        const result = await this.drizzleService.$transaction(async(tx) => {
             // 1. Create main account
             const newAccount = await tx.account.create({
                 data: {
@@ -141,7 +141,7 @@ export class UserService extends AuthService{
             if(!keyStore) throw new Error('Cannot generate keytoken');
 
             // Create notification thread
-            const notificationThread = await this.prismaService.notificationThread.create({
+            const notificationThread = await this.drizzleService.notificationThread.create({
                 data:{
                     accountId: result.newAccount.id,
                     createdAt: currentTime,

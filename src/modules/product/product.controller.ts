@@ -4,17 +4,19 @@ import { RoleGuard } from '../auth/auth-role.guard';
 import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
-import { AccountType } from 'prisma/generated/prisma';
-import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
-import { ApiResponse, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
-import { AccessTokenGuard } from '../auth/access-token.guard';
+import { AccountType } from 'src/database/types';
+import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO } from './dto/request-product.dto';
+import { ApiBearerAuth, ApiTags, PartialType } from '@nestjs/swagger';
+import { JwtAccessAuthGuard } from '../auth/guards/jwt-access-auth.guard';
+import { ApiEndpoint } from 'src/shared/swagger/api-docs.decorator';
 
 // Add this DTO for update operations
-export class UpdateProductDTO extends CreateSpuDTO {
+export class UpdateProductDTO extends PartialType(CreateSpuDTO) {
     // Inherits all fields from CreateSpuDTO but makes them optional for updates
 }
 
 @Controller('product')
+@ApiTags('Product')
 @ApiBearerAuth('access')
 export class ProductController {
     constructor(
@@ -22,10 +24,14 @@ export class ProductController {
     ) {}
 
     @Post('create_product')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
-    @ApiOperation({ summary: 'Create a new product with SPU and SKU' })
-    @ApiResponse({ status: 201, description: 'Product created successfully' })
+    @ApiEndpoint({
+        summary: 'Create a new product with SPU and SKU',
+        auth: true,
+        body: { type: CreateProductDTO },
+        responses: [{ status: 201, description: 'Product created successfully' }],
+    })
     async createProduct(
         @Body() createProductDto: CreateProductDTO,
         @AuthRequest('account') account: JWTdecode
@@ -40,8 +46,14 @@ export class ProductController {
 
 
     @Post('create_brand')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'Create a product brand',
+        auth: true,
+        body: { type: CreateBrandDTO },
+        responses: [{ status: 201, description: 'Brand created successfully' }],
+    })
     async createBrand(@Body() body: CreateBrandDTO) {
         return this.productService.createBrand(body);
     }
@@ -58,8 +70,14 @@ export class ProductController {
 
 
     @Patch(':productId')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'Update a product',
+        auth: true,
+        params: [{ name: 'productId', required: true, example: 'spu_123' }],
+        body: { type: UpdateProductDTO },
+    })
     async updateProduct(
         @Param('productId') productId: string,
         @Body() updateProductDTO: Partial<CreateSpuDTO & CreateSkuDTO>,
@@ -69,8 +87,14 @@ export class ProductController {
     }
 
     @Post('publish/:id')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'Publish a shop product',
+        auth: true,
+        params: [{ name: 'id', required: true, example: 'spu_123' }],
+        responses: [{ status: 201, description: 'Product published' }],
+    })
     publishProduct(
         @Param('id') productId: string,
         @AuthRequest('account') account: JWTdecode
@@ -82,8 +106,14 @@ export class ProductController {
     }
 
     @Post('unpublish/:id')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'Unpublish a shop product',
+        auth: true,
+        params: [{ name: 'id', required: true, example: 'spu_123' }],
+        responses: [{ status: 201, description: 'Product unpublished' }],
+    })
     async unpublishProduct(
         @Param('id') productId: string,
         @AuthRequest('account') account: JWTdecode
@@ -95,8 +125,16 @@ export class ProductController {
     }
 
     @Get('drafts/all')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'List draft products for authenticated shop',
+        auth: true,
+        queries: [
+            { name: 'skip', required: false, example: 0, type: Number },
+            { name: 'take', required: false, example: 10, type: Number },
+        ],
+    })
     async getAllDraftForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
@@ -110,8 +148,16 @@ export class ProductController {
     }
 
     @Get('published/all')
-    @UseGuards(AccessTokenGuard, RoleGuard)
+    @UseGuards(JwtAccessAuthGuard, RoleGuard)
     @Roles(AccountType.SHOP)
+    @ApiEndpoint({
+        summary: 'List published products for authenticated shop',
+        auth: true,
+        queries: [
+            { name: 'skip', required: false, example: 0, type: Number },
+            { name: 'take', required: false, example: 10, type: Number },
+        ],
+    })
     async getAllPublishForShop(
         @AuthRequest('account') account: JWTdecode,
         @Query('skip') skip?: string,
@@ -125,11 +171,23 @@ export class ProductController {
     }
 
     @Get('search/:keySearch')
+    @ApiEndpoint({
+        summary: 'Search products by keyword',
+        params: [{ name: 'keySearch', required: true, example: 'iphone' }],
+    })
     async getListSearchProduct(@Param('keySearch') keySearch: string) {
         return this.productService.getListSearchProduct(keySearch);
     }
 
     @Get('all')
+    @ApiEndpoint({
+        summary: 'List products',
+        queries: [
+            { name: 'take', required: false, example: 50, type: Number },
+            { name: 'skip', required: false, example: 0, type: Number },
+            { name: 'isPublished', required: false, example: true, type: Boolean },
+        ],
+    })
     findAllProducts(
         @Query('take') take?: string,
         @Query('skip') skip?: string,
@@ -148,11 +206,19 @@ export class ProductController {
     }
 
     @Get('productById/:productId')
+    @ApiEndpoint({
+        summary: 'Get product details by id',
+        params: [{ name: 'productId', required: true, example: 'spu_123' }],
+    })
     async findProduct(@Param('productId') productId: string) {
         return this.productService.findUniqueProduct(productId);
     }
 
     @Get('productByName/:name')
+    @ApiEndpoint({
+        summary: 'Find products by name',
+        params: [{ name: 'name', required: true, example: 'iphone' }],
+    })
     async findProductByname(@Param('name') name: string) {
         return this.productService.findProductByname(name);
     }

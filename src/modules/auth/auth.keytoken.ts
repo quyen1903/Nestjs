@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "src/services/prisma/prisma.service";
-import { KeyToken, RefreshTokenUsed } from "prisma/generated/prisma";
+import { DrizzleService } from "src/database/drizzle.service";
+import { KeyToken, RefreshTokenUsed } from "src/database/types";
 @Injectable()
 export abstract class ShopKeyTokenService {
-    constructor(private readonly prismaService: PrismaService){}
+    constructor(private readonly drizzleService: DrizzleService){}
         
     /**
      * Upsert key token for shop account with device support
@@ -21,7 +21,7 @@ export abstract class ShopKeyTokenService {
     }): Promise<KeyToken> {
         const currentTime = BigInt(Date.now());
         
-        return this.prismaService.keyToken.upsert({
+        return this.drizzleService.keyToken.upsert({
             where: { 
                 authId_deviceId: {
                     authId: accountId,
@@ -50,7 +50,7 @@ export abstract class ShopKeyTokenService {
      * Find key token by account ID (returns all active tokens for the account)
      */
     async findByAccountId(accountId: string): Promise<KeyToken[]> {
-        return this.prismaService.keyToken.findMany({
+        return this.drizzleService.keyToken.findMany({
             where: {
                 authId: accountId,
                 isActive: true
@@ -65,7 +65,7 @@ export abstract class ShopKeyTokenService {
      * Find specific key token by account ID and device ID
      */
     async findByAccountIdAndDeviceId(accountId: string, deviceId: string): Promise<KeyToken | null> {
-        return this.prismaService.keyToken.findFirst({
+        return this.drizzleService.keyToken.findFirst({
             where: {
                 authId: accountId,
                 deviceId: deviceId,
@@ -80,7 +80,7 @@ export abstract class ShopKeyTokenService {
     async removeKeyByAccountID(accountId: string): Promise<{ count: number }> {
         const currentTime = BigInt(Date.now());
         
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: { 
                 authId: accountId,
                 isActive: true
@@ -101,7 +101,7 @@ export abstract class ShopKeyTokenService {
 
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.update({
+        return this.drizzleService.keyToken.update({
             where: { id: keyToken.id },
             data: {
                 isActive: false,
@@ -114,7 +114,7 @@ export abstract class ShopKeyTokenService {
      * Find key token by refresh token
      */
     async findByRefreshToken(refreshToken: string): Promise<KeyToken | null> {
-        return this.prismaService.keyToken.findFirst({
+        return this.drizzleService.keyToken.findFirst({
             where: { 
                 refreshToken,
                 isActive: true
@@ -126,7 +126,7 @@ export abstract class ShopKeyTokenService {
      * Find used refresh token record
      */
     async findByUsedRefreshToken(token: string): Promise<RefreshTokenUsed | null> {
-        return this.prismaService.refreshTokenUsed.findFirst({
+        return this.drizzleService.refreshTokenUsed.findFirst({
             where: { token },
         });
     }
@@ -144,7 +144,7 @@ export abstract class ShopKeyTokenService {
     ): Promise<RefreshTokenUsed> {
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.refreshTokenUsed.create({
+        return this.drizzleService.refreshTokenUsed.create({
             data: {
                 keyTokenId,
                 token,
@@ -164,7 +164,7 @@ export abstract class ShopKeyTokenService {
     async cleanupExpiredTokens(): Promise<{ count: number }> {
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: {
                 expiresAt: {
                     lt: currentTime
@@ -182,7 +182,7 @@ export abstract class ShopKeyTokenService {
      * Get active session count for an account
      */
     async getActiveSessionCount(accountId: string): Promise<number> {
-        return this.prismaService.keyToken.count({
+        return this.drizzleService.keyToken.count({
             where: {
                 authId: accountId,
                 isActive: true
@@ -194,7 +194,7 @@ export abstract class ShopKeyTokenService {
      * Get all active sessions for an account with details
      */
     async getActiveSessionsWithDetails(accountId: string): Promise<KeyToken[]> {
-        return this.prismaService.keyToken.findMany({
+        return this.drizzleService.keyToken.findMany({
             where: {
                 authId: accountId,
                 isActive: true
@@ -211,7 +211,7 @@ export abstract class ShopKeyTokenService {
     async revokeOtherSessions(accountId: string, currentDeviceId: string): Promise<{ count: number }> {
         const currentTime = BigInt(Date.now());
 
-        return this.prismaService.keyToken.updateMany({
+        return this.drizzleService.keyToken.updateMany({
             where: {
                 authId: accountId,
                 deviceId: {

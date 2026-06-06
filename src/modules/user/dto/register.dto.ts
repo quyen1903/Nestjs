@@ -1,4 +1,4 @@
-import { Sex } from "prisma/generated/prisma";
+import { Sex } from "src/database/types";
 import { PasswordValidator } from "src/shared/validators/password.validator";
 import { IsOptional, IsPhoneNumber, IsString, IsNotEmpty, IsEmail, IsEnum, MinLength, MaxLength, IsDateString, IsDate } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";

@@ -1,4 +1,4 @@
-import { AccountAuthentication, KeyToken, Prisma } from "prisma/generated/prisma";
+import { KeyToken } from "src/database/types";
 import { StrictBuilder } from "builder-pattern";
 
 export class AuthSHopDTO{
@@ -7,7 +7,7 @@ export class AuthSHopDTO{
     publicKey: KeyToken['publicKey'];
     refreshToken: KeyToken['refreshToken'];
     static fromEntity(
-        a: Prisma.KeyTokenGetPayload<{}>,
+        a: KeyToken,
     ){
         return StrictBuilder<AuthSHopDTO>()
             .accountId(a.authId)

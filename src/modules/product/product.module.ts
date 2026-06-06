@@ -3,7 +3,7 @@ import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { AuthModule } from '../auth/auth.module';
 import { KeyTokenModule } from '../keytoken/keytoken.module';
-import { PrismaModule } from 'src/services/prisma/prisma.module';
+import { DrizzleModule } from 'src/database/drizzle.module';
 import { KafkaModule } from 'src/services/kafka/kafka.module';
 import { ShopAuthModule } from '../auth/shop-auth/shop-auth.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -12,7 +12,7 @@ import { BrandModule } from './brand/brand.module';
 import { CategoryModule } from './category/category.module';
 
 @Module({
-  imports:[ AuthModule, KeyTokenModule, PrismaModule, KafkaModule, ShopAuthModule, JwtModule, SpuModule, BrandModule, CategoryModule],
+  imports:[ AuthModule, KeyTokenModule, DrizzleModule, KafkaModule, ShopAuthModule, JwtModule, SpuModule, BrandModule, CategoryModule],
   controllers: [ProductController],
   providers: [ ProductService ],
   exports: [ ProductService ]
