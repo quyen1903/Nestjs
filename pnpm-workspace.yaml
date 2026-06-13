@@ -1,0 +1,21 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+storeDir: .pnpm-store
+
+packageExtensions:
+  "@nestjs-modules/mailer@2.3.6":
+    dependencies:
+      lodash: "^4.17.23"
+
+publicHoistPattern:
+  - lodash
+
+allowBuilds:
+  '@nestjs/core': false
+  '@prisma/engines': false
+  '@scarf/scarf': false
+  prisma: false
+  sharp: false
+  unrs-resolver: false

@@ -1,0 +1,76 @@
+"use client";
+
+import Link from "next/link";
+import { Bell, ExternalLink, LogOut, UserRound } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { useAuth } from "@/hooks/use-auth";
+import { useOrganization } from "@/hooks/use-organization";
+
+export function DashboardTopbar() {
+  const { organizations, organization, setOrganizationId } = useOrganization();
+  const { session, signOut } = useAuth();
+
+  return (
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+      <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">{organization.name}</p>
+          <p className="hidden text-xs text-muted-foreground sm:block">Organization-scoped dashboard</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={organization.id} onValueChange={setOrganizationId}>
+            <SelectTrigger className="h-9 w-[190px]">
+              <SelectValue placeholder="Organization" />
+            </SelectTrigger>
+            <SelectContent>
+              {organizations.map((item) => (
+                <SelectItem key={item.id} value={item.id}>
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button asChild variant="outline" size="icon" aria-label="Open storefront">
+            <Link href="/">
+              <ExternalLink className="size-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="icon" aria-label="Notifications">
+            <Bell className="size-4" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Account menu">
+                <UserRound className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{session?.displayName ?? "Demo merchant"}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => void signOut()}>
+                <LogOut className="size-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  );
+}

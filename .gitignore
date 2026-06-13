@@ -1,12 +1,15 @@
 # compiled output
 /dist
+**/dist/
 /node_modules
+/.pnpm-store
 /build
 /complexity-report
 /.idea
 /.vscode
 /report
 /prisma/generated
+**/prisma/generated/
 /prisma/migrations
 
 # Logs
@@ -72,6 +75,7 @@ out/
 /.cache
 /.parcel-cache
 /.turbo
+**/.turbo/
 
 # Frontend - Dependencies
 node_modules/

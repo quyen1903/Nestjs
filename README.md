@@ -1,127 +1,74 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Ecommerce Monorepo
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS API plus Next.js web app managed with pnpm workspaces and Turborepo.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Workspace Layout
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-In this project, we need .env and download kafka local then run kafka zookeeper and kafka server
-
-Product module I use factory design pattern
-Comment module I use nested set model
-I'm implementing redis distributed lock in cart and checkout module
-
-This project use soft delete, which means we mark is_active to false, not completely remove data from database
-Dont worry, because I just use half CPU cores, so when you run on local, your pc CPU would not be overwhelm
-Because my laptop lack many disk, (but redundant RAM, that so ridiculous) so I will not implement Docker herre
-please run on local postgresql
-
-And I also use many many DTO, so please ping me in case you wanna run on postman, i will give you postman's JSON
-Thanks for visit, and please send me a feedback via this email
-quyenng2k@gmail.com
-P/S If you think my project is helpful, dont hesitate to star this project
-
-## Project setup
-
-```bash
-$ npm install
+```text
+apps/
+  api/     NestJS ecommerce backend
+  web/     Next.js storefront/dashboard frontend
+frontend/  Legacy static frontend demo
 ```
 
-## Compile and run the project
+The root package is only the monorepo orchestrator. App-specific source,
+configs, and dependencies live in each app package.
+
+## Setup
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+pnpm install
 ```
 
-# run kafka zookeeper (in windows)
-```bash
-#in first terminal
-$ cd C:\kafka\
+The API reads environment variables from the repository root `.env`, with
+`apps/api/.env` available as an app-local override.
 
-$ .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
-
-# in second terminal
-$ cd C:\kafka\
-
-$ .\bin\windows\kafka-server-start.bat .\config\server.properties
-
-
-## Run tests
+## Common Commands
 
 ```bash
-# unit tests
-$ npm run test
+# Run both apps in development
+pnpm dev
 
-# e2e tests
-$ npm run test:e2e
+# Run only the API
+pnpm dev:api
+pnpm start
 
-# test coverage
-$ npm run test:cov
+# Run only the web app
+pnpm dev:web
+
+# Verify and build everything
+pnpm typecheck
+pnpm build
+
+# Package-scoped commands
+pnpm --filter @ecommerce/api build
+pnpm --filter @ecommerce/web build
 ```
 
-## Deployment
+## API Notes
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- API source: `apps/api/src`
+- Prisma schema: `apps/api/prisma/schema.prisma`
+- Generated Prisma client: `apps/api/prisma/generated/prisma`
+- Default API base: `http://localhost:3056/v1/api`
+- Kafka is disabled by default. Set `KAFKA_ENABLED=true` only when you want broker-backed events.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Kafka, Optional
 
-```bash
-$ npm install -g mau
-$ mau deploy
+```powershell
+$env:KAFKA_ENABLED="true"
+
+cd C:\kafka\
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+
+cd C:\kafka\
+.\bin\windows\kafka-server-start.bat .\config\server.properties
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Quality Gates
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+pnpm typecheck
+pnpm build
+pnpm --filter @ecommerce/api test
+```

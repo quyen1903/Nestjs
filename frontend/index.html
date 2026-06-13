@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuyenCommerce Frontend</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#store" data-view-link="store">
+      <span class="brand-mark">QC</span>
+      <span>QuyenCommerce</span>
+    </a>
+
+    <form id="searchForm" class="search" role="search">
+      <input id="searchInput" name="search" type="search" autocomplete="off" placeholder="Search products">
+      <button type="submit">Search</button>
+    </form>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <button class="nav-button is-active" type="button" data-view="store">Store</button>
+      <button class="nav-button" type="button" data-view="checkout">Checkout</button>
+      <button class="nav-button" type="button" data-view="seller">Seller</button>
+    </nav>
+
+    <div class="topbar-actions">
+      <button id="authButton" class="ghost-button" type="button">Sign in</button>
+      <button id="cartButton" class="solid-button" type="button" data-view="checkout">
+        Cart <span id="cartCount" class="count-pill">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="left-rail" aria-label="Marketplace controls">
+      <form id="apiForm" class="rail-section">
+        <div class="rail-title">Connection</div>
+        <label class="field">
+          <span>API base</span>
+          <input id="apiBaseInput" name="apiBase" type="url" spellcheck="false">
+        </label>
+        <div class="inline-actions">
+          <button class="solid-button" type="submit">Save</button>
+          <button id="reloadButton" class="ghost-button" type="button">Reload</button>
+        </div>
+        <output id="apiStatus" class="status-line">Idle</output>
+      </form>
+
+      <section class="rail-section">
+        <div class="rail-title">Filters</div>
+        <label class="field">
+          <span>Category</span>
+          <select id="categorySelect"></select>
+        </label>
+        <label class="field">
+          <span>Sort</span>
+          <select id="sortSelect">
+            <option value="newest">Newest</option>
+            <option value="priceAsc">Price low to high</option>
+            <option value="priceDesc">Price high to low</option>
+            <option value="nameAsc">Name A to Z</option>
+          </select>
+        </label>
+        <label class="toggle-line">
+          <input id="publishedOnly" type="checkbox" checked>
+          <span>Published only</span>
+        </label>
+      </section>
+
+      <section class="rail-section session-panel">
+        <div class="rail-title">Session</div>
+        <div id="sessionSummary" class="session-summary"></div>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <section class="hero-band">
+        <div class="hero-copy">
+          <p class="eyebrow">Live marketplace</p>
+          <h1>QuyenCommerce storefront</h1>
+          <p>Independent shops, live inventory, practical pricing, and a focused checkout surface.</p>
+        </div>
+        <div class="hero-media" aria-hidden="true">
+          <img src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1200&q=80" alt="">
+        </div>
+      </section>
+
+      <section id="view-store" class="view is-active" aria-labelledby="storeTitle">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Catalog</p>
+            <h2 id="storeTitle">Products</h2>
+          </div>
+          <div id="resultMeta" class="result-meta"></div>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+      </section>
+
+      <section id="view-checkout" class="view" aria-labelledby="checkoutTitle">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Cart</p>
+            <h2 id="checkoutTitle">Checkout</h2>
+          </div>
+          <div class="inline-actions">
+            <button id="syncCartButton" class="ghost-button" type="button">Sync cart</button>
+            <button id="clearCartButton" class="danger-button" type="button">Clear</button>
+          </div>
+        </div>
+        <div id="cartView" class="checkout-layout"></div>
+      </section>
+
+      <section id="view-seller" class="view" aria-labelledby="sellerTitle">
+        <div class="view-head">
+          <div>
+            <p class="eyebrow">Shop</p>
+            <h2 id="sellerTitle">Seller studio</h2>
+          </div>
+        </div>
+
+        <div class="seller-grid">
+          <form id="productForm" class="studio-form">
+            <div class="form-row">
+              <label class="field">
+                <span>Product name</span>
+                <input name="name" required maxlength="100" placeholder="Mechanical keyboard">
+              </label>
+              <label class="field">
+                <span>SKU name</span>
+                <input name="skuName" required maxlength="200" placeholder="Keyboard - black switches">
+              </label>
+            </div>
+            <label class="field">
+              <span>Intro</span>
+              <textarea name="intro" rows="3" maxlength="200" placeholder="Compact wireless keyboard"></textarea>
+            </label>
+            <div class="form-row">
+              <label class="field">
+                <span>Brand ID</span>
+                <input name="brandId" required placeholder="Brand UUID">
+              </label>
+              <label class="field">
+                <span>Category ID</span>
+                <input name="categoryId" required placeholder="Category UUID">
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Price</span>
+                <input name="price" required type="number" min="1" step="1" value="9900">
+              </label>
+              <label class="field">
+                <span>Stock</span>
+                <input name="stock" type="number" min="0" step="1" value="100">
+              </label>
+            </div>
+            <label class="field">
+              <span>Image URL</span>
+              <input name="image" type="url" placeholder="https://example.com/product.jpg">
+            </label>
+            <label class="field">
+              <span>Attributes</span>
+              <input name="attributes" placeholder='{"color":"black","switch":"linear"}'>
+            </label>
+            <label class="toggle-line">
+              <input name="isMarketable" type="checkbox" checked>
+              <span>Marketable</span>
+            </label>
+            <button class="solid-button" type="submit">Create product</button>
+          </form>
+
+          <form id="brandForm" class="studio-form">
+            <div class="rail-title">Brand</div>
+            <label class="field">
+              <span>Name</span>
+              <input name="name" required placeholder="Keychron">
+            </label>
+            <label class="field">
+              <span>Image URL</span>
+              <input name="image" type="url" placeholder="https://example.com/logo.png">
+            </label>
+            <div class="form-row">
+              <label class="field">
+                <span>Initial</span>
+                <input name="initial" maxlength="1" placeholder="K">
+              </label>
+              <label class="field">
+                <span>Sort</span>
+                <input name="sort" type="number" step="1" value="10">
+              </label>
+            </div>
+            <button class="ghost-button" type="submit">Create brand</button>
+          </form>
+        </div>
+        <pre id="sellerOutput" class="result-output" aria-live="polite"></pre>
+      </section>
+    </section>
+
+    <aside class="right-rail" aria-label="Cart summary">
+      <section class="rail-section cart-panel">
+        <div class="rail-title">Cart summary</div>
+        <div id="miniCart"></div>
+      </section>
+    </aside>
+  </main>
+
+  <dialog id="productDialog" class="modal">
+    <div id="productDetail" class="modal-body"></div>
+  </dialog>
+
+  <dialog id="authDialog" class="modal">
+    <form id="authForm" class="modal-body auth-form" method="dialog">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Account</p>
+          <h2 id="authTitle">Sign in</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Close">x</button>
+      </div>
+
+      <div class="segmented-control">
+        <button class="is-active" type="button" data-auth-role="user">User</button>
+        <button type="button" data-auth-role="shop">Shop</button>
+      </div>
+      <div class="segmented-control">
+        <button class="is-active" type="button" data-auth-mode="login">Login</button>
+        <button type="button" data-auth-mode="register">Register</button>
+      </div>
+
+      <div id="authFields" class="auth-fields"></div>
+      <button class="solid-button" type="submit">Continue</button>
+      <output id="authOutput" class="status-line"></output>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
