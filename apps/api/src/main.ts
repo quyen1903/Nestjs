@@ -18,6 +18,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
     const port = process.env.PORT ?? 3056;
+    const apiPrefix = 'v1/api';
 
     /*
         only primary process ( old Nodejs version is isMaster ) can use systemcall fork to create new nodejs process
@@ -75,6 +76,12 @@ async function bootstrap() {
             // Compression middleware
             app.use(compression());
             
+            // Stripe webhook signature verification requires the unparsed body.
+            app.use(`/${apiPrefix}/payments/webhook`, bodyParser.raw({
+                type: 'application/json',
+                limit: '2mb',
+            }));
+
             // Body parser configuration
             app.use(bodyParser.json({ limit: '50mb' }));
             app.use(bodyParser.urlencoded({
@@ -86,7 +93,7 @@ async function bootstrap() {
 
 
             // Global prefix for all routes
-            app.setGlobalPrefix('v1/api');
+            app.setGlobalPrefix(apiPrefix);
             app.useGlobalInterceptors(new PrismaExceptionInterceptor());
             app.useGlobalInterceptors(new SuccessInterceptor())
             app.useGlobalPipes(ValidationCustomPipe.compactVersion());

@@ -1,30 +1,52 @@
-import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Body, Controller, Get, Headers, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto, RefundPaymentDto } from './dto/payment.dto';
+import { AccessTokenGuard } from '../auth/access-token.guard';
+import { RoleGuard } from '../auth/auth-role.guard';
+import { Roles } from '../auth/roles.decorator';
+import { AccountType } from 'prisma/generated/prisma';
+import { AuthRequest } from '../auth/dto/auth-request.dto';
+import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 
 @Controller('payments')
 export class PaymentController {
     constructor(private readonly paymentService: PaymentService) {}
 
     @Post()
-    async createPayment(@Body() createPaymentDto: CreatePaymentDto) {
-        return this.paymentService.createPaymentIntent(createPaymentDto);
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.USER)
+    async createPayment(
+        @Body() createPaymentDto: CreatePaymentDto,
+        @AuthRequest('account') account: JWTdecode,
+    ) {
+        return this.paymentService.createPaymentIntent(createPaymentDto, account);
     }
 
     @Get(':id')
-    async getPayment(@Param('id') id: string) {
-        return this.paymentService.getPaymentIntent(id);
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.USER, AccountType.SHOP, AccountType.ADMIN, AccountType.SUPER_ADMIN)
+    async getPayment(
+        @Param('id') id: string,
+        @AuthRequest('account') account: JWTdecode,
+    ) {
+        return this.paymentService.getPaymentIntent(id, account);
     }
 
     @Post('refund')
-    async refundPayment(@Body() refundDto: RefundPaymentDto) {
-        return this.paymentService.refundPayment(refundDto);
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.SHOP, AccountType.ADMIN, AccountType.SUPER_ADMIN)
+    async refundPayment(
+        @Body() refundDto: RefundPaymentDto,
+        @AuthRequest('account') account: JWTdecode,
+    ) {
+        return this.paymentService.refundPayment(refundDto, account);
     }
 
     @Post('customers')
-    async createCustomer(@Body() body: { email: string; name?: string; metadata?: Record<string, any> }) {
-        return this.paymentService.createCustomer(body.email, body.name, body.metadata);
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.USER)
+    async createCustomer(@AuthRequest('account') account: JWTdecode) {
+        return this.paymentService.createCustomer(account);
     }
 
     @Post('webhook')
@@ -32,6 +54,6 @@ export class PaymentController {
         @Headers('stripe-signature') signature: string,
         @Req() req: any,
     ) {
-        return this.paymentService.handleWebhookEvent(signature, req);
+        return this.paymentService.handleWebhookEvent(signature, req.body);
     }
 }

@@ -5,12 +5,16 @@ import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { AmountDiscountDTO } from './dto/amountDiscount.dto';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+import { RoleGuard } from '../auth/auth-role.guard';
+import { Roles } from '../auth/roles.decorator';
+import { AccountType } from 'prisma/generated/prisma';
 @Controller('discount')
 export class DiscountController {
     constructor(private readonly discountService: DiscountService) {}
 
     @Post('')
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.SHOP)
     createDiscountCode(@Body() payload:CreateDiscountDTO, @AuthRequest('account') account:JWTdecode){
         return this.discountService.createDiscountCode(payload, account.accountId)
     }
@@ -31,7 +35,8 @@ export class DiscountController {
     }
 
     @Get('')
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.SHOP)
     getAllDiscountCodes(
         @AuthRequest('account') account: JWTdecode,
         @Query('limit') limit : number,
@@ -47,9 +52,13 @@ export class DiscountController {
     }
 
     @Delete('')
-    @UseGuards(AccessTokenGuard)
-    deleteDiscountCode(@Body() payload){
-        return this.discountService.deleteDiscountCode(payload)
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.SHOP)
+    deleteDiscountCode(
+        @Body() payload: { discountCode: string },
+        @AuthRequest('account') account: JWTdecode,
+    ){
+        return this.discountService.deleteDiscountCode(payload.discountCode, account.accountId)
     }
 
 }

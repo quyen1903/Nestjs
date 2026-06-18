@@ -8,6 +8,7 @@ import { DiscountModule } from '../discount/discount.module';
 import { ProductModule } from '../product/product.module';
 import { CheckoutApplicationService } from './application/checkout.application.service';
 import { CheckoutRepository } from './infrastructure/checkout.repository';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CheckoutRepository } from './infrastructure/checkout.repository';
     KeyTokenModule,
     DiscountModule,
     ProductModule,
+    JwtModule,
   ],
   controllers: [CheckoutController],
   providers: [CheckoutService, CheckoutApplicationService, CheckoutRepository],

@@ -44,12 +44,16 @@ export class DiscountService {
 
     async createDiscountCode( payload: CreateDiscountDTO, shopId: string ): Promise<Discount>{
         // Validate the date range for the discount code
-        if (new Date() < new Date(payload.discountStartDates) || new Date() > new Date(payload.discountEndDates)) {
-            throw new BadRequestException('Discount code has expired');
+        const now = new Date();
+        const startDate = new Date(payload.discountStartDates);
+        const endDate = new Date(payload.discountEndDates);
+
+        if (startDate >= endDate) {
+            throw new BadRequestException('Start date must be before end date');
         }
 
-        if (new Date(payload.discountStartDates) >= new Date(payload.discountEndDates)) {
-            throw new BadRequestException('Start date must be before end date');
+        if (endDate <= now) {
+            throw new BadRequestException('Discount end date must be in the future');
         }
 
         //check weather this discount used or not
@@ -65,17 +69,27 @@ export class DiscountService {
         const newDiscount = await this.prismaService.discount.create({
             data:{
                 ...payload,
-                discountStartDates: new Date(payload.discountStartDates),
-                discountEndDates: new Date(payload.discountEndDates),
+                discountStartDates: startDate,
+                discountEndDates: endDate,
+                discountUsesCount: 0,
+                discountUsersUsed: [],
+                discountIsActive: true,
                 discountShopId: shopId
             }
         })
 
         if(newDiscount){
             const topics = this.producerService.getTopics()
-            const shop = await this.prismaService.spu.findUnique({
-                where:{
-                    id: newDiscount.discountShopId
+            const shop = await this.prismaService.shopBusiness.findUnique({
+                where:{ accountId: newDiscount.discountShopId },
+                include: {
+                    account: {
+                        include: {
+                            profile: {
+                                select: { name: true }
+                            }
+                        }
+                    }
                 }
             })
             await this.producerService.produce({
@@ -87,7 +101,7 @@ export class DiscountService {
                         discountValue: newDiscount.discountValue,
                         discountType: newDiscount.discountType,
                         shopId: newDiscount.discountShopId,
-                        shopName: shop?.id
+                        shopName: shop?.account?.profile?.name
                     })
                 }]
             })
@@ -150,18 +164,17 @@ export class DiscountService {
 
         if(!foundDiscount) throw new NotFoundException('discount doesnt exist')
         if(!foundDiscount.discountIsActive) throw new NotFoundException('discount is expired!')
-        if(!foundDiscount.discountMaxUses) throw new NotFoundException('discount are out!')
+        if(foundDiscount.discountUsesCount >= foundDiscount.discountMaxUses) throw new NotFoundException('discount are out!')
 
         if(new Date() < new Date(foundDiscount.discountStartDates) || new Date() > new Date(foundDiscount.discountEndDates)){
             throw new NotFoundException('discount code had expired!!')
         }
 
         //check wheather discount had minimum value
-        let totalOrder = 0
+        const totalOrder = discountProducts.reduce((accumulator, product)=>{
+            return accumulator + (product.quantity * product.price)
+        },0)
         if(foundDiscount.discountMinOrderValue > 0){
-            totalOrder = discountProducts.reduce((accumulator, product)=>{
-                return accumulator + (product.quantity * product.price)
-            },0)
             if(totalOrder < foundDiscount.discountMinOrderValue) {
                 throw new NotFoundException(`discount require a minimum order of ${foundDiscount.discountMinOrderValue}`)
             }
@@ -181,22 +194,35 @@ export class DiscountService {
         }
 
         //check wheather discount is fixed amount
-        const amount = foundDiscount.discountType === 'fixed_amount' ? foundDiscount.discountValue : totalOrder * (foundDiscount.discountValue / 100)
+        const amount = foundDiscount.discountType === 'fixed_amount'
+            ? Math.min(foundDiscount.discountValue, totalOrder)
+            : totalOrder * (foundDiscount.discountValue / 100)
 
         return {
             totalOrder,// discount percentage
             discount:amount,// reduced money
-            totalPrice:totalOrder - amount//money user pay
+            totalPrice:Math.max(totalOrder - amount, 0)//money user pay
         }
     }
 
-    async deleteDiscountCode({discountShopId, discountCode}:AmountDiscountDTO){
-        return this.prismaService.discount.delete({
+    async deleteDiscountCode(discountCode: string, discountShopId: string){
+        const result = await this.prismaService.discount.updateMany({
             where: {
                 discountCode,
-                discountShopId
+                discountShopId,
+                discountIsActive: true
+            },
+            data: {
+                discountIsActive: false,
+                updatedAt: BigInt(Date.now())
             }
         })
+
+        if (result.count !== 1) {
+            throw new NotFoundException('discount not existed!!')
+        }
+
+        return { deleted: true }
     }
 
 }

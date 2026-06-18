@@ -13,6 +13,9 @@ import { CheckoutReview, UserOrderUpdate } from '../domain/checkout.types';
 import { OrderPolicy } from '../domain/order-policy';
 import { CheckoutRepository } from '../infrastructure/checkout.repository';
 
+type CheckoutCommand = CheckoutDTO & { userId: string };
+type CartProductSnapshot = { productId: string; quantity: number };
+
 @Injectable()
 export class CheckoutApplicationService {
   private readonly pricing = new CheckoutPricingService();
@@ -27,18 +30,31 @@ export class CheckoutApplicationService {
     cartId,
     userId,
     shopOrderIds,
-  }: CheckoutDTO): Promise<CheckoutReview> {
+  }: CheckoutCommand): Promise<CheckoutReview> {
     return this.checkoutRepository.transaction(async (tx) => {
-      const cart = await this.checkoutRepository.getCartById(cartId);
+      const cart = await this.checkoutRepository.getCartByIdForUser(
+        tx,
+        cartId,
+        userId,
+      );
       if (!cart) {
         throw new BadRequestException('Cart does not existed!!');
       }
+
+      const cartProducts = await this.checkoutRepository.getCartProducts(
+        tx,
+        cart.id,
+      );
+      this.assertRequestedItemsBelongToCart(shopOrderIds, cartProducts);
 
       const reviewedOrders = [];
       let checkoutOrder = this.pricing.createEmptyTotals();
 
       for (const { shopId, shopDiscounts = [], itemProducts } of shopOrderIds) {
-        const checkProductServer = await this.getCheckedProducts(itemProducts);
+        const checkProductServer = await this.getCheckedProducts(
+          shopId,
+          itemProducts,
+        );
 
         for (const product of checkProductServer) {
           const inventory =
@@ -78,7 +94,13 @@ export class CheckoutApplicationService {
       }
 
       return {
-        shopOrderIds,
+        shopOrderIds: reviewedOrders.map(
+          ({ shopId, shopDiscounts, itemProducts }) => ({
+            shopId,
+            shopDiscounts,
+            itemProducts,
+          }),
+        ),
         reviewedOrders,
         checkoutOrder,
       };
@@ -125,17 +147,32 @@ export class CheckoutApplicationService {
             inventory.id,
             item.quantity,
           );
-          await this.checkoutRepository.decrementInventory(
+          const decrementResult = await this.checkoutRepository.decrementInventory(
             tx,
             inventory.id,
             item.quantity,
           );
+
+          if (decrementResult.count !== 1) {
+            throw new BadRequestException(
+              `Not enough stock for product ID ${item.productId}`,
+            );
+          }
+
           await this.checkoutRepository.createOrderItem(
             tx,
             order.id,
             inventory.id,
             item,
           );
+        }
+
+        for (const discount of shopCheckout.shopDiscounts ?? []) {
+          await this.checkoutRepository.consumeDiscountForOrder(tx, {
+            discountCode: discount.codeId,
+            discountShopId: shopCheckout.shopId,
+            userId,
+          });
         }
 
         createdOrders.push(order);
@@ -271,6 +308,7 @@ export class CheckoutApplicationService {
   }
 
   private async getCheckedProducts(
+    shopId: string,
     itemProducts: ItemProductDTO[],
   ): Promise<ItemProductDTO[]> {
     const checkProductServer =
@@ -281,7 +319,39 @@ export class CheckoutApplicationService {
       throw new BadRequestException('order wrong !!!');
     }
 
+    if (products.some((product) => product.shopId !== shopId)) {
+      throw new BadRequestException('Product does not belong to requested shop');
+    }
+
     return products;
+  }
+
+  private assertRequestedItemsBelongToCart(
+    shopOrderIds: ShopOrderIdDTO[],
+    cartProducts: CartProductSnapshot[],
+  ) {
+    const cartQuantityByProductId = new Map(
+      cartProducts.map((product) => [product.productId, product.quantity]),
+    );
+    const requestedQuantityByProductId = new Map<string, number>();
+
+    for (const shopOrder of shopOrderIds) {
+      for (const product of shopOrder.itemProducts) {
+        requestedQuantityByProductId.set(
+          product.productId,
+          (requestedQuantityByProductId.get(product.productId) ?? 0) +
+            product.quantity,
+        );
+      }
+    }
+
+    for (const [productId, requestedQuantity] of requestedQuantityByProductId) {
+      const cartQuantity = cartQuantityByProductId.get(productId);
+
+      if (!cartQuantity || requestedQuantity > cartQuantity) {
+        throw new BadRequestException('Checkout item is not in the user cart');
+      }
+    }
   }
 
   private async calculateDiscount(
@@ -291,13 +361,23 @@ export class CheckoutApplicationService {
     products: ItemProductDTO[],
   ): Promise<number> {
     let discount = 0;
+    const seenDiscountCodes = new Set<string>();
 
     for (const shopDiscount of shopDiscounts) {
+      if (seenDiscountCodes.has(shopDiscount.codeId)) {
+        throw new BadRequestException('Duplicate discount code in checkout');
+      }
+      seenDiscountCodes.add(shopDiscount.codeId);
+
       const result = await this.discountService.getDiscountAmount({
         discountCode: shopDiscount.codeId,
         discountUserId: userId,
         discountShopId: shopId,
-        discountProducts: products,
+        discountProducts: products.map((product) => ({
+          productId: product.productId,
+          quantity: product.quantity,
+          price: product.price ?? 0,
+        })),
       });
 
       discount += result.discount;

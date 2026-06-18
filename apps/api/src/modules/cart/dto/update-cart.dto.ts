@@ -3,24 +3,17 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
 class ItemProductDTO {
     @IsInt()
     @IsNotEmpty()
+    @Min(0)
     quantity: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    price: number;
-
-    @IsString()
-    @IsNotEmpty()
-    shopId: string;
 
     @IsInt()
     @IsOptional()
@@ -29,10 +22,6 @@ class ItemProductDTO {
     @IsString()
     @IsNotEmpty()
     productId: string;
-
-    @IsString()
-    @IsNotEmpty()
-    name: string;
 }
 
 class ShopOrderDTO {
@@ -51,10 +40,6 @@ class ShopOrderDTO {
 }
 
 export class UpdateCartDTO {
-    @IsString()
-    @IsNotEmpty()
-    userId: string;
-
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => ShopOrderDTO)

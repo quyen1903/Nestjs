@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Cart, OrderStatus, Prisma } from 'prisma/generated/prisma';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Cart, Discount, OrderStatus, Prisma } from 'prisma/generated/prisma';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { ItemProductDTO } from '../dto/checkout.dto';
 import {
@@ -9,6 +9,14 @@ import {
 } from '../domain/checkout.types';
 
 type TxClient = Prisma.TransactionClient;
+type LockedDiscount = Pick<
+  Discount,
+  | 'id'
+  | 'discountUsesCount'
+  | 'discountMaxUses'
+  | 'discountMaxUsesPerUser'
+  | 'discountUsersUsed'
+>;
 
 @Injectable()
 export class CheckoutRepository {
@@ -18,9 +26,26 @@ export class CheckoutRepository {
     return this.prismaService.$transaction(handler);
   }
 
-  getCartById(cartId: string): Promise<Cart | null> {
-    return this.prismaService.cart.findFirst({
-      where: { id: cartId },
+  getCartByIdForUser(
+    tx: TxClient,
+    cartId: string,
+    userId: string,
+  ): Promise<Cart | null> {
+    return tx.cart.findFirst({
+      where: { id: cartId, userId },
+    });
+  }
+
+  getCartProducts(tx: TxClient, cartId: string) {
+    return tx.cartProduct.findMany({
+      where: {
+        cartId,
+        isActive: true,
+      },
+      select: {
+        productId: true,
+        quantity: true,
+      },
     });
   }
 
@@ -77,9 +102,17 @@ export class CheckoutRepository {
   }
 
   decrementInventory(tx: TxClient, inventoryId: string, quantity: number) {
-    return tx.inventory.update({
-      where: { id: inventoryId },
-      data: { inventoryStock: { decrement: quantity } },
+    return tx.inventory.updateMany({
+      where: {
+        id: inventoryId,
+        inventoryStock: {
+          gte: quantity,
+        },
+      },
+      data: {
+        inventoryStock: { decrement: quantity },
+        updatedAt: BigInt(Date.now()),
+      },
     });
   }
 
@@ -202,6 +235,73 @@ export class CheckoutRepository {
       },
       data: {
         valid: false,
+        updatedAt: BigInt(Date.now()),
+      },
+    });
+  }
+
+  async confirmReservationsForOrder(tx: TxClient, userId: string, inventoryIds: string[]) {
+    if (inventoryIds.length === 0) return { count: 0 };
+
+    return tx.reservationInventory.updateMany({
+      where: {
+        userId,
+        inventoryId: { in: inventoryIds },
+        valid: true,
+        isConfirmed: false,
+      },
+      data: {
+        isConfirmed: true,
+        valid: false,
+        updatedAt: BigInt(Date.now()),
+      },
+    });
+  }
+
+  async consumeDiscountForOrder(
+    tx: TxClient,
+    params: {
+      discountCode: string;
+      discountShopId: string;
+      userId: string;
+    },
+  ) {
+    const discounts = await tx.$queryRaw<LockedDiscount[]>`
+      SELECT
+        id,
+        discount_uses_count as "discountUsesCount",
+        discount_max_uses as "discountMaxUses",
+        discount_max_uses_per_user as "discountMaxUsesPerUser",
+        discount_users_used as "discountUsersUsed"
+      FROM discounts
+      WHERE discount_code = ${params.discountCode}
+        AND discount_shop = ${params.discountShopId}
+        AND discount_is_active = true
+        AND is_active = true
+      FOR UPDATE
+    `;
+    const discount = discounts[0];
+
+    if (!discount) {
+      throw new BadRequestException('Discount does not exist');
+    }
+
+    if (discount.discountUsesCount >= discount.discountMaxUses) {
+      throw new BadRequestException('Discount is out of uses');
+    }
+
+    if (
+      discount.discountMaxUsesPerUser > 0 &&
+      discount.discountUsersUsed.includes(params.userId)
+    ) {
+      throw new BadRequestException('This user already used this discount');
+    }
+
+    return tx.discount.update({
+      where: { id: discount.id },
+      data: {
+        discountUsesCount: { increment: 1 },
+        discountUsersUsed: { push: params.userId },
         updatedAt: BigInt(Date.now()),
       },
     });

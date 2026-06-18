@@ -1,18 +1,23 @@
-import { IsNotEmpty, IsOptional, IsString, ValidateNested, IsArray, IsNumber } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, ValidateNested, IsArray, IsNumber, Min } from "class-validator";
 import { Type } from "class-transformer";
 
 export class ItemProductDTO{
     @IsNumber()
-    @IsNotEmpty()
-    price: number;
+    @IsOptional()
+    price?: number;
 
     @IsNumber()
     @IsNotEmpty()
+    @Min(1)
     quantity: number;
 
     @IsString()
     @IsNotEmpty()
     productId: string;
+
+    shopId?: string;
+
+    name?: string;
 
 }
 
@@ -50,10 +55,6 @@ export class CheckoutDTO{
     @IsString()
     @IsNotEmpty()
     cartId: string;
-
-    @IsString()
-    @IsNotEmpty()
-    userId: string;
 
     @IsArray()
     @ValidateNested()

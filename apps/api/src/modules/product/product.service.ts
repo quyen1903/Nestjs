@@ -124,14 +124,37 @@ export class ProductService {
     async checkProductByServer(skus: ItemProductDTO[]){
         return await Promise.all(skus.map(
             async (sku)=>{
-                const foundProduct = await this.prismaService.sku.findUnique({
-                    where:{id: sku.productId}
+                if (sku.quantity <= 0) {
+                    throw new BadRequestException('Product quantity must be greater than 0');
+                }
+
+                const foundProduct = await this.prismaService.sku.findFirst({
+                    where:{
+                        id: sku.productId,
+                        status: 1,
+                    },
+                    include: {
+                        spu: {
+                            select: {
+                                name: true,
+                                shopBusinessId: true,
+                                isMarketable: true,
+                                status: true,
+                            }
+                        }
+                    }
                 })
-                if(foundProduct){
+                if(foundProduct && foundProduct.spu?.isMarketable && foundProduct.spu.status === 1){
+                    if ((foundProduct.stock ?? 0) < sku.quantity) {
+                        throw new BadRequestException('Not enough SKU stock available');
+                    }
+
                     return{
                         price:foundProduct.price,
-                        quantity:foundProduct.stock,
-                        productId:sku.productId
+                        quantity:sku.quantity,
+                        productId:sku.productId,
+                        shopId: foundProduct.spu.shopBusinessId,
+                        name: foundProduct.name || foundProduct.spu.name,
                     }
                 }
             }

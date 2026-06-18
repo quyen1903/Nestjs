@@ -11,9 +11,6 @@ export class CreateOrderDTO {
     @IsString()
     cartId: string;
 
-    @IsString()
-    userId: string;
-
     @IsObject()
     userAddress: object;
 

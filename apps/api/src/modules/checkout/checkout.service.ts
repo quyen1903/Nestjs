@@ -10,7 +10,7 @@ export class CheckoutService {
     private readonly checkoutApplicationService: CheckoutApplicationService,
   ) {}
 
-  async checkoutReview({ cartId, userId, shopOrderIds }: CheckoutDTO) {
+  async checkoutReview({ cartId, shopOrderIds }: CheckoutDTO, userId: string) {
     return this.checkoutApplicationService.checkoutReview({
       cartId,
       userId,
