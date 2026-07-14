@@ -682,8 +682,8 @@ Rules:
 - Third-party SDKs must document network destinations, telemetry, data
   collection, retry behavior, and failure mode when relevant.
 
-Do not add a dependency for a small task that the language runtime, Spring,
-NestJS, or the existing stack can safely handle.
+Do not add a dependency for a small task that the language runtime, NestJS, or
+the existing stack can safely handle.
 
 ---
 
@@ -723,8 +723,8 @@ Runtime rules:
 - Do not store real customer exports, shop exports, payment records, order
   dumps, private keys, certificates, or provider tokens in the repository.
 - Do not disable security controls globally to simplify development.
-- Local overrides belong in ignored files such as `.env.local`,
-  `application-local.yml`, or equivalent.
+- Local overrides belong in ignored files such as `.env.local`, `.env`, or
+  equivalent.
 - Do not print full `.env` values.
 
 ---

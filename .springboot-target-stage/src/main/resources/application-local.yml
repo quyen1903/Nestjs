@@ -1,8 +1,0 @@
-spring:
-  config:
-    activate:
-      on-profile: local
-
-# Local defaults remain in application.yml and use synthetic placeholder
-# credentials. Override them through ignored local configuration or environment.
-
