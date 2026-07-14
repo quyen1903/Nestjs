@@ -1,19 +1,22 @@
-import { Injectable, NestMiddleware } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
-import { DiscordService } from "src/services/discord/discord.service";
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
+import { DiscordService } from 'src/services/discord/discord.service';
+
 @Injectable()
-export class DiscordMiddleware implements NestMiddleware{
-    
-    constructor(
-        private readonly discordService: DiscordService
-    ){}
-    use(req: Request, res: Response, next: NextFunction){
-        console.log("🌐 Middleware Triggered for:", req.method, req.originalUrl);
+export class DiscordMiddleware implements NestMiddleware {
+    constructor(private readonly discordService: DiscordService) {}
+
+    use(req: Request, res: Response, next: NextFunction) {
+        const requestId = (req as Request & { requestId?: string }).requestId;
         this.discordService.sendToFormatCode({
-            title:`Method: ${req.method}`,
-            code: req.method === 'GET' ? req.query: req.body,
-            message: `${req.get('host')}${req.originalUrl}}`
-        })
-        next()
+            title: `Method: ${req.method}`,
+            code: JSON.stringify({
+                method: req.method,
+                path: req.path,
+                requestId,
+            }),
+            message: req.path,
+        });
+        next();
     }
 }

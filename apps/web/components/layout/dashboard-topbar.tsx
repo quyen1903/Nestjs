@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ExternalLink, LogOut, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ExternalLink, LogOut, UserRound } from "lucide-react";
+import { useState } from "react";
 
+import { DashboardNotifications } from "@/components/layout/dashboard-notifications";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +28,21 @@ import { useOrganization } from "@/hooks/use-organization";
 export function DashboardTopbar() {
   const { organizations, organization, setOrganizationId } = useOrganization();
   const { session, signOut } = useAuth();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    if (isSigningOut) {
+      return;
+    }
+
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      router.replace("/login");
+    }
+  }
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
@@ -46,14 +64,18 @@ export function DashboardTopbar() {
               ))}
             </SelectContent>
           </Select>
-          <Button asChild variant="outline" size="icon" aria-label="Open storefront">
-            <Link href="/">
-              <ExternalLink className="size-4" />
-            </Link>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Sign out"
+            title="Sign out"
+            disabled={isSigningOut}
+            onClick={() => void handleSignOut()}
+          >
+            <LogOut className="size-4" />
           </Button>
-          <Button variant="outline" size="icon" aria-label="Notifications">
-            <Bell className="size-4" />
-          </Button>
+          <DashboardNotifications />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Account menu">
@@ -63,7 +85,17 @@ export function DashboardTopbar() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{session?.displayName ?? "Demo merchant"}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => void signOut()}>
+              <DropdownMenuItem asChild>
+                <Link href="/">
+                  <ExternalLink className="size-4" />
+                  Open storefront
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={isSigningOut}
+                onSelect={() => void handleSignOut()}
+              >
                 <LogOut className="size-4" />
                 Sign out
               </DropdownMenuItem>

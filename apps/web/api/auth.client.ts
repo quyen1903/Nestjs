@@ -16,20 +16,17 @@ type RegisterInput = LoginInput & {
 
 export async function login(input: LoginInput): Promise<AuthSession> {
   if (apiConfig.mode === "live") {
-    try {
-      const payload = await apiRequest<Record<string, any>>(input.role === "shop" ? "/login" : "/loginManual", {
-        method: "POST",
-        body: {
-          email: input.email,
-          password: input.password,
-          deviceName: "Next.js web",
-          deviceId: `web-${crypto.randomUUID()}`
-        }
-      });
-      return toSession(payload, input.role === "shop" ? "SHOP" : "USER");
-    } catch {
-      // TODO: replace mock fallback with HTTP-only cookie based auth once backend session routes are ready.
-    }
+    const endpoint = input.role === "shop" ? "/auth/shop/login" : "/auth/user/loginManual";
+    const payload = await apiRequest<Record<string, any>>(endpoint, {
+      method: "POST",
+      body: {
+        email: input.email,
+        password: input.password,
+        deviceName: "Next.js web",
+        deviceId: `web-${crypto.randomUUID()}`
+      }
+    });
+    return toSession(payload, input.role === "shop" ? "SHOP" : "USER");
   }
 
   return simulate({
@@ -43,33 +40,29 @@ export async function login(input: LoginInput): Promise<AuthSession> {
 
 export async function register(input: RegisterInput): Promise<AuthSession> {
   if (apiConfig.mode === "live") {
-    try {
-      const endpoint = input.role === "shop" ? "/register" : "/user/registerManual";
-      const body =
-        input.role === "shop"
-          ? {
-              email: input.email,
-              password: input.password,
-              name: input.name,
-              businessName: input.businessName ?? input.name,
-              businessType: input.businessType ?? "Retail",
-              currency: "USD",
-              theme: "light",
-              language: "en"
-            }
-          : {
-              email: input.email,
-              password: input.password,
-              name: input.name,
-              currency: "USD",
-              theme: "light",
-              language: "en"
-            };
-      const payload = await apiRequest<Record<string, any>>(endpoint, { method: "POST", body });
-      return toSession(payload, input.role === "shop" ? "SHOP" : "USER");
-    } catch {
-      // TODO: show backend validation codes directly once auth responses are consistent.
-    }
+    const endpoint = input.role === "shop" ? "/auth/shop/register" : "/user/registerManual";
+    const body =
+      input.role === "shop"
+        ? {
+            email: input.email,
+            password: input.password,
+            name: input.name,
+            businessName: input.businessName ?? input.name,
+            businessType: input.businessType ?? "Retail",
+            currency: "USD",
+            theme: "light",
+            language: "en"
+          }
+        : {
+            email: input.email,
+            password: input.password,
+            name: input.name,
+            currency: "USD",
+            theme: "light",
+            language: "en"
+          };
+    const payload = await apiRequest<Record<string, any>>(endpoint, { method: "POST", body });
+    return toSession(payload, input.role === "shop" ? "SHOP" : "USER");
   }
 
   return simulate({
@@ -83,11 +76,8 @@ export async function register(input: RegisterInput): Promise<AuthSession> {
 
 export async function logout(session: AuthSession | null): Promise<void> {
   if (apiConfig.mode === "live" && session?.accessToken) {
-    try {
-      await apiRequest("/logout", { method: "POST", token: session.accessToken });
-    } catch {
-      // Local session teardown still proceeds.
-    }
+    const endpoint = session.role === "SHOP" ? "/auth/shop/logout" : "/auth/user/logout";
+    await apiRequest(endpoint, { method: "POST", token: session.accessToken });
   }
 }
 

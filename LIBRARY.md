@@ -145,6 +145,11 @@ Root scripts should support:
 - Do not add a global state library to backend services.
 - Do not hand-roll cryptography.
 - Do not parse CSV/Excel with ad hoc string splitting when robust libraries exist.
+- The legacy NestJS API lists `@prisma/client-runtime-utils` directly at the
+  exact installed Prisma Client version because its custom generated-client
+  output imports that package from the API package boundary. Keep these
+  versions aligned; this is a pnpm runtime-resolution requirement, not a second
+  ORM.
 
 ---
 

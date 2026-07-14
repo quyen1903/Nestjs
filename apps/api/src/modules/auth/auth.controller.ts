@@ -1,8 +1,8 @@
 import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { Request, Response } from 'express';
-import 'express';
+import type { Request, Response } from 'express';
+
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
@@ -31,7 +31,6 @@ export class AuthController {
     async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
         const { accessToken, refreshToken } = (req as any).user;
 
-        console.log("req", req)
         res.cookie('access_token', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

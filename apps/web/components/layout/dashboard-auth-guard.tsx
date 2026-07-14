@@ -9,15 +9,15 @@ export function DashboardAuthGuard({ children }: { children: React.ReactNode }) 
   const { session } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const requireGuard = process.env.NEXT_PUBLIC_REQUIRE_DASHBOARD_AUTH === "true";
+  const canAccessDashboard = session?.role === "SHOP" || session?.role === "ADMIN";
 
   useEffect(() => {
-    if (requireGuard && session?.role !== "SHOP" && session?.role !== "ADMIN") {
+    if (!canAccessDashboard) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [pathname, requireGuard, router, session?.role]);
+  }, [canAccessDashboard, pathname, router]);
 
-  if (requireGuard && session?.role !== "SHOP" && session?.role !== "ADMIN") {
+  if (!canAccessDashboard) {
     return null;
   }
 

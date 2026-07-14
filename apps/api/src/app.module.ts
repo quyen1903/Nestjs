@@ -12,7 +12,6 @@ import { UserModule } from './modules/user/user.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { DiscordModule } from './services/discord/discord.module';
-import { DiscordService } from './services/discord/discord.service';
 import { DiscordMiddleware } from './middleware/discord.middleware';
 import { NotificationModule } from './modules/notification/notification.module';
 import { EmailModule } from './services/email/email.module';
@@ -42,10 +41,9 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
         PaymentModule,
     ],
     controllers:[AppController],
-    providers: [DiscordService],
 })
 export class AppModule implements NestModule{
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(DiscordMiddleware, RequestIdMiddleware).forRoutes('*');
+        consumer.apply(RequestIdMiddleware, DiscordMiddleware).forRoutes('*');
     }
 }

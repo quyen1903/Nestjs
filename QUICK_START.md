@@ -28,10 +28,15 @@ PORT=3056
 DATABASE_URL=postgresql://user:password@localhost:5432/ecommerce_db
 JWT_SECRET_KEY=replace-me-local-only
 KAFKA_ENABLED=false
+DISCORD_ENABLED=false
 ```
 
 Kafka is disabled by default. Set `KAFKA_ENABLED=true` only when you are running
 a local Kafka broker and want broker-backed events.
+
+Discord delivery is disabled by default. Set `DISCORD_ENABLED=true` only with
+approved local credentials; the middleware forwards request method, path, and
+request ID only, never request bodies or query values.
 
 ## Database
 

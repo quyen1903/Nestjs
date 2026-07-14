@@ -1,0 +1,1517 @@
+{
+  "docs/migration/fixtures/representative-contract-fixtures.json": {
+    "mtime": 1782716870.4100485,
+    "ast_hash": "0d9e9446bd3d46f9d622bd2efe31a3ac",
+    "semantic_hash": ""
+  },
+  "mvnw": {
+    "mtime": 1757312468.0,
+    "ast_hash": "ab50dd89da7da2346b28003352eeeeeb",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/EcommerceApplication.java": {
+    "mtime": 1782717135.7940645,
+    "ast_hash": "24871e2f05647fee864d177b981a4cde",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/api/SuccessEnvelope.java": {
+    "mtime": 1782717138.1015735,
+    "ast_hash": "24d70887307f566848ec116295d7a439",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/api/SuccessEnvelopeAdvice.java": {
+    "mtime": 1783177860.285206,
+    "ast_hash": "210640315523c8c7c6094d9e6b8c10db",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/config/EcommerceProperties.java": {
+    "mtime": 1782747706.1745956,
+    "ast_hash": "ef670f8d56ffd3f737151313bae15970",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/config/OpenApiConfiguration.java": {
+    "mtime": 1782717137.5905743,
+    "ast_hash": "e1b06cf56f1b0397ccf6f6c459fda8ff",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/config/ProductionConfigurationGuard.java": {
+    "mtime": 1782747646.0910323,
+    "ast_hash": "023479007acdbdd4145f7be805a0673d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/error/ApiErrorResponse.java": {
+    "mtime": 1782717203.4532359,
+    "ast_hash": "eb5a79f1ff8d582cac7da51e2f3c6638",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/error/ApiErrorWriter.java": {
+    "mtime": 1782717203.671235,
+    "ast_hash": "337cc0f88670eb23c5f8aa24f99ac646",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/error/ApplicationException.java": {
+    "mtime": 1782717203.5682354,
+    "ast_hash": "b8522b23d2c25e64b4de3ac6115660b3",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/error/GlobalExceptionHandler.java": {
+    "mtime": 1782748361.9363222,
+    "ast_hash": "4006248fc3f0ffbf4075d275130bfc6b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/observability/RequestIdFilter.java": {
+    "mtime": 1782717137.8145728,
+    "ast_hash": "4c8ae9d5885c5c0b6f8f56cf7fa0f9d8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/observability/RequestSizeLimitFilter.java": {
+    "mtime": 1782717203.9562397,
+    "ast_hash": "fc3e3cef549dbefb8659d6e193d9bca9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/security/SecurityConfiguration.java": {
+    "mtime": 1783177861.7732062,
+    "ast_hash": "80d8106e6531ceca86fa7b043c3089dd",
+    "semantic_hash": ""
+  },
+  "src/main/resources/db/baseline/local-schema.sql": {
+    "mtime": 1782716380.778448,
+    "ast_hash": "ea97fe4807cc50f1d7133f3cbad3aef0",
+    "semantic_hash": ""
+  },
+  "src/main/resources/db/migration/V20251230040704__legacy_schema_baseline.sql": {
+    "mtime": 1782717285.1297235,
+    "ast_hash": "ba44808760d3970e40baaf730dddba56",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/LegacySchemaBaselineTest.java": {
+    "mtime": 1782970999.0935018,
+    "ast_hash": "9df5bb13344da9be55ac1775118fb4bd",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/shared/config/ProductionConfigurationGuardTest.java": {
+    "mtime": 1782747707.452592,
+    "ast_hash": "2aa053b0513bdcef52e4316dde9de8fd",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/shared/error/GlobalExceptionHandlerTest.java": {
+    "mtime": 1782717354.7220068,
+    "ast_hash": "861ba328dbd942ca06be1d865222f424",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/shared/observability/RequestIdFilterTest.java": {
+    "mtime": 1782717354.6030066,
+    "ast_hash": "cb4509943a59c62b50a1980b9b632095",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/shared/security/FoundationProbeController.java": {
+    "mtime": 1782717567.9150808,
+    "ast_hash": "95a64121ab5200e057949c2750d16954",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/shared/security/FoundationSecurityTest.java": {
+    "mtime": 1783177885.491671,
+    "ast_hash": "c2c6f39444c5ead28547bf38bfc7af1a",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1782717010.0623715,
+    "ast_hash": "c9395ddd1e3459e8049436ffe1c7b2cd",
+    "semantic_hash": ""
+  },
+  "API_REFERENCE.md": {
+    "mtime": 1783179310.8931866,
+    "ast_hash": "8146a896d139db842396df7abc66b5d6",
+    "semantic_hash": ""
+  },
+  "BACKEND_DOCUMENTATION.md": {
+    "mtime": 1782973444.4219925,
+    "ast_hash": "cdd1752ffdbb71892502158ae28acff8",
+    "semantic_hash": ""
+  },
+  "CODING_STANDARDS.md": {
+    "mtime": 1782717010.1713736,
+    "ast_hash": "f9f9ffd7c94695f3b682af03d8a4ad0f",
+    "semantic_hash": ""
+  },
+  "HELP.md": {
+    "mtime": 1783179296.0033743,
+    "ast_hash": "7e5f953bc388bb19b6c1b038b84815df",
+    "semantic_hash": ""
+  },
+  "ISSUES_AND_FIXES.md": {
+    "mtime": 1783179300.0124812,
+    "ast_hash": "8a91e874c5f5a1a8c5c75ce9aad82f52",
+    "semantic_hash": ""
+  },
+  "LIBRARY.md": {
+    "mtime": 1782973426.1276479,
+    "ast_hash": "3082207f5cce71f584eb226604f0c74d",
+    "semantic_hash": ""
+  },
+  "QUICK_START.md": {
+    "mtime": 1783143842.9146013,
+    "ast_hash": "905f08ec9f1225e38b53400bb6a0c54f",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1783179291.4450088,
+    "ast_hash": "88b94c581c0cfa2aa6e1e70878e5645b",
+    "semantic_hash": ""
+  },
+  "SECURITY.md": {
+    "mtime": 1782971479.4494767,
+    "ast_hash": "c791be45a843e4bde4e7b5a7412bcfab",
+    "semantic_hash": ""
+  },
+  "SPRING_BOOT_MIGRATION_PROMPT.md": {
+    "mtime": 1782715197.8403027,
+    "ast_hash": "fe3ffb7eb691db09302f553bc1820506",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0001-modular-monolith-layout.md": {
+    "mtime": 1782716833.5896316,
+    "ast_hash": "82e3fae600fbaf2e7aec49a0a60b06ac",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0002-auth-token-compatibility.md": {
+    "mtime": 1782749618.0485413,
+    "ast_hash": "af4c2da17b762b0b833425079b281c99",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0003-persistence-and-flyway.md": {
+    "mtime": 1782716833.8106222,
+    "ast_hash": "2dabf8e9639b543424e932a5a558c50a",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0004-realtime-protocol.md": {
+    "mtime": 1782973427.2656472,
+    "ast_hash": "fb1ff0359207ff6e8b139f2060382a5f",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0005-event-publication.md": {
+    "mtime": 1782973428.4036474,
+    "ast_hash": "eb3ce514f60f08420e8ed6563cf2fbf6",
+    "semantic_hash": ""
+  },
+  "docs/architecture/decisions/0006-cutover-and-rollback.md": {
+    "mtime": 1782716834.1256225,
+    "ast_hash": "bc60c3c50e13b2b32cfb331812536361",
+    "semantic_hash": ""
+  },
+  "docs/legacy/frontend/README.md": {
+    "mtime": 1781335487.3117366,
+    "ast_hash": "1c74790846a909a8be10dd9086253d88",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/AGENTS.md": {
+    "mtime": 1781335487.1047373,
+    "ast_hash": "688329ecb687750500fbf6801af089d7",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/API_REFERENCE.md": {
+    "mtime": 1776005181.406118,
+    "ast_hash": "c2a442bc0e849e4d6197d558c257cd87",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/BACKEND_DOCUMENTATION.md": {
+    "mtime": 1776005158.3142872,
+    "ast_hash": "e7fb0d666525eea1cd27a70ed0f26185",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/CODING_STANDARDS.md": {
+    "mtime": 1781335487.105738,
+    "ast_hash": "767487b154d7e51648facfd2a1fdc792",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/HELP.md": {
+    "mtime": 1761378389.0,
+    "ast_hash": "74307326b366546269a9e98fdfe00f56",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/ISSUES_AND_FIXES.md": {
+    "mtime": 1776005263.941395,
+    "ast_hash": "54b452214dd46943bf97618d3d818e86",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/LIBRARY.md": {
+    "mtime": 1781335487.105738,
+    "ast_hash": "51d7cbc7b255629824a9d07e0d125be2",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/QUICK_START.md": {
+    "mtime": 1781335487.1067371,
+    "ast_hash": "ff90ec7c8c177c0e1a7c74590c5c4aa5",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/README.md": {
+    "mtime": 1781335487.1067371,
+    "ast_hash": "06946a979a32a17b0c0530c03b22c1da",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/SECURITY.md": {
+    "mtime": 1781812512.5881279,
+    "ast_hash": "5470ede8740e9e42d289a39e40b8e48e",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/SPRING_BOOT_MIGRATION_PROMPT.md": {
+    "mtime": 1782715197.8403027,
+    "ast_hash": "fe3ffb7eb691db09302f553bc1820506",
+    "semantic_hash": ""
+  },
+  "docs/legacy/nestjs/source-docs/apps-api-API_REFERENCE.md": {
+    "mtime": 1781335487.1247354,
+    "ast_hash": "c2a442bc0e849e4d6197d558c257cd87",
+    "semantic_hash": ""
+  },
+  "docs/migration/API_PARITY_MATRIX.md": {
+    "mtime": 1783179308.2866614,
+    "ast_hash": "176ac9e56f862d69813a229bde861bc6",
+    "semantic_hash": ""
+  },
+  "docs/migration/BASELINE_VERIFICATION.md": {
+    "mtime": 1783179305.3264785,
+    "ast_hash": "d1df5f6d16702deef3ed54a04c1c778e",
+    "semantic_hash": ""
+  },
+  "docs/migration/DATABASE_PARITY_MATRIX.md": {
+    "mtime": 1783142395.758073,
+    "ast_hash": "d4f3f8877b96061d32a691481806581d",
+    "semantic_hash": ""
+  },
+  "docs/migration/DEPENDENCY_PARITY_MATRIX.md": {
+    "mtime": 1783142397.7107475,
+    "ast_hash": "3aa0fe0876e06a30056818d982d2e28d",
+    "semantic_hash": ""
+  },
+  "docs/migration/DISCREPANCY_REGISTER.md": {
+    "mtime": 1783179302.8704834,
+    "ast_hash": "80110c00f8b4201506087fd1602c2214",
+    "semantic_hash": ""
+  },
+  "docs/migration/FLYWAY_BASELINE_RUNBOOK.md": {
+    "mtime": 1782749677.0388825,
+    "ast_hash": "2621deea40f7e6bc9dc4c8467e18d07b",
+    "semantic_hash": ""
+  },
+  "docs/migration/MARKDOWN_PARITY_MATRIX.md": {
+    "mtime": 1783142403.5518794,
+    "ast_hash": "499541a6d0c47e85213dd9350261ce04",
+    "semantic_hash": ""
+  },
+  "docs/migration/MODULE_PARITY_MATRIX.md": {
+    "mtime": 1783142399.6304762,
+    "ast_hash": "57b00396d3817fc0eadb9ad6909c91b3",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_0_REPORT.md": {
+    "mtime": 1782716870.5170548,
+    "ast_hash": "a0e0b91c0cc4c4b4e329e40b5e179499",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_1_REPORT.md": {
+    "mtime": 1782718107.8988252,
+    "ast_hash": "ae73f600bbe9de82c1b323307e1a3c00",
+    "semantic_hash": ""
+  },
+  "docs/migration/PRISMA_TO_JAVA_MAPPING.md": {
+    "mtime": 1782716797.9467053,
+    "ast_hash": "83d12825dc2605229e3eccd71ba52bb6",
+    "semantic_hash": ""
+  },
+  "src/main/resources/application-local.yml": {
+    "mtime": 1782717254.93331,
+    "ast_hash": "7397fc2d513de1dfb1966bc03dd1ea0c",
+    "semantic_hash": ""
+  },
+  "src/main/resources/application-production.yml": {
+    "mtime": 1782969727.0889902,
+    "ast_hash": "d5e20cbd53c25d708cf0d2d36e1f5e19",
+    "semantic_hash": ""
+  },
+  "src/main/resources/application-test.yml": {
+    "mtime": 1782717255.0473092,
+    "ast_hash": "8f387e4ee19183628c532afe6db5d91e",
+    "semantic_hash": ""
+  },
+  "src/main/resources/application.yml": {
+    "mtime": 1783143839.7991264,
+    "ast_hash": "792911f5fc00c83f209ce73777682922",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/LegacySessionReader.java": {
+    "mtime": 1782745905.9251993,
+    "ast_hash": "61a38c8a4e98c765d200f7dee985fa10",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/LegacySessionSnapshot.java": {
+    "mtime": 1782745904.3941896,
+    "ast_hash": "8c438bc66f079b4b8eae6035c884a2b8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/domain/ActorPrincipal.java": {
+    "mtime": 1782745897.1456745,
+    "ast_hash": "a72ec75265fbc04488578c1a0e23c32a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/domain/ActorType.java": {
+    "mtime": 1782745895.1021597,
+    "ast_hash": "75bff4abd45bffec29dbb48e3bdd3a71",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/domain/AdminPrincipal.java": {
+    "mtime": 1782745901.771191,
+    "ast_hash": "47b9771420185d256735fb4b8dcbf690",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/domain/ShopPrincipal.java": {
+    "mtime": 1782745900.2741885,
+    "ast_hash": "4628d9363e7b096b7f768da8cfcc539d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/domain/UserPrincipal.java": {
+    "mtime": 1782745898.7676778,
+    "ast_hash": "1888cb8c3f58d167bfccf9e6a248c733",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcLegacySessionReader.java": {
+    "mtime": 1782746297.3916683,
+    "ast_hash": "3b0bfa851ee2e5ab515e3a33312f126c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/AdminOnly.java": {
+    "mtime": 1782746032.6646998,
+    "ast_hash": "040c8da4e2597e2b2c50eb7ee701abc4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyAccessTokenAuthenticator.java": {
+    "mtime": 1782747766.215024,
+    "ast_hash": "818fbddc8a374cc9d71f23d31c6eb0ba",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyAccessTokenFilter.java": {
+    "mtime": 1782746027.1336994,
+    "ast_hash": "168c55ddb03bbd96623df785b8a15fea",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyAuthConfiguration.java": {
+    "mtime": 1782751300.0714982,
+    "ast_hash": "d942f2ab93775b71492112fe84d52861",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyAuthenticationException.java": {
+    "mtime": 1782745970.7795413,
+    "ast_hash": "f983715de231219e73fa0140a04767f0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyRsaPublicKeyParser.java": {
+    "mtime": 1782746298.6766658,
+    "ast_hash": "2f263ca6592fc918d4236a2c16b72de0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/ShopOnly.java": {
+    "mtime": 1782746031.295699,
+    "ast_hash": "08debfb533c25ee3016d41a2464dac7c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/UserOnly.java": {
+    "mtime": 1782746029.996698,
+    "ast_hash": "0967aeab1abd6b46aa001f3a8e8f4278",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/security/SecurityFilterContributor.java": {
+    "mtime": 1782745891.081227,
+    "ast_hash": "c88fabc1e1e5e2dda1e3d67f5c52063d",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/infrastructure/JdbcLegacySessionReaderTest.java": {
+    "mtime": 1782746928.1501687,
+    "ast_hash": "ada97588353471e55d50aa4106b3285b",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/ActorAuthorizationTest.java": {
+    "mtime": 1782746161.8515873,
+    "ast_hash": "06350eed832e0ea89f4787ce81f2ca6a",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/LegacyAccessTokenAuthenticatorTest.java": {
+    "mtime": 1782747708.6595924,
+    "ast_hash": "b264663c1c51d2172c34a0b07ce0cb18",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/LegacyAccessTokenFilterTest.java": {
+    "mtime": 1782746231.651594,
+    "ast_hash": "b5aacfb4c0925f8fdab493bf51b60ffe",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_2_PROGRESS_REPORT.md": {
+    "mtime": 1782749616.9145455,
+    "ast_hash": "240ad0f254704be118e8f217b20ee314",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/LegacyCredentialReader.java": {
+    "mtime": 1782746837.833026,
+    "ast_hash": "19e71c1911ceb844eee0868f23cfcdf7",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/LegacyCredentialSnapshot.java": {
+    "mtime": 1782746836.696029,
+    "ast_hash": "12ddb42d747a56da3d1e8a4aec1c76db",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/VerifiedCredential.java": {
+    "mtime": 1782746839.0210242,
+    "ast_hash": "30edad08152ef0c41e74ffa76237bad9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcLegacyCredentialReader.java": {
+    "mtime": 1782749387.4799564,
+    "ast_hash": "afbd0f773d5ee4dca8d1c40188fc2e1e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyCredentialAuthenticator.java": {
+    "mtime": 1782749388.6469567,
+    "ast_hash": "8607003a85a8cc2a23ab18ab34810888",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyCredentialException.java": {
+    "mtime": 1782746879.906548,
+    "ast_hash": "10a4f53fcce29d250b714c87f0317cbe",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyPasswordVerifier.java": {
+    "mtime": 1782748613.977813,
+    "ast_hash": "f486ab8d8958265c617447d6390783a0",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/LegacyCredentialAuthenticatorTest.java": {
+    "mtime": 1782749418.9571693,
+    "ast_hash": "279ad76b77289a651ae08e5bf201ff61",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/LegacyPasswordVerifierTest.java": {
+    "mtime": 1782746925.5961685,
+    "ast_hash": "f70a10609848674f7875dce7daf09f9b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/ForgotPasswordRequest.java": {
+    "mtime": 1782748844.9643066,
+    "ast_hash": "6cea8222a5da9e84180cf5dda7b5c0bc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/LoginRequest.java": {
+    "mtime": 1782747938.05196,
+    "ast_hash": "4a79294c061bd8686d4624acff81eaf4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/ResetPasswordRequest.java": {
+    "mtime": 1782748846.173306,
+    "ast_hash": "5c05d1b0f0fa65c69635bce9779b48a9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/ShopAuthController.java": {
+    "mtime": 1782750227.9932942,
+    "ast_hash": "df5787c7dbb21268ac60691585f04e22",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/UserAuthController.java": {
+    "mtime": 1782748849.7953067,
+    "ast_hash": "3b3c342406acf035f92fa5537c7742c1",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/AccountIdentityResponse.java": {
+    "mtime": 1782747846.244383,
+    "ast_hash": "33e5f8e9e986612b74068371a03a816c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/AuthLoginService.java": {
+    "mtime": 1782747935.8509653,
+    "ast_hash": "34d6fdb2e65c528950dfdf92fdc3acf5",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/AuthSessionStore.java": {
+    "mtime": 1782747841.520181,
+    "ast_hash": "12c93b7e4fedb22533a7829e587a7388",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/CredentialAttemptStore.java": {
+    "mtime": 1782749385.125955,
+    "ast_hash": "17964be7c2afc23c0d27348d5d431111",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/IssuedTokenPair.java": {
+    "mtime": 1782747762.5860238,
+    "ast_hash": "206967d36875deb7999887dbe28fe72a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/LogoutResponse.java": {
+    "mtime": 1782747850.3523781,
+    "ast_hash": "f23d40c495f9f297e479083c4b292972",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/PasswordResetMessageResponse.java": {
+    "mtime": 1782748847.3933096,
+    "ast_hash": "78e0d9b550f05ed663d217a89762917a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/PasswordResetNotifier.java": {
+    "mtime": 1782748690.2823071,
+    "ast_hash": "4d27b1c5c250007bb6ba8598914502f5",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/PasswordResetService.java": {
+    "mtime": 1782748790.4297118,
+    "ast_hash": "97c027ede5031ec7c22ec4842c9e22e6",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/RefreshTokenClaims.java": {
+    "mtime": 1782748299.5031538,
+    "ast_hash": "e442f577ee9a221410713b955123eb03",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/RefreshTokenResponse.java": {
+    "mtime": 1782748300.829154,
+    "ast_hash": "0ddd1672e92065daacf76ab493b66464",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/RefreshTokenService.java": {
+    "mtime": 1782748303.236153,
+    "ast_hash": "e58e7f12c14eec6e4d6e597ba536a871",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/ShopLoginResponse.java": {
+    "mtime": 1782747849.1623814,
+    "ast_hash": "930b34dd86ae1f760a5bbddf98dbc374",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/UserLoginResponse.java": {
+    "mtime": 1782747847.7413847,
+    "ast_hash": "185dd9951db10c0bd21095a2c781132d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/ValidateResetTokenResponse.java": {
+    "mtime": 1782748848.616308,
+    "ast_hash": "7566e4b3bbfb1003c78a4a917178d92f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/config/PasswordResetProductionGuard.java": {
+    "mtime": 1782748689.1183083,
+    "ast_hash": "494f73b361e31a5009b7ed5bb4450b83",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/config/PasswordResetProperties.java": {
+    "mtime": 1782748687.9433084,
+    "ast_hash": "5c5be4e16efda01f6b824263bbf7a63d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcAuthSessionStore.java": {
+    "mtime": 1782747934.1829667,
+    "ast_hash": "1f27d4bd1ff182aa225b69dec2d4ca23",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcCredentialAttemptStore.java": {
+    "mtime": 1782749386.3229542,
+    "ast_hash": "942a3c7c5bbc6dc5d1ebbe2528819e84",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcPasswordResetService.java": {
+    "mtime": 1782748843.4643097,
+    "ast_hash": "0da92f8513bb6b09d8154610b644fd5c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcRefreshTokenService.java": {
+    "mtime": 1782748388.1061823,
+    "ast_hash": "585ec57beafe9125f02d71365ea5d307",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/SmtpPasswordResetNotifier.java": {
+    "mtime": 1782748691.4183085,
+    "ast_hash": "c7c449fad27fb008c248547b326ce486",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyPasswordHasher.java": {
+    "mtime": 1782748601.5787518,
+    "ast_hash": "9f74677211b542e87278d7bdfd8c7aff",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyRefreshTokenVerifier.java": {
+    "mtime": 1782748302.089155,
+    "ast_hash": "3bb121dc069fbb63398446174ff7ffdf",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/LegacyTokenIssuer.java": {
+    "mtime": 1782747763.8040226,
+    "ast_hash": "8ae82523090725e8d3db9e0233ad7da0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/TokenDigester.java": {
+    "mtime": 1782747709.961593,
+    "ast_hash": "246765ed4cbaeb49530685eaf59176b0",
+    "semantic_hash": ""
+  },
+  "src/main/resources/db/migration/V20260629000100__add_compatibility_token_digests.sql": {
+    "mtime": 1782747655.7600315,
+    "ast_hash": "e1231ce08038f5a0ff2bce335a859a94",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/api/AuthControllerSecurityTest.java": {
+    "mtime": 1782751412.8182805,
+    "ast_hash": "0e5342aa9a9f9d679e40b0ecc8224a50",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/application/AuthLoginServiceTest.java": {
+    "mtime": 1782748132.7438362,
+    "ast_hash": "f5ce484a22c83b2ee9faaf2c5ee823c0",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/config/PasswordResetProductionGuardTest.java": {
+    "mtime": 1782748911.3211393,
+    "ast_hash": "717886e97495e3d5326dbe6c401cff24",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/infrastructure/JdbcAuthSessionLifecycleTest.java": {
+    "mtime": 1782748949.2745173,
+    "ast_hash": "3d9a1d38779d29c0c9d18e96f9870670",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/infrastructure/LocalPostgresCompatibilityTest.java": {
+    "mtime": 1783142079.1104085,
+    "ast_hash": "2020720f343b3acedd04f305406c70f3",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/infrastructure/SmtpPasswordResetNotifierTest.java": {
+    "mtime": 1782748912.5551336,
+    "ast_hash": "4d555e3bb7f6da97dce6b573d1cd3ef5",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/LegacyTokenIssuerTest.java": {
+    "mtime": 1782748495.223452,
+    "ast_hash": "0ba3c465dc040be3ce1777ca75a30d17",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/TokenDigesterTest.java": {
+    "mtime": 1782748129.6388402,
+    "ast_hash": "65c737d4962de43f3f7d221458f68a9f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/api/GoogleOAuthUnavailableController.java": {
+    "mtime": 1782751294.8936877,
+    "ast_hash": "b5366697fbd9571233267f023b4fcd8c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/AccountRegistrationService.java": {
+    "mtime": 1782750166.322507,
+    "ast_hash": "c0bcb489baae2691f96d1443764f7efe",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/GoogleOAuthLoginService.java": {
+    "mtime": 1782751221.978767,
+    "ast_hash": "42dd48b4a9a686ddc7b4c4335fe5f7d8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/NotificationThreadResponse.java": {
+    "mtime": 1782750163.8164988,
+    "ast_hash": "24fba6731d071569556e2ecea2584c28",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/ShopRegistrationCommand.java": {
+    "mtime": 1782750162.2254996,
+    "ast_hash": "5eab6b37bda1a8555f369564bd8892ba",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/UserRegistrationCommand.java": {
+    "mtime": 1782750160.502499,
+    "ast_hash": "587fc21365befe9a2c6b0ef4e55bb5ff",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/application/UserRegistrationResponse.java": {
+    "mtime": 1782750165.0825002,
+    "ast_hash": "527daa6bad5dfaa1c76e11d4563f2544",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/config/GoogleOAuthProductionGuard.java": {
+    "mtime": 1782751481.4117038,
+    "ast_hash": "190efa301b1232bfdd63f9e69b310d6a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/config/GoogleOAuthProperties.java": {
+    "mtime": 1782751220.6057649,
+    "ast_hash": "d1111409496737a90a56f89a5ebe2ee1",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcAccountRegistrationService.java": {
+    "mtime": 1782750167.5785,
+    "ast_hash": "5f78f2cb34521d70b49c8b3dec463579",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/infrastructure/JdbcGoogleOAuthLoginService.java": {
+    "mtime": 1782751312.280703,
+    "ast_hash": "e672819ec5b17016f5d58147967ff3d8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/GoogleOAuthConfiguration.java": {
+    "mtime": 1782751347.1397614,
+    "ast_hash": "7288848fa90fbc3cb774631811dd8cfe",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/auth/security/GoogleOAuthSuccessHandler.java": {
+    "mtime": 1782751296.281687,
+    "ast_hash": "cdb60a3d99b54b67c70911e7e0d9b7ec",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CategoryController.java": {
+    "mtime": 1782750681.1772056,
+    "ast_hash": "e48406e635e379d2a3d3d48845b67fdc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CategoryRemovalResponse.java": {
+    "mtime": 1782750679.9512067,
+    "ast_hash": "929413ea7e4d33f72b97d5a28677fb1b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CreateBrandRequest.java": {
+    "mtime": 1782750640.0535464,
+    "ast_hash": "783991b1701c765ec74750011fd7f654",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CreateCategoryRequest.java": {
+    "mtime": 1782750677.2882044,
+    "ast_hash": "9709c7355b3feb0c491d0c3ec41e15fc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CreateProductRequest.java": {
+    "mtime": 1782750638.8155446,
+    "ast_hash": "1e9d69cc9449da0555968a89c2ee7a9c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CreateSkuRequest.java": {
+    "mtime": 1782750637.5785458,
+    "ast_hash": "883f34b72204edd5cf5e02ce928b7d6d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/CreateSpuRequest.java": {
+    "mtime": 1782750636.273545,
+    "ast_hash": "6551593b53317a0000c9d420bd0d1b33",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/ProductController.java": {
+    "mtime": 1782750642.5695446,
+    "ast_hash": "71318c26e2f7176e992cbd34fc1bea60",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/UpdateCategoryRequest.java": {
+    "mtime": 1782750678.6672053,
+    "ast_hash": "9d6894a9238ccdfc1f5313bc52fb66e0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/api/UpdateProductRequest.java": {
+    "mtime": 1782750641.320544,
+    "ast_hash": "939ed97f6275794c517dffdf80b2256b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/BrandView.java": {
+    "mtime": 1782750384.986358,
+    "ast_hash": "ee1e2e64403bb4fe2d9af1ed8d652f27",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/CatalogService.java": {
+    "mtime": 1782750396.3123548,
+    "ast_hash": "f241d495c9eccf27bcd572da50770697",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/CategoryService.java": {
+    "mtime": 1782750397.8063655,
+    "ast_hash": "174ba00695bb578e9ff5528ddeaf4ffc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/CategoryView.java": {
+    "mtime": 1782750386.322355,
+    "ast_hash": "58e4af67244b75fb9e2ef72a50b276b4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/CreateSkuCommand.java": {
+    "mtime": 1782750393.3643632,
+    "ast_hash": "79bdcf331dfe5b487149c290232e7552",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/CreateSpuCommand.java": {
+    "mtime": 1782750392.0373597,
+    "ast_hash": "67b456c98b0085743e6161fc798c6748",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/ProductMutationResponse.java": {
+    "mtime": 1782750390.4423592,
+    "ast_hash": "3801b3b9245511fad4e018f06c2dd831",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/ProductView.java": {
+    "mtime": 1782750388.9243565,
+    "ast_hash": "5bb75920daca600d23c5f430ae3e180c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/SkuView.java": {
+    "mtime": 1782750387.6283572,
+    "ast_hash": "8d097136462469ae8fe9c4a8b22e73fd",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/application/UpdateProductCommand.java": {
+    "mtime": 1782750395.0653548,
+    "ast_hash": "7c0362cd889907489576e3c45dece5c6",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/infrastructure/CatalogConfiguration.java": {
+    "mtime": 1782972170.5835426,
+    "ast_hash": "5316c646a194eb0be4c2a9d408f218ed",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/infrastructure/JdbcCatalogService.java": {
+    "mtime": 1782972171.7675483,
+    "ast_hash": "773e80ccfcb12dd57d8a24c5ad53923c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/catalog/infrastructure/JdbcCategoryService.java": {
+    "mtime": 1782750723.7157853,
+    "ast_hash": "df3fd8246b129004023c437e6d42d846",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/customer/api/UserRegistrationController.java": {
+    "mtime": 1782750224.048756,
+    "ast_hash": "77dcc00524915493b7928ad81762c9c9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/customer/api/UserRegistrationRequest.java": {
+    "mtime": 1782750222.797757,
+    "ast_hash": "d66a5eda4119a527f7c7c31331f426ad",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shop/api/ShopRegistrationRequest.java": {
+    "mtime": 1782750226.2397578,
+    "ast_hash": "9dde943aaba684bcc9a2fa9e0a42da5b",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/config/GoogleOAuthProductionGuardTest.java": {
+    "mtime": 1782751482.8127038,
+    "ast_hash": "bf3fb94ac0a40622685f9586aae80147",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/GoogleOAuthConfigurationTest.java": {
+    "mtime": 1782751484.191702,
+    "ast_hash": "e465e73e3d4662dd0a9338c8e286f120",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/auth/security/GoogleOAuthSuccessHandlerTest.java": {
+    "mtime": 1782751400.8539379,
+    "ast_hash": "cad8231c3539a70679abd1827ec7e187",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/catalog/api/CatalogControllerSecurityTest.java": {
+    "mtime": 1782750787.7795093,
+    "ast_hash": "9bfc9a8703d902764178b8e219e2ad11",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/catalog/infrastructure/LocalPostgresCatalogCompatibilityTest.java": {
+    "mtime": 1782751556.6487238,
+    "ast_hash": "3fb8ed57cdabf0d30b4b07440a7b72d2",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_3_REPORT.md": {
+    "mtime": 1782751853.551643,
+    "ast_hash": "11650100a387ae2f47c09ab50f2f85f7",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/CartController.java": {
+    "mtime": 1782752165.074772,
+    "ast_hash": "5be37c3f9d0789488b2c50d330771871",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/CartProductRequest.java": {
+    "mtime": 1782752156.541768,
+    "ast_hash": "3f42353e329e1b2d18d3b1056dcba27a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/CartUpdateProductRequest.java": {
+    "mtime": 1782752159.116769,
+    "ast_hash": "671363a088fff5415af2834256f368cc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/CreateCartRequest.java": {
+    "mtime": 1782752157.8177633,
+    "ast_hash": "255a0a044177a2259edbe9123546acc9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/DeleteCartItemRequest.java": {
+    "mtime": 1782752162.62677,
+    "ast_hash": "4b8ad29415a2dc067b4519d29fb1576b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/DeleteCartItemResponse.java": {
+    "mtime": 1782752163.8697672,
+    "ast_hash": "e06d1d1f86bbc1ba4df77e63b7749085",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/ShopCartUpdateRequest.java": {
+    "mtime": 1782752160.296765,
+    "ast_hash": "7751ee51873207af265c0c14db65bcbe",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/api/UpdateCartRequest.java": {
+    "mtime": 1782752161.4497662,
+    "ast_hash": "e6a378f18592e7dbc72ccd5408651ab6",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/application/CartItemView.java": {
+    "mtime": 1782752111.2227428,
+    "ast_hash": "fd7f8eed3a8dab484a872da6a3dee81a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/application/CartService.java": {
+    "mtime": 1782752114.0927548,
+    "ast_hash": "aeeed4b043ebbd537500a3fd87f4c936",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/application/CartUpdateItem.java": {
+    "mtime": 1782752112.496744,
+    "ast_hash": "48bfeabfbcd7ca3ba594fc4677760d37",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/infrastructure/CartConfiguration.java": {
+    "mtime": 1782752166.2197666,
+    "ast_hash": "d10ed4df4f171572bea46faee6b25775",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/cart/infrastructure/JdbcCartService.java": {
+    "mtime": 1782752116.165748,
+    "ast_hash": "918a4410ee5586b7fb8e3b18cefb490b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/CreateDiscountRequest.java": {
+    "mtime": 1782968698.9773889,
+    "ast_hash": "65f139f9eb5cd3ae9d221bf3234ed2e1",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/DeleteDiscountRequest.java": {
+    "mtime": 1782968705.3121736,
+    "ast_hash": "5beca2032b78b3a17298d85dee83a530",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/DeleteDiscountResponse.java": {
+    "mtime": 1782968707.2857988,
+    "ast_hash": "99770490346500280a7e797f2a998611",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/DiscountAmountProductRequest.java": {
+    "mtime": 1782968701.0825963,
+    "ast_hash": "7343a3b6acdc8bc160ad13b23dab30f4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/DiscountAmountRequest.java": {
+    "mtime": 1782968703.278596,
+    "ast_hash": "66cbe1525674a438adf90851ac43d0f6",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/api/DiscountController.java": {
+    "mtime": 1782968709.141851,
+    "ast_hash": "fd70c28d380cc99e37daf5b1eaee0907",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/application/CreateDiscountCommand.java": {
+    "mtime": 1782968635.5590813,
+    "ast_hash": "78538df08583c7168f8d0c2563d21702",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/application/DiscountProductView.java": {
+    "mtime": 1782968638.6556046,
+    "ast_hash": "93f7ca090a0ddd0e96abb4f8c59655d3",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/application/DiscountQuote.java": {
+    "mtime": 1782968639.9966056,
+    "ast_hash": "3dce4bb69617db0e41e091314a7e0d58",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/application/DiscountService.java": {
+    "mtime": 1782968641.514149,
+    "ast_hash": "58d67cb5d9aa91cf90c290d766911504",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/application/DiscountView.java": {
+    "mtime": 1782968637.2320797,
+    "ast_hash": "1efe640645dcfcb318d0237ba4b69464",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/infrastructure/DiscountConfiguration.java": {
+    "mtime": 1782972172.9095454,
+    "ast_hash": "617a1237df3ae9b331b9ec46ed99a87f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/discount/infrastructure/JdbcDiscountService.java": {
+    "mtime": 1782972174.0815442,
+    "ast_hash": "0990a483943f724166cd19077129496c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/api/InventoryController.java": {
+    "mtime": 1782752306.7111394,
+    "ast_hash": "c1c462bc58f3fe94e9ed42bf7c7611df",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/api/InventoryRequest.java": {
+    "mtime": 1782752305.410139,
+    "ast_hash": "51eeac554d7be2039a21fe6cd2892b13",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/application/InventoryReservationService.java": {
+    "mtime": 1782969787.594792,
+    "ast_hash": "5821f0adf700824422e27058efa53bcb",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/application/InventoryService.java": {
+    "mtime": 1782752212.9558494,
+    "ast_hash": "b8975c166d99bd018c676257c9d63b49",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/application/InventoryView.java": {
+    "mtime": 1782752211.6298473,
+    "ast_hash": "b4904d8592f3cd5b4a715dcb39c2cbb8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/application/ReservationRequest.java": {
+    "mtime": 1782752214.2068498,
+    "ast_hash": "90112bd96fae27cd5d41ddf15073cb4b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/application/ReservationView.java": {
+    "mtime": 1782752215.3518555,
+    "ast_hash": "082a5127dbf3840c90e1f32241c6c68d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/infrastructure/InventoryConfiguration.java": {
+    "mtime": 1782752308.1581404,
+    "ast_hash": "17b266bdad48f097121097a80e3a6b18",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/infrastructure/JdbcInventoryReservationService.java": {
+    "mtime": 1782969792.298185,
+    "ast_hash": "998d150e3257e5dd0cbcb3d8ccdedc7d",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/inventory/infrastructure/JdbcInventoryService.java": {
+    "mtime": 1782752218.7498496,
+    "ast_hash": "b51348bc94aa0383d00115affb7e7ecd",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/cart/api/CommerceControllerSecurityTest.java": {
+    "mtime": 1782968893.8871276,
+    "ast_hash": "7129074ba9a0de94d4077b028534dda1",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/inventory/infrastructure/LocalPostgresCommerceStateTest.java": {
+    "mtime": 1782968803.5814464,
+    "ast_hash": "bfc205098bdb7f6c6c57810dacd07eb2",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_4_REPORT.md": {
+    "mtime": 1782969300.4002259,
+    "ast_hash": "088061424deea94f8705c99228a558a4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/api/CheckoutController.java": {
+    "mtime": 1782969915.2862642,
+    "ast_hash": "58e55d7f7209280c4d7412ce0c78edf5",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/api/CheckoutDiscountRequest.java": {
+    "mtime": 1782969911.446755,
+    "ast_hash": "f283953bd243571f474332fe61480fd6",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/api/CheckoutProductRequest.java": {
+    "mtime": 1782969910.2360184,
+    "ast_hash": "aba85c1141c191c17cd15c3fa9137183",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/api/CheckoutRequest.java": {
+    "mtime": 1782969913.9747024,
+    "ast_hash": "ec9fad0a78c3bf29d05a4d406ebcbb8c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/api/CheckoutShopRequest.java": {
+    "mtime": 1782969912.6787,
+    "ast_hash": "b95e4706f9cee373806dd6af4ed8a3bf",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutCommand.java": {
+    "mtime": 1782969899.0138345,
+    "ast_hash": "7830f1274be99d01e344059b9f32e59a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutProductSelection.java": {
+    "mtime": 1782969896.432197,
+    "ast_hash": "7c4cecd08bef737dacc56a91fbb070ea",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutProductView.java": {
+    "mtime": 1782969900.3312757,
+    "ast_hash": "26d4e18b14957a5a1d0d5c0f89943970",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutReviewView.java": {
+    "mtime": 1782969904.134801,
+    "ast_hash": "e26d2ec0c9a58826b480562552888e38",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutService.java": {
+    "mtime": 1782969908.100041,
+    "ast_hash": "31249c0608947ed426943bd74ba683a0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutShopSelection.java": {
+    "mtime": 1782969897.7041578,
+    "ast_hash": "16e50d575cb5787ed13b206323af1c90",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CheckoutTotals.java": {
+    "mtime": 1782969902.9345367,
+    "ast_hash": "dfad047961ac17737ba892ee9d89e63f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/CreateOrdersResult.java": {
+    "mtime": 1782969906.7909396,
+    "ast_hash": "301fb570b71d48e237cf602e2bfe0ad3",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/OrderView.java": {
+    "mtime": 1782969905.474381,
+    "ast_hash": "a7df3a6e0d085719ac90fde94ad63364",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/application/ShopCheckoutView.java": {
+    "mtime": 1782969901.6440153,
+    "ast_hash": "cafebb8d398bb483888e2780a06ee28e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/infrastructure/CheckoutConfiguration.java": {
+    "mtime": 1782970080.4684255,
+    "ast_hash": "f6164c8be076e0ed319f4b9152006f6f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/checkout/infrastructure/JdbcCheckoutService.java": {
+    "mtime": 1782970995.1499531,
+    "ast_hash": "34a2bc40566d77dc1db694161950a59c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/api/CreatePaymentRequest.java": {
+    "mtime": 1782970519.6947663,
+    "ast_hash": "f791e28e99aed3338ede6edfe1f25277",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/api/PaymentController.java": {
+    "mtime": 1782970522.3353028,
+    "ast_hash": "cbf0f2aa299c649a1c5e7bc1ae6fce33",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/api/RefundPaymentRequest.java": {
+    "mtime": 1782970521.021302,
+    "ast_hash": "a1efcd288838cc03fc69c88fedd0b268",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/CreatePaymentCommand.java": {
+    "mtime": 1782970214.0680628,
+    "ast_hash": "5563414fbf080b11bc22d45ece060d6a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/CreatePaymentResult.java": {
+    "mtime": 1782970219.6282187,
+    "ast_hash": "cc45988f72f98338fca861083b7c4667",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/CustomerResult.java": {
+    "mtime": 1782970223.7644157,
+    "ast_hash": "c566c2754909d2e5ba17722bc10e529b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/GatewayPaymentIntent.java": {
+    "mtime": 1782970229.383207,
+    "ast_hash": "0618668b15a48443636397848c75b97a",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/GatewayRefund.java": {
+    "mtime": 1782970231.2882636,
+    "ast_hash": "ebbbba0c8a471e7efc3ee43ca014f47f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/PaymentGateway.java": {
+    "mtime": 1782970234.7205548,
+    "ast_hash": "e697791f6a8bbdf5b68995e307901699",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/PaymentIntentView.java": {
+    "mtime": 1782970217.5906408,
+    "ast_hash": "7af7b8b0c82446acd88d8a5fd35d5aa7",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/PaymentService.java": {
+    "mtime": 1782970227.5425694,
+    "ast_hash": "a34f70e8b2b771037b726ea7b8b57fa7",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/RefundPaymentCommand.java": {
+    "mtime": 1782970215.6756406,
+    "ast_hash": "fca23e0f74bf5a96886751489f1b3cc4",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/RefundPaymentResult.java": {
+    "mtime": 1782970221.7487411,
+    "ast_hash": "e8b002333a1455fb748aef933482affa",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/VerifiedPaymentEvent.java": {
+    "mtime": 1782970232.9769034,
+    "ast_hash": "5dd01e079c8fd47832f6582221018bdf",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/application/WebhookResult.java": {
+    "mtime": 1782970225.7615304,
+    "ast_hash": "b44cc125f2272b65580ae4ba3b9d28ba",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/config/StripeProductionGuard.java": {
+    "mtime": 1782969731.6263874,
+    "ast_hash": "0ae30868c95f830a14dd10dc6f479c62",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/config/StripeProperties.java": {
+    "mtime": 1782969730.3638408,
+    "ast_hash": "2957767f7942b2815ef6192498684e17",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/infrastructure/DefaultPaymentService.java": {
+    "mtime": 1782971119.9477818,
+    "ast_hash": "d02469d2fa6a9da17dddb1c34032c37e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/infrastructure/JdbcPaymentStore.java": {
+    "mtime": 1782971118.3602502,
+    "ast_hash": "9b1bd99627cb264d4aff4c7c57bee471",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/infrastructure/PaymentConfiguration.java": {
+    "mtime": 1782970523.6723025,
+    "ast_hash": "18b7fba31c4dc67f65ab7b61de965e55",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/infrastructure/StripePaymentGateway.java": {
+    "mtime": 1782970286.7842486,
+    "ast_hash": "9c59e65d08e5129b5fa49ff3f0dedad0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/payment/infrastructure/UnavailablePaymentGateway.java": {
+    "mtime": 1782970285.5193713,
+    "ast_hash": "5cec25c4b04fa6dadc6cd8137de69d70",
+    "semantic_hash": ""
+  },
+  "src/main/resources/db/migration/V20260702000100__add_checkout_payment_idempotency.sql": {
+    "mtime": 1782971116.8312564,
+    "ast_hash": "2f1f34c92461fdb3c5a2eecd1f7054b6",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/checkout/api/CheckoutPaymentControllerSecurityTest.java": {
+    "mtime": 1782970680.467382,
+    "ast_hash": "8fd92e4685c77f50ba449d53c8456c23",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/payment/config/StripeProductionGuardTest.java": {
+    "mtime": 1782971522.933848,
+    "ast_hash": "c47d4fb962927b2f907448e032e80b0a",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/payment/infrastructure/LocalPostgresCheckoutPaymentTest.java": {
+    "mtime": 1782971214.2460656,
+    "ast_hash": "2e276676a1dec4f17e7b2a0eeb59c61c",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/payment/infrastructure/StripePaymentGatewayTest.java": {
+    "mtime": 1782970628.2879162,
+    "ast_hash": "cf54b2eed5b20022c599b4e765ee2a46",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_5_REPORT.md": {
+    "mtime": 1782971580.0080543,
+    "ast_hash": "0fa067d80b15255e42d578e96b769ffb",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/api/CommentController.java": {
+    "mtime": 1782972239.3700216,
+    "ast_hash": "6d121ec6218d1d91e3f515dd3aeae14f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/api/CreateCommentRequest.java": {
+    "mtime": 1782972237.010625,
+    "ast_hash": "752d551daba2c0e76daa5619e94895ba",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/api/DeleteCommentRequest.java": {
+    "mtime": 1782972238.1932485,
+    "ast_hash": "0e1d51fff0fe1d7d300b90f11d377f8e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/application/CommentAuthorView.java": {
+    "mtime": 1782972231.4791656,
+    "ast_hash": "6ebd75a46bd786b9835845c450cc311e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/application/CommentService.java": {
+    "mtime": 1782972234.9838345,
+    "ast_hash": "5a39e752264f4929419e4bf5ed9704f8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/application/CommentView.java": {
+    "mtime": 1782972232.6810763,
+    "ast_hash": "a2921df5324f5f34357ac6cd5c5b962f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/application/CreateCommentCommand.java": {
+    "mtime": 1782972230.2961144,
+    "ast_hash": "600cd9a6d3b7c2b82b9149160a4c4f1e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/application/DeleteCommentResult.java": {
+    "mtime": 1782972233.821555,
+    "ast_hash": "175ef84579d0e5899d9dcc59641f6505",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/infrastructure/CommentConfiguration.java": {
+    "mtime": 1782972311.6285288,
+    "ast_hash": "3c6bdd6d43318816d89b332f4dc27b78",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/comment/infrastructure/JdbcCommentService.java": {
+    "mtime": 1782972574.3338683,
+    "ast_hash": "0ba60bee6a9255fde91be8243bab598f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/application/DomainEventOutbox.java": {
+    "mtime": 1782972091.4334714,
+    "ast_hash": "bfbf309a3d69242d4986607d561290bf",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/application/EventPublisher.java": {
+    "mtime": 1782972092.611472,
+    "ast_hash": "52bafb4f5d64ab6138483dcb8f39fdc8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/config/KafkaEventProperties.java": {
+    "mtime": 1782972089.4834716,
+    "ast_hash": "6842d4a380868d89f12c125e1a22ead8",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/infrastructure/EventingConfiguration.java": {
+    "mtime": 1782972142.766611,
+    "ast_hash": "28d312fed1ac039d42b42496d8406be2",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/infrastructure/JdbcDomainEventOutbox.java": {
+    "mtime": 1782972094.5164714,
+    "ast_hash": "6770869286b54228a66f0f93f380ed2f",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/infrastructure/JdbcOutboxDispatcher.java": {
+    "mtime": 1782972140.1946056,
+    "ast_hash": "e5e4cf21b3f69a5771d0d4001c2299e0",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/infrastructure/KafkaEventPublisher.java": {
+    "mtime": 1782972095.6534712,
+    "ast_hash": "569f36063afa865e2ba3fe0584431bdf",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/eventing/infrastructure/OutboxDispatchJob.java": {
+    "mtime": 1782972141.5126066,
+    "ast_hash": "e182c0a404ae3ebe2ffac79c8f559bb9",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/jobs/application/OrderExpirationService.java": {
+    "mtime": 1782972475.776284,
+    "ast_hash": "c31a5e844c8e51b36aca76f72065d25b",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/jobs/config/OrderExpirationProperties.java": {
+    "mtime": 1782972473.760282,
+    "ast_hash": "e09300e3d136a64e3d89cd18998a9490",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/jobs/infrastructure/JdbcOrderExpirationService.java": {
+    "mtime": 1782973225.5360174,
+    "ast_hash": "49a03aa65abb59e647d9d55dea4041dc",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/jobs/infrastructure/OrderExpirationConfiguration.java": {
+    "mtime": 1782972480.097281,
+    "ast_hash": "b155a46aba14156869a973e3caf1c464",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/jobs/infrastructure/OrderExpirationJob.java": {
+    "mtime": 1782972478.91629,
+    "ast_hash": "9429d4439b5f505e452908b5d56b2165",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/notification/application/NotificationEventHandler.java": {
+    "mtime": 1782972394.6775913,
+    "ast_hash": "103ad168ce3d1c6edb6738b9d60ead3e",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/notification/application/NotificationProcessingResult.java": {
+    "mtime": 1782972393.3476,
+    "ast_hash": "2f1170483e794e15679cf5890c3d3177",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/notification/infrastructure/JdbcNotificationEventHandler.java": {
+    "mtime": 1782973142.1863444,
+    "ast_hash": "20a331876e40ac356d7b69a92417813c",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/notification/infrastructure/KafkaNotificationListener.java": {
+    "mtime": 1782972421.6394348,
+    "ast_hash": "7ccb26707c98f352de6e7103430efd29",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/notification/infrastructure/NotificationConfiguration.java": {
+    "mtime": 1782972422.8874333,
+    "ast_hash": "9d675f7f3390f15446c018d06aaf6056",
+    "semantic_hash": ""
+  },
+  "src/main/resources/db/migration/V20260702000200__add_reliable_events.sql": {
+    "mtime": 1782972046.9392712,
+    "ast_hash": "a5add1807828d6fde31c6e6d16722e0b",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/comment/api/CommentControllerSecurityTest.java": {
+    "mtime": 1782972576.3628712,
+    "ast_hash": "0af9c7b684dd0a5f904ba522759fc4c5",
+    "semantic_hash": ""
+  },
+  "src/test/java/com/itechwx/ecommerce/phase6/LocalPostgresPhase6Test.java": {
+    "mtime": 1783142183.5980117,
+    "ast_hash": "673932737e170d9413246ec91bebf47e",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_6_REPORT.md": {
+    "mtime": 1783142391.5500424,
+    "ast_hash": "6ffa5a3b69587e8c718e48eb207678af",
+    "semantic_hash": ""
+  },
+  "src/main/java/com/itechwx/ecommerce/shared/api/LegacyHomeController.java": {
+    "mtime": 1783178115.7688189,
+    "ast_hash": "232316788c3280012180d2c243ba69ae",
+    "semantic_hash": ""
+  },
+  "docs/migration/PHASE_7_PROGRESS_REPORT.md": {
+    "mtime": 1783179315.8540094,
+    "ast_hash": "994390a644e52e383a83fb9f62c36239",
+    "semantic_hash": ""
+  },
+  "src/main/resources/static/index.html": {
+    "mtime": 1781335487.1237433,
+    "ast_hash": "96662dcd0d411415bf1c010f3e209072",
+    "semantic_hash": ""
+  }
+}

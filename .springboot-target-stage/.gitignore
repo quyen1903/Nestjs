@@ -1,0 +1,12 @@
+/target/
+/.idea/
+/.vscode/
+*.iml
+*.log
+.env
+.env.*
+!.env.example
+application-local.yml
+application-production.yml
+!src/main/resources/application-local.yml
+!src/main/resources/application-production.yml

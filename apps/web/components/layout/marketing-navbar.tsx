@@ -1,9 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { BarChart3, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export function MarketingNavbar() {
+  const { session } = useAuth();
+  const accountHref =
+    session?.role === "SHOP" || session?.role === "ADMIN" ? "/dashboard" : "/account";
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
       <div className="page-shell flex h-16 items-center justify-between gap-4">
@@ -26,7 +33,9 @@ export function MarketingNavbar() {
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Login</Link>
+            <Link href={session ? accountHref : "/login"}>
+              {session ? (session.role === "USER" ? "Account" : "Dashboard") : "Login"}
+            </Link>
           </Button>
           <Button asChild size="sm">
             <Link href="/cart">

@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 
 import { mockOrganizations } from "@/api/mock-data";
+import { useAuth } from "@/hooks/use-auth";
 import type { Organization, TenantContext } from "@/types/domain";
 
 type OrganizationContextValue = {
@@ -15,7 +16,12 @@ type OrganizationContextValue = {
 const OrganizationContext = createContext<OrganizationContextValue | null>(null);
 
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
-  const [organizationId, setOrganizationId] = useState(mockOrganizations[0].id);
+  const { session } = useAuth();
+  const [organizationId, setOrganizationId] = useState(
+    () =>
+      mockOrganizations.find((item) => item.id === session?.organizationId)?.id ??
+      mockOrganizations[0].id
+  );
   const organization =
     mockOrganizations.find((item) => item.id === organizationId) ?? mockOrganizations[0];
 

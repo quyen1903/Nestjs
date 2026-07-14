@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useMemo, useState } from "react";
 
 import * as authClient from "@/api/auth.client";
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const queryClient = useQueryClient();
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -38,10 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut: async () => {
         const current = session;
         setSession(null);
-        await authClient.logout(current);
+        queryClient.clear();
+        try {
+          await authClient.logout(current);
+        } catch (error) {
+          console.error("Remote logout failed after local session teardown.", error);
+        }
       }
     }),
-    [session]
+    [queryClient, session]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
