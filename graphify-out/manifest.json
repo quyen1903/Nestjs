@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/dto/request-product.dto.ts": {
-    "mtime": 1781335487.2787359,
-    "ast_hash": "fc42c79a0d31ec2c9fa156b213d241a7",
+    "mtime": 1785579297.9204748,
+    "ast_hash": "da1a851f0db803a3b0de8800f2ce650e",
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/interfaces/product.interface.ts": {
@@ -1120,8 +1120,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.controller.ts": {
-    "mtime": 1781335487.2797358,
-    "ast_hash": "e80b9842e8034ec3a4aad1694dd407eb",
+    "mtime": 1785583039.9606218,
+    "ast_hash": "35f20acd5bd8dd7581d87a0e991d82a5",
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.module.ts": {
@@ -1130,8 +1130,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.service.ts": {
-    "mtime": 1781810252.092252,
-    "ast_hash": "cb816971d3f789c9070cfcaa159732e1",
+    "mtime": 1785583039.9636233,
+    "ast_hash": "023dfb507e042713a5ff48252632e38f",
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/sku/sku.controller.ts": {
@@ -1420,8 +1420,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.service.spec.ts": {
-    "mtime": 1781810545.9262443,
-    "ast_hash": "901ae279037ae6a6283e53aaba8f2430",
+    "mtime": 1785583039.9656224,
+    "ast_hash": "1cb0566883cb804a3a902706aa2a3afd",
     "semantic_hash": ""
   },
   "apps/api/src/middleware/discord.middleware.spec.ts": {
@@ -1437,6 +1437,26 @@
   "apps/web/components/layout/dashboard-notifications.tsx": {
     "mtime": 1784018955.0271468,
     "ast_hash": "434d8fdc6d65138b14a27d7744c26919",
+    "semantic_hash": ""
+  },
+  "apps/api/src/modules/product/dto/create-brand.dto.ts": {
+    "mtime": 1785579192.7551217,
+    "ast_hash": "72d89fd477c4fb18fbec8c7572ccf52a",
+    "semantic_hash": ""
+  },
+  "apps/api/src/modules/product/dto/create-category.dto.ts": {
+    "mtime": 1785580852.7970064,
+    "ast_hash": "2afa01d17631d1043f40eeac3edbe7eb",
+    "semantic_hash": ""
+  },
+  "apps/api/src/modules/product/dto/create-sku.dto.ts": {
+    "mtime": 1785579052.0810802,
+    "ast_hash": "0b0bfd4653f18d24d7bf6f06c516e552",
+    "semantic_hash": ""
+  },
+  "apps/api/src/modules/product/dto/create-spu.dto.ts": {
+    "mtime": 1785579127.0082858,
+    "ast_hash": "bd049b882a4487806c253ed14d1a79f5",
     "semantic_hash": ""
   }
 }

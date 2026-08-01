@@ -162,8 +162,7 @@ model UserBehavior {
 
 // Shop-specific business data
 model ShopBusiness {
-  accountId    String      @id
-  
+  accountId       String   @id @map("account_id")  
   // Business info
   businessName    String   @map("business_name")
   businessType    String   @map("business_type")

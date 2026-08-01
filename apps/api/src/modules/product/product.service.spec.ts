@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductService } from './product.service';
 
 describe('ProductService', () => {
@@ -69,5 +69,76 @@ describe('ProductService', () => {
     await expect(
       service.checkProductByServer([{ productId: 'sku-1', quantity: 2 } as any]),
     ).rejects.toThrow(BadRequestException);
+  });
+
+  it('creates a root category and its self closure path', async () => {
+    const tx = {
+      category: {
+        create: jest.fn().mockResolvedValue({ id: 'category-1', name: 'Smartphones', sort: 100 }),
+      },
+      categoryClosureTable: {
+        createMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const prismaService = {
+      $transaction: jest.fn(async (callback) => callback(tx)),
+    };
+    const service = new ProductService(prismaService as any, producerService as any);
+
+    await expect(
+      service.createCategory({ name: '  Smartphones  ', sort: 100 }),
+    ).resolves.toEqual({ id: 'category-1', name: 'Smartphones', sort: 100 });
+    expect(tx.category.create).toHaveBeenCalledWith({
+      data: { name: 'Smartphones', sort: 100 },
+    });
+    expect(tx.categoryClosureTable.createMany).toHaveBeenCalledWith({
+      data: [{ ancestorId: 'category-1', descendantId: 'category-1', depth: 0 }],
+    });
+  });
+
+  it('copies parent ancestor paths when creating a child category', async () => {
+    const tx = {
+      category: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'parent-1' }),
+        create: jest.fn().mockResolvedValue({ id: 'category-1', name: 'Smartphones' }),
+      },
+      categoryClosureTable: {
+        findMany: jest.fn().mockResolvedValue([
+          { ancestorId: 'root-1', depth: 1 },
+          { ancestorId: 'parent-1', depth: 0 },
+        ]),
+        createMany: jest.fn().mockResolvedValue({ count: 3 }),
+      },
+    };
+    const prismaService = {
+      $transaction: jest.fn(async (callback) => callback(tx)),
+    };
+    const service = new ProductService(prismaService as any, producerService as any);
+
+    await service.createCategory({ name: 'Smartphones', parentId: 'parent-1' });
+
+    expect(tx.categoryClosureTable.createMany).toHaveBeenCalledWith({
+      data: [
+        { ancestorId: 'category-1', descendantId: 'category-1', depth: 0 },
+        { ancestorId: 'root-1', descendantId: 'category-1', depth: 2 },
+        { ancestorId: 'parent-1', descendantId: 'category-1', depth: 1 },
+      ],
+    });
+  });
+
+  it('rejects a missing parent category', async () => {
+    const tx = {
+      category: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
+    };
+    const prismaService = {
+      $transaction: jest.fn(async (callback) => callback(tx)),
+    };
+    const service = new ProductService(prismaService as any, producerService as any);
+
+    await expect(
+      service.createCategory({ name: 'Smartphones', parentId: 'missing-parent' }),
+    ).rejects.toThrow(NotFoundException);
   });
 });

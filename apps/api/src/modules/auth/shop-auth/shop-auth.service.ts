@@ -235,7 +235,7 @@ export class ShopAuthService extends AuthService {
                 );
 
                 // 5. Create/update key store (per device)
-                const keyStore = await tx.keyToken.upsert({
+                await tx.keyToken.upsert({
                     where: {
                         authId_deviceId: {
                             authId: foundShop.id,
@@ -324,6 +324,14 @@ export class ShopAuthService extends AuthService {
         refreshToken: string;
     }>{
         try {
+            const existingShop = await this.prismaService.accountAuthentication.findFirst({
+                where: { email: register.email.toLowerCase().trim() }
+            });
+
+            if (existingShop) {
+                throw new BadRequestException('Shop already registered');
+            }
+
             const email = register.email.toLowerCase().trim();
             const currentTime = Date.now();
             const salt = crypto.randomBytes(32).toString('hex');

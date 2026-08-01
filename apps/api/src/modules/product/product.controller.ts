@@ -5,9 +5,14 @@ import { AuthRequest } from '../auth/dto/auth-request.dto';
 import { JWTdecode } from 'src/shared/interfaces/jwt.interface';
 import { Roles } from '../auth/roles.decorator';
 import { AccountType } from 'prisma/generated/prisma';
-import { CreateBrandDTO, CreateSkuDTO, CreateSpuDTO, CreateProductDTO, CreateCategoryDTO } from './dto/request-product.dto';
-import { ApiResponse, ApiOperation, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { CreateProductDTO } from './dto/request-product.dto';
+import { ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+
+import { CreateBrandDTO } from './dto/create-brand.dto';
+import { CreateCategoryDTO } from './dto/create-category.dto';
+import { CreateSpuDTO } from './dto/create-spu.dto';
+import { CreateSkuDTO } from './dto/create-sku.dto';
 
 // Add this DTO for update operations
 export class UpdateProductDTO extends CreateSpuDTO {
@@ -45,15 +50,12 @@ export class ProductController {
         return this.productService.createBrand(body);
     }
 
-    // @Post('create_category')
-    // @UseGuards(AccessTokenGuard, RoleGuard)
-    // @Roles(AccountType.SHOP)
-    // createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
-    //     return this.productService.createCategory(
-    //         createCategoryDto.name, 
-    //         createCategoryDto.parentId
-    //     );
-    // }
+    @Post('create_category')
+    @UseGuards(AccessTokenGuard, RoleGuard)
+    @Roles(AccountType.SHOP)
+    async createCategory(@Body() createCategoryDto: CreateCategoryDTO) {
+        return this.productService.createCategory(createCategoryDto);
+    }
 
 
     @Patch(':productId')

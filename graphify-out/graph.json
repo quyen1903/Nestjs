@@ -2000,7 +2000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_api_src_modules_auth_dto_auth_request_dto_ts_dto_auth_request_dto",
-      "community": 132,
+      "community": 36,
       "norm_label": "auth-request.dto.ts"
     },
     {
@@ -2010,7 +2010,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "dto_auth_request_dto_authaccountpayload",
-      "community": 132,
+      "community": 36,
       "norm_label": "authaccountpayload"
     },
     {
@@ -2020,7 +2020,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "dto_auth_request_dto_authenticatedrequest",
-      "community": 83,
+      "community": 36,
       "norm_label": "authenticatedrequest"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "dto_auth_request_dto_authentication",
-      "community": 132,
+      "community": 36,
       "norm_label": "authentication"
     },
     {
@@ -2240,7 +2240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shop_auth_shop_auth_controller",
-      "community": 30,
+      "community": 56,
       "norm_label": "shop-auth.controller.ts"
     },
     {
@@ -2310,7 +2310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shop_auth_shop_auth_module",
-      "community": 30,
+      "community": 20,
       "norm_label": "shop-auth.module.ts"
     },
     {
@@ -2550,7 +2550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller",
-      "community": 83,
+      "community": 36,
       "norm_label": "user-auth.controller.ts"
     },
     {
@@ -2560,7 +2560,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller",
-      "community": 83,
+      "community": 36,
       "norm_label": "userauthcontroller"
     },
     {
@@ -2570,7 +2570,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_constructor",
-      "community": 83,
+      "community": 36,
       "norm_label": ".constructor()"
     },
     {
@@ -2580,7 +2580,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_loginuser",
-      "community": 83,
+      "community": 36,
       "norm_label": ".loginuser()"
     },
     {
@@ -2590,7 +2590,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_logoutuser",
-      "community": 83,
+      "community": 36,
       "norm_label": ".logoutuser()"
     },
     {
@@ -2600,7 +2600,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_handlerefreshtoken",
-      "community": 83,
+      "community": 36,
       "norm_label": ".handlerefreshtoken()"
     },
     {
@@ -2610,7 +2610,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_forgotpassword",
-      "community": 83,
+      "community": 36,
       "norm_label": ".forgotpassword()"
     },
     {
@@ -2620,7 +2620,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_resetpassword",
-      "community": 83,
+      "community": 36,
       "norm_label": ".resetpassword()"
     },
     {
@@ -2630,7 +2630,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "user_auth_user_auth_controller_userauthcontroller_validateresettoken",
-      "community": 83,
+      "community": 36,
       "norm_label": ".validateresettoken()"
     },
     {
@@ -2640,7 +2640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_auth_user_auth_module",
-      "community": 12,
+      "community": 36,
       "norm_label": "user-auth.module.ts"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "user_auth_user_auth_module_userauthmodule",
-      "community": 12,
+      "community": 36,
       "norm_label": "userauthmodule"
     },
     {
@@ -2660,7 +2660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_auth_user_auth_service",
-      "community": 12,
+      "community": 36,
       "norm_label": "user-auth.service.ts"
     },
     {
@@ -2800,7 +2800,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cart_cart_controller",
-      "community": 56,
+      "community": 16,
       "norm_label": "cart.controller.ts"
     },
     {
@@ -2930,7 +2930,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice",
-      "community": 82,
+      "community": 16,
       "norm_label": "cartservice"
     },
     {
@@ -2940,7 +2940,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_constructor",
-      "community": 82,
+      "community": 16,
       "norm_label": ".constructor()"
     },
     {
@@ -2950,7 +2950,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_getcartbyuserid",
-      "community": 82,
+      "community": 16,
       "norm_label": ".getcartbyuserid()"
     },
     {
@@ -2960,7 +2960,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_getorcreatecart",
-      "community": 82,
+      "community": 16,
       "norm_label": ".getorcreatecart()"
     },
     {
@@ -2980,7 +2980,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_synccartcount",
-      "community": 82,
+      "community": 16,
       "norm_label": ".synccartcount()"
     },
     {
@@ -2990,7 +2990,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_reactivatecartproduct",
-      "community": 82,
+      "community": 16,
       "norm_label": ".reactivatecartproduct()"
     },
     {
@@ -3010,7 +3010,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_update",
-      "community": 82,
+      "community": 16,
       "norm_label": ".update()"
     },
     {
@@ -3020,7 +3020,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_deleteusercart",
-      "community": 82,
+      "community": 16,
       "norm_label": ".deleteusercart()"
     },
     {
@@ -3030,7 +3030,7 @@
       "source_location": "L255",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_getlistusercart",
-      "community": 82,
+      "community": 16,
       "norm_label": ".getlistusercart()"
     },
     {
@@ -3040,7 +3040,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "cart_cart_service_cartservice_clearcart",
-      "community": 82,
+      "community": 16,
       "norm_label": ".clearcart()"
     },
     {
@@ -3940,7 +3940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "comment_comment_controller",
-      "community": 35,
+      "community": 6,
       "norm_label": "comment.controller.ts"
     },
     {
@@ -3950,7 +3950,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "comment_comment_controller_commentcontroller",
-      "community": 35,
+      "community": 6,
       "norm_label": "commentcontroller"
     },
     {
@@ -3960,7 +3960,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "comment_comment_controller_commentcontroller_constructor",
-      "community": 35,
+      "community": 6,
       "norm_label": ".constructor()"
     },
     {
@@ -3970,7 +3970,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "comment_comment_controller_commentcontroller_createcomment",
-      "community": 35,
+      "community": 6,
       "norm_label": ".createcomment()"
     },
     {
@@ -3980,7 +3980,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "comment_comment_controller_commentcontroller_getcomment",
-      "community": 35,
+      "community": 6,
       "norm_label": ".getcomment()"
     },
     {
@@ -3990,7 +3990,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "comment_comment_controller_commentcontroller_deletecomment",
-      "community": 35,
+      "community": 6,
       "norm_label": ".deletecomment()"
     },
     {
@@ -4020,7 +4020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "comment_comment_service",
-      "community": 35,
+      "community": 6,
       "norm_label": "comment.service.ts"
     },
     {
@@ -4030,7 +4030,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice",
-      "community": 35,
+      "community": 6,
       "norm_label": "commentservice"
     },
     {
@@ -4050,7 +4050,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_createcomment",
-      "community": 35,
+      "community": 6,
       "norm_label": ".createcomment()"
     },
     {
@@ -4060,7 +4060,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_deletecomments",
-      "community": 35,
+      "community": 6,
       "norm_label": ".deletecomments()"
     },
     {
@@ -4070,7 +4070,7 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_movecommenttonewparent",
-      "community": 35,
+      "community": 6,
       "norm_label": ".movecommenttonewparent()"
     },
     {
@@ -4080,7 +4080,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_getcommentsbyparentid",
-      "community": 35,
+      "community": 6,
       "norm_label": ".getcommentsbyparentid()"
     },
     {
@@ -4090,7 +4090,7 @@
       "source_location": "L303",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_getdirectreplies",
-      "community": 35,
+      "community": 6,
       "norm_label": ".getdirectreplies()"
     },
     {
@@ -4100,7 +4100,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_getfullthread",
-      "community": 35,
+      "community": 6,
       "norm_label": ".getfullthread()"
     },
     {
@@ -4110,7 +4110,7 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_buildcommenttree",
-      "community": 35,
+      "community": 6,
       "norm_label": ".buildcommenttree()"
     },
     {
@@ -4120,7 +4120,7 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_buildnestedcommenttree",
-      "community": 35,
+      "community": 6,
       "norm_label": ".buildnestedcommenttree()"
     },
     {
@@ -4130,7 +4130,7 @@
       "source_location": "L481",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_getpaginatedcomments",
-      "community": 35,
+      "community": 6,
       "norm_label": ".getpaginatedcomments()"
     },
     {
@@ -4140,7 +4140,7 @@
       "source_location": "L539",
       "_origin": "ast",
       "id": "comment_comment_service_commentservice_searchcomments",
-      "community": 35,
+      "community": 6,
       "norm_label": ".searchcomments()"
     },
     {
@@ -4150,7 +4150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_comment_dto",
-      "community": 35,
+      "community": 6,
       "norm_label": "comment.dto.ts"
     },
     {
@@ -4160,7 +4160,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_comment_dto_createcommentdto",
-      "community": 35,
+      "community": 6,
       "norm_label": "createcommentdto"
     },
     {
@@ -4170,7 +4170,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "dto_comment_dto_getcommentdto",
-      "community": 35,
+      "community": 6,
       "norm_label": "getcommentdto"
     },
     {
@@ -4180,7 +4180,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "dto_comment_dto_deletecommentdto",
-      "community": 35,
+      "community": 6,
       "norm_label": "deletecommentdto"
     },
     {
@@ -4190,7 +4190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "discount_discount_controller",
-      "community": 9,
+      "community": 56,
       "norm_label": "discount.controller.ts"
     },
     {
@@ -4710,7 +4710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "keytoken_keytoken_service",
-      "community": 12,
+      "community": 38,
       "norm_label": "keytoken.service.ts"
     },
     {
@@ -5439,8 +5439,8 @@
       "source_file": "apps/api/src/modules/product/brand/dto/create-brand.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "dto_create_brand_dto",
-      "community": 43,
+      "id": "apps_api_src_modules_product_brand_dto_create_brand_dto_ts_dto_create_brand_dto",
+      "community": 83,
       "norm_label": "create-brand.dto.ts"
     },
     {
@@ -5449,8 +5449,8 @@
       "source_file": "apps/api/src/modules/product/brand/dto/create-brand.dto.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "dto_create_brand_dto_createbranddto",
-      "community": 43,
+      "id": "apps_api_src_modules_product_brand_dto_create_brand_dto_ts_dto_create_brand_dto_createbranddto",
+      "community": 83,
       "norm_label": "createbranddto"
     },
     {
@@ -5649,8 +5649,8 @@
       "source_file": "apps/api/src/modules/product/category/dto/create-category.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "dto_create_category_dto",
-      "community": 27,
+      "id": "apps_api_src_modules_product_category_dto_create_category_dto_ts_dto_create_category_dto",
+      "community": 132,
       "norm_label": "create-category.dto.ts"
     },
     {
@@ -5659,8 +5659,8 @@
       "source_file": "apps/api/src/modules/product/category/dto/create-category.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "dto_create_category_dto_createcategorydto",
-      "community": 27,
+      "id": "apps_api_src_modules_product_category_dto_create_category_dto_ts_dto_create_category_dto_createcategorydto",
+      "community": 132,
       "norm_label": "createcategorydto"
     },
     {
@@ -5684,6 +5684,86 @@
       "norm_label": "updatecategorydto"
     },
     {
+      "label": "create-brand.dto.ts",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-brand.dto.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_api_src_modules_product_dto_create_brand_dto_ts_dto_create_brand_dto",
+      "community": 141,
+      "norm_label": "create-brand.dto.ts"
+    },
+    {
+      "label": "CreateBrandDTO",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-brand.dto.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "apps_api_src_modules_product_dto_create_brand_dto_ts_dto_create_brand_dto_createbranddto",
+      "community": 141,
+      "norm_label": "createbranddto"
+    },
+    {
+      "label": "create-category.dto.ts",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-category.dto.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_api_src_modules_product_dto_create_category_dto_ts_dto_create_category_dto",
+      "community": 142,
+      "norm_label": "create-category.dto.ts"
+    },
+    {
+      "label": "CreateCategoryDTO",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-category.dto.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "apps_api_src_modules_product_dto_create_category_dto_ts_dto_create_category_dto_createcategorydto",
+      "community": 142,
+      "norm_label": "createcategorydto"
+    },
+    {
+      "label": "create-sku.dto.ts",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-sku.dto.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "dto_create_sku_dto",
+      "community": 35,
+      "norm_label": "create-sku.dto.ts"
+    },
+    {
+      "label": "CreateSkuDTO",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-sku.dto.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "dto_create_sku_dto_createskudto",
+      "community": 35,
+      "norm_label": "createskudto"
+    },
+    {
+      "label": "create-spu.dto.ts",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-spu.dto.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_api_src_modules_product_dto_create_spu_dto_ts_dto_create_spu_dto",
+      "community": 35,
+      "norm_label": "create-spu.dto.ts"
+    },
+    {
+      "label": "CreateSpuDTO",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/dto/create-spu.dto.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "dto_create_spu_dto_createspudto",
+      "community": 35,
+      "norm_label": "createspudto"
+    },
+    {
       "label": "request-product.dto.ts",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
@@ -5694,54 +5774,14 @@
       "norm_label": "request-product.dto.ts"
     },
     {
-      "label": "CreateSpuDTO",
-      "file_type": "code",
-      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L15",
-      "_origin": "ast",
-      "id": "dto_request_product_dto_createspudto",
-      "community": 35,
-      "norm_label": "createspudto"
-    },
-    {
-      "label": "CreateSkuDTO",
-      "file_type": "code",
-      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L112",
-      "_origin": "ast",
-      "id": "dto_request_product_dto_createskudto",
-      "community": 35,
-      "norm_label": "createskudto"
-    },
-    {
       "label": "CreateProductDTO",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L192",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "dto_request_product_dto_createproductdto",
       "community": 35,
       "norm_label": "createproductdto"
-    },
-    {
-      "label": "CreateBrandDTO",
-      "file_type": "code",
-      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L210",
-      "_origin": "ast",
-      "id": "dto_request_product_dto_createbranddto",
-      "community": 35,
-      "norm_label": "createbranddto"
-    },
-    {
-      "label": "CreateCategoryDTO",
-      "file_type": "code",
-      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L250",
-      "_origin": "ast",
-      "id": "dto_request_product_dto_createcategorydto",
-      "community": 35,
-      "norm_label": "createcategorydto"
     },
     {
       "label": "product.interface.ts",
@@ -5787,7 +5827,7 @@
       "label": "UpdateProductDTO",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L13",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "product_product_controller_updateproductdto",
       "community": 35,
@@ -5797,47 +5837,57 @@
       "label": "ProductController",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L19",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller",
-      "community": 35,
+      "community": 82,
       "norm_label": "productcontroller"
     },
     {
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L20",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_constructor",
-      "community": 35,
+      "community": 82,
       "norm_label": ".constructor()"
     },
     {
       "label": ".createProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L29",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_createproduct",
-      "community": 35,
+      "community": 82,
       "norm_label": ".createproduct()"
     },
     {
       "label": ".createBrand()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L44",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_createbrand",
-      "community": 35,
+      "community": 82,
       "norm_label": ".createbrand()"
+    },
+    {
+      "label": ".createCategory()",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "product_product_controller_productcontroller_createcategory",
+      "community": 82,
+      "norm_label": ".createcategory()"
     },
     {
       "label": ".updateProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L62",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_updateproduct",
       "community": 35,
@@ -5847,80 +5897,80 @@
       "label": ".publishProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_publishproduct",
-      "community": 35,
+      "community": 82,
       "norm_label": ".publishproduct()"
     },
     {
       "label": ".unpublishProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L90",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_unpublishproduct",
-      "community": 35,
+      "community": 82,
       "norm_label": ".unpublishproduct()"
     },
     {
       "label": ".getAllDraftForShop()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L103",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_getalldraftforshop",
-      "community": 35,
+      "community": 82,
       "norm_label": ".getalldraftforshop()"
     },
     {
       "label": ".getAllPublishForShop()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L118",
+      "source_location": "L120",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_getallpublishforshop",
-      "community": 35,
+      "community": 82,
       "norm_label": ".getallpublishforshop()"
     },
     {
       "label": ".getListSearchProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L131",
+      "source_location": "L133",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_getlistsearchproduct",
-      "community": 35,
+      "community": 82,
       "norm_label": ".getlistsearchproduct()"
     },
     {
       "label": ".findAllProducts()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L136",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_findallproducts",
-      "community": 35,
+      "community": 82,
       "norm_label": ".findallproducts()"
     },
     {
       "label": ".findProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L154",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_findproduct",
-      "community": 35,
+      "community": 82,
       "norm_label": ".findproduct()"
     },
     {
       "label": ".findProductByname()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.controller.ts",
-      "source_location": "L159",
+      "source_location": "L161",
       "_origin": "ast",
       "id": "product_product_controller_productcontroller_findproductbyname",
-      "community": 35,
+      "community": 82,
       "norm_label": ".findproductbyname()"
     },
     {
@@ -5967,7 +6017,7 @@
       "label": "ProductService",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.service.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "product_product_service_productservice",
       "community": 35,
@@ -5977,7 +6027,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.service.ts",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "product_product_service_productservice_constructor",
       "community": 35,
@@ -5987,7 +6037,7 @@
       "label": ".createProduct()",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/product.service.ts",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "product_product_service_productservice_createproduct",
       "community": 35,
@@ -6114,6 +6164,16 @@
       "norm_label": ".findproductbyname()"
     },
     {
+      "label": ".createCategory()",
+      "file_type": "code",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L500",
+      "_origin": "ast",
+      "id": "product_product_service_productservice_createcategory",
+      "community": 35,
+      "norm_label": ".createcategory()"
+    },
+    {
       "label": "sku.controller.ts",
       "file_type": "code",
       "source_file": "apps/api/src/modules/product/sku/sku.controller.ts",
@@ -6149,7 +6209,7 @@
       "source_file": "apps/api/src/modules/product/spu/dto/create-spu.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "dto_create_spu_dto",
+      "id": "apps_api_src_modules_product_spu_dto_create_spu_dto_ts_dto_create_spu_dto",
       "community": 148,
       "norm_label": "create-spu.dto.ts"
     },
@@ -7720,7 +7780,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "utils_index_getinfodata",
-      "community": 9,
+      "community": 30,
       "norm_label": "getinfodata()"
     },
     {
@@ -8880,7 +8940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "cart_page",
-      "community": 29,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
@@ -8890,7 +8950,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "cart_page_cart",
-      "community": 29,
+      "community": 18,
       "norm_label": "cart()"
     },
     {
@@ -8900,7 +8960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_app_categories_slug_page_tsx_slug_page",
-      "community": 6,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
@@ -8910,7 +8970,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "slug_page_category",
-      "community": 6,
+      "community": 18,
       "norm_label": "category()"
     },
     {
@@ -8920,7 +8980,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "checkout_page",
-      "community": 29,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -8930,7 +8990,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "checkout_page_checkout",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkout()"
     },
     {
@@ -9120,7 +9180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "settings_page",
-      "community": 2,
+      "community": 29,
       "norm_label": "page.tsx"
     },
     {
@@ -9130,7 +9190,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "settings_page_dashboardsettings",
-      "community": 2,
+      "community": 29,
       "norm_label": "dashboardsettings()"
     },
     {
@@ -9190,7 +9250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_page",
-      "community": 6,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
@@ -9200,7 +9260,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_page_home",
-      "community": 6,
+      "community": 18,
       "norm_label": "home()"
     },
     {
@@ -9230,7 +9290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_app_products_page_tsx_products_page",
-      "community": 6,
+      "community": 14,
       "norm_label": "page.tsx"
     },
     {
@@ -9240,7 +9300,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "products_page_products",
-      "community": 6,
+      "community": 14,
       "norm_label": "products()"
     },
     {
@@ -9480,7 +9540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "common_pagination",
-      "community": 6,
+      "community": 18,
       "norm_label": "pagination.tsx"
     },
     {
@@ -9490,7 +9550,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "common_pagination_paginationprops",
-      "community": 6,
+      "community": 18,
       "norm_label": "paginationprops"
     },
     {
@@ -9500,7 +9560,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "common_pagination_pagination",
-      "community": 6,
+      "community": 18,
       "norm_label": "pagination()"
     },
     {
@@ -9780,7 +9840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "layout_storefront_header",
-      "community": 6,
+      "community": 18,
       "norm_label": "storefront-header.tsx"
     },
     {
@@ -9790,7 +9850,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "layout_storefront_header_storefrontheader",
-      "community": 6,
+      "community": 18,
       "norm_label": "storefrontheader()"
     },
     {
@@ -9990,7 +10050,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "state_empty_state_emptystate",
-      "community": 6,
+      "community": 18,
       "norm_label": "emptystate()"
     },
     {
@@ -10000,7 +10060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "state_error_state",
-      "community": 6,
+      "community": 18,
       "norm_label": "error-state.tsx"
     },
     {
@@ -10010,7 +10070,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "state_error_state_errorstateprops",
-      "community": 6,
+      "community": 18,
       "norm_label": "errorstateprops"
     },
     {
@@ -10020,7 +10080,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "state_error_state_errorstate",
-      "community": 6,
+      "community": 18,
       "norm_label": "errorstate()"
     },
     {
@@ -10030,7 +10090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "state_loading_state",
-      "community": 6,
+      "community": 14,
       "norm_label": "loading-state.tsx"
     },
     {
@@ -10040,7 +10100,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "state_loading_state_loadingstateprops",
-      "community": 6,
+      "community": 14,
       "norm_label": "loadingstateprops"
     },
     {
@@ -10050,7 +10110,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "state_loading_state_loadingstate",
-      "community": 6,
+      "community": 14,
       "norm_label": "loadingstate()"
     },
     {
@@ -10070,7 +10130,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "storefront_checkout_summary_checkoutsummary",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkoutsummary()"
     },
     {
@@ -10160,7 +10220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "storefront_product_grid",
-      "community": 6,
+      "community": 18,
       "norm_label": "product-grid.tsx"
     },
     {
@@ -10170,7 +10230,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "storefront_product_grid_productgrid",
-      "community": 6,
+      "community": 18,
       "norm_label": "productgrid()"
     },
     {
@@ -10420,7 +10480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_checkbox",
-      "community": 2,
+      "community": 29,
       "norm_label": "checkbox.tsx"
     },
     {
@@ -10430,7 +10490,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_checkbox_checkbox",
-      "community": 2,
+      "community": 29,
       "norm_label": "checkbox"
     },
     {
@@ -11090,7 +11150,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "api_cart_queries_usecart",
-      "community": 29,
+      "community": 18,
       "norm_label": "usecart()"
     },
     {
@@ -11110,7 +11170,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "api_cart_queries_useupdatecartitem",
-      "community": 29,
+      "community": 18,
       "norm_label": "useupdatecartitem()"
     },
     {
@@ -11120,7 +11180,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "api_cart_queries_useclearcart",
-      "community": 29,
+      "community": 18,
       "norm_label": "useclearcart()"
     },
     {
@@ -11130,7 +11190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_cart_page",
-      "community": 29,
+      "community": 18,
       "norm_label": "cart-page.tsx"
     },
     {
@@ -11140,7 +11200,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "pages_cart_page_cartpage",
-      "community": 29,
+      "community": 18,
       "norm_label": "cartpage()"
     },
     {
@@ -11160,7 +11220,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "api_checkout_queries_usecheckoutreview",
-      "community": 29,
+      "community": 2,
       "norm_label": "usecheckoutreview()"
     },
     {
@@ -11170,7 +11230,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "api_checkout_queries_usesubmitcheckout",
-      "community": 29,
+      "community": 2,
       "norm_label": "usesubmitcheckout()"
     },
     {
@@ -11180,7 +11240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_checkout_page",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkout-page.tsx"
     },
     {
@@ -11190,7 +11250,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "pages_checkout_page_checkoutpage",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkoutpage()"
     },
     {
@@ -11200,7 +11260,7 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "pages_checkout_page_field",
-      "community": 29,
+      "community": 2,
       "norm_label": "field()"
     },
     {
@@ -11210,7 +11270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_checkout_schema",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkout.schema.ts"
     },
     {
@@ -11220,7 +11280,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_checkout_schema_checkoutschema",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkoutschema"
     },
     {
@@ -11230,7 +11290,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "schemas_checkout_schema_checkoutvalues",
-      "community": 29,
+      "community": 2,
       "norm_label": "checkoutvalues"
     },
     {
@@ -11310,7 +11370,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "api_dashboard_queries_usemerchantsettings",
-      "community": 2,
+      "community": 29,
       "norm_label": "usemerchantsettings()"
     },
     {
@@ -11340,7 +11400,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "api_dashboard_queries_useupdatemerchantsettings",
-      "community": 2,
+      "community": 29,
       "norm_label": "useupdatemerchantsettings()"
     },
     {
@@ -11470,7 +11530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_dashboard_settings_page",
-      "community": 2,
+      "community": 29,
       "norm_label": "dashboard-settings-page.tsx"
     },
     {
@@ -11480,7 +11540,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "pages_dashboard_settings_page_dashboardsettingspage",
-      "community": 2,
+      "community": 29,
       "norm_label": "dashboardsettingspage()"
     },
     {
@@ -11490,7 +11550,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "pages_dashboard_settings_page_settingsform",
-      "community": 2,
+      "community": 29,
       "norm_label": "settingsform()"
     },
     {
@@ -11500,7 +11560,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "pages_dashboard_settings_page_field",
-      "community": 2,
+      "community": 29,
       "norm_label": "field()"
     },
     {
@@ -11550,7 +11610,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "api_product_queries_useproducts",
-      "community": 6,
+      "community": 18,
       "norm_label": "useproducts()"
     },
     {
@@ -11560,7 +11620,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "api_product_queries_usecategories",
-      "community": 6,
+      "community": 18,
       "norm_label": "usecategories()"
     },
     {
@@ -11580,7 +11640,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "api_product_queries_usecategoryproducts",
-      "community": 6,
+      "community": 18,
       "norm_label": "usecategoryproducts()"
     },
     {
@@ -11620,7 +11680,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "schemas_settings_schema",
-      "community": 2,
+      "community": 29,
       "norm_label": "settings.schema.ts"
     },
     {
@@ -11630,7 +11690,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "schemas_settings_schema_settingsschema",
-      "community": 2,
+      "community": 29,
       "norm_label": "settingsschema"
     },
     {
@@ -11640,7 +11700,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "schemas_settings_schema_settingsvalues",
-      "community": 2,
+      "community": 29,
       "norm_label": "settingsvalues"
     },
     {
@@ -11650,7 +11710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_category_page",
-      "community": 6,
+      "community": 18,
       "norm_label": "category-page.tsx"
     },
     {
@@ -11660,7 +11720,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "pages_category_page_categorypage",
-      "community": 6,
+      "community": 18,
       "norm_label": "categorypage()"
     },
     {
@@ -11690,7 +11750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_products_page",
-      "community": 6,
+      "community": 18,
       "norm_label": "products-page.tsx"
     },
     {
@@ -11700,7 +11760,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "pages_products_page_productspage",
-      "community": 6,
+      "community": 18,
       "norm_label": "productspage()"
     },
     {
@@ -11710,7 +11770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_storefront_home_page",
-      "community": 6,
+      "community": 18,
       "norm_label": "storefront-home-page.tsx"
     },
     {
@@ -11720,7 +11780,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "pages_storefront_home_page_storefronthomepage",
-      "community": 6,
+      "community": 18,
       "norm_label": "storefronthomepage()"
     },
     {
@@ -11730,7 +11790,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "pages_storefront_home_page_metric",
-      "community": 6,
+      "community": 18,
       "norm_label": "metric()"
     },
     {
@@ -11770,7 +11830,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_utils_cn",
-      "community": 6,
+      "community": 18,
       "norm_label": "cn()"
     },
     {
@@ -27160,28 +27220,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/product/brand/brand.controller.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "brand_brand_controller",
-      "target": "dto_create_brand_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/brand.controller.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "brand_brand_controller",
-      "target": "dto_create_brand_dto_createbranddto"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/brand.controller.ts",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27307,28 +27345,6 @@
       "target": "brand_brand_service_brandservice"
     },
     {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/brand.service.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "brand_brand_service",
-      "target": "dto_create_brand_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/brand.service.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "brand_brand_service",
-      "target": "dto_create_brand_dto_createbranddto"
-    },
-    {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/product/brand/brand.service.ts",
@@ -27349,47 +27365,14 @@
       "target": "brand_brand_service_brandservice_create"
     },
     {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/brand.service.ts",
-      "source_location": "L14",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "brand_brand_service_brandservice_create",
-      "target": "dto_create_brand_dto_createbranddto"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/dto/create-brand.dto.ts",
+      "source_file": "apps/api/src/modules/product/brand/dto/create-brand.dto.ts",
       "source_location": "L3",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_create_brand_dto",
-      "target": "dto_create_brand_dto_createbranddto"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/dto/update-brand.dto.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_update_brand_dto",
-      "target": "dto_create_brand_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/brand/dto/update-brand.dto.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_update_brand_dto",
-      "target": "dto_create_brand_dto_createbranddto"
+      "source": "apps_api_src_modules_product_brand_dto_create_brand_dto_ts_dto_create_brand_dto",
+      "target": "apps_api_src_modules_product_brand_dto_create_brand_dto_ts_dto_create_brand_dto_createbranddto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27432,28 +27415,6 @@
       "confidence_score": 1.0,
       "source": "category_category_controller",
       "target": "category_category_service_categoryservice"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.controller.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_controller",
-      "target": "dto_create_category_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.controller.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_controller",
-      "target": "dto_create_category_dto_createcategorydto"
     },
     {
       "relation": "imports_from",
@@ -27575,17 +27536,6 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/product/category/category.controller.ts",
-      "source_location": "L11",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_controller_categorycontroller_create",
-      "target": "dto_create_category_dto_createcategorydto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.controller.ts",
       "source_location": "L26",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27655,28 +27605,6 @@
       "confidence_score": 1.0,
       "source": "category_category_service",
       "target": "category_category_service_categoryservice"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.service.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_service",
-      "target": "dto_create_category_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.service.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_service",
-      "target": "dto_create_category_dto_createcategorydto"
     },
     {
       "relation": "imports_from",
@@ -27755,17 +27683,6 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/product/category/category.service.ts",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "category_category_service_categoryservice_create",
-      "target": "dto_create_category_dto_createcategorydto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/category.service.ts",
       "source_location": "L19",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27775,34 +27692,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/dto/create-category.dto.ts",
+      "source_file": "apps/api/src/modules/product/category/dto/create-category.dto.ts",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_create_category_dto",
-      "target": "dto_create_category_dto_createcategorydto"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/dto/update-category.dto.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_update_category_dto",
-      "target": "dto_create_category_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/category/dto/update-category.dto.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_update_category_dto",
-      "target": "dto_create_category_dto_createcategorydto"
+      "source": "apps_api_src_modules_product_category_dto_create_category_dto_ts_dto_create_category_dto",
+      "target": "apps_api_src_modules_product_category_dto_create_category_dto_ts_dto_create_category_dto_createcategorydto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27817,22 +27712,240 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L210",
+      "source_file": "apps/api/src/modules/product/dto/create-brand.dto.ts",
+      "source_location": "L9",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_request_product_dto",
-      "target": "dto_request_product_dto_createbranddto"
+      "source": "apps_api_src_modules_product_dto_create_brand_dto_ts_dto_create_brand_dto",
+      "target": "apps_api_src_modules_product_dto_create_brand_dto_ts_dto_create_brand_dto_createbranddto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L250",
+      "source_file": "apps/api/src/modules/product/dto/create-category.dto.ts",
+      "source_location": "L10",
       "weight": 1.0,
-      "confidence_score": 1.0,
+      "source": "apps_api_src_modules_product_dto_create_category_dto_ts_dto_create_category_dto",
+      "target": "apps_api_src_modules_product_dto_create_category_dto_ts_dto_create_category_dto_createcategorydto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/create-sku.dto.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "dto_create_sku_dto",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
+      "source_location": "L5",
+      "weight": 1.0,
       "source": "dto_request_product_dto",
-      "target": "dto_request_product_dto_createcategorydto"
+      "target": "dto_create_sku_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "product_product_controller",
+      "target": "dto_create_sku_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "product_product_service",
+      "target": "dto_create_sku_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dto_request_product_dto",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "dto_request_product_dto_createproductdto",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "product_product_controller",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "product_product_controller_productcontroller_updateproduct",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "product_product_service",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "product_product_service_productservice_createproduct",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "product_product_service_productservice_updateproduct",
+      "target": "dto_create_sku_dto_createskudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/create-spu.dto.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "apps_api_src_modules_product_dto_create_spu_dto_ts_dto_create_spu_dto",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dto_request_product_dto",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/dto/request-product.dto.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "dto_request_product_dto_createproductdto",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "product_product_controller",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "product_product_controller_productcontroller_updateproduct",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "context": "type",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "product_product_controller_updateproductdto",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "product_product_service",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "product_product_service_productservice_createproduct",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "product_product_service_productservice_updateproduct",
+      "target": "dto_create_spu_dto_createspudto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27845,26 +27958,6 @@
       "target": "dto_request_product_dto_createproductdto"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L112",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_request_product_dto",
-      "target": "dto_request_product_dto_createskudto"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/dto/request-product.dto.ts",
-      "source_location": "L15",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "dto_request_product_dto",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -27885,127 +27978,6 @@
       "confidence_score": 1.0,
       "source": "product_product_service",
       "target": "dto_request_product_dto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "references",
-      "context": "generic_arg",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L62",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller_productcontroller_updateproduct",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "inherits",
-      "context": "type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L13",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller_updateproductdto",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service_productservice_createproduct",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "references",
-      "context": "generic_arg",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L141",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service_productservice_updateproduct",
-      "target": "dto_request_product_dto_createspudto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller",
-      "target": "dto_request_product_dto_createskudto"
-    },
-    {
-      "relation": "references",
-      "context": "generic_arg",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L62",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller_productcontroller_updateproduct",
-      "target": "dto_request_product_dto_createskudto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service",
-      "target": "dto_request_product_dto_createskudto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service_productservice_createproduct",
-      "target": "dto_request_product_dto_createskudto"
-    },
-    {
-      "relation": "references",
-      "context": "generic_arg",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L141",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service_productservice_updateproduct",
-      "target": "dto_request_product_dto_createskudto"
     },
     {
       "relation": "imports",
@@ -28028,61 +28000,6 @@
       "confidence_score": 1.0,
       "source": "product_product_controller_productcontroller_createproduct",
       "target": "dto_request_product_dto_createproductdto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller",
-      "target": "dto_request_product_dto_createbranddto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L44",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller_productcontroller_createbrand",
-      "target": "dto_request_product_dto_createbranddto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service",
-      "target": "dto_request_product_dto_createbranddto"
-    },
-    {
-      "relation": "references",
-      "context": "parameter_type",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.service.ts",
-      "source_location": "L108",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_service_productservice_createbrand",
-      "target": "dto_request_product_dto_createbranddto"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/modules/product/product.controller.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "product_product_controller",
-      "target": "dto_request_product_dto_createcategorydto"
     },
     {
       "relation": "contains",
@@ -28220,6 +28137,16 @@
       "confidence_score": 1.0,
       "source": "product_product_controller_productcontroller",
       "target": "product_product_controller_productcontroller_createbrand"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.controller.ts",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "product_product_controller_productcontroller",
+      "target": "product_product_controller_productcontroller_createcategory",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -28458,6 +28385,16 @@
       "confidence_score": 1.0,
       "source": "product_product_service_productservice",
       "target": "product_product_service_productservice_createbrand"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/modules/product/product.service.ts",
+      "source_location": "L500",
+      "weight": 1.0,
+      "source": "product_product_service_productservice",
+      "target": "product_product_service_productservice_createcategory",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -48739,5 +48676,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "7a7a0ea4796c094eedc381280cca5e2a23bc8c54"
+  "built_at_commit": "637d7e0e998f4793087dbdf9228d50caa16c62e9"
 }

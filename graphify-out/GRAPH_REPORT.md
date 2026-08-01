@@ -1,16 +1,16 @@
-# Graph Report - ecommerce  (2026-07-14)
+# Graph Report - ecommerce  (2026-08-01)
 
 ## Corpus Check
-- 285 files · ~75,047 words
+- 289 files · ~75,598 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1746 nodes · 2976 edges · 156 communities (121 shown, 35 thin omitted)
+- 1752 nodes · 2965 edges · 158 communities (122 shown, 36 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7a7a0ea4`
+- Built from commit: `637d7e0e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -153,6 +153,8 @@
 - [[_COMMUNITY_Community 138|Community 138]]
 - [[_COMMUNITY_Community 139|Community 139]]
 - [[_COMMUNITY_Community 140|Community 140]]
+- [[_COMMUNITY_Community 141|Community 141]]
+- [[_COMMUNITY_Community 142|Community 142]]
 - [[_COMMUNITY_Community 144|Community 144]]
 - [[_COMMUNITY_Community 145|Community 145]]
 - [[_COMMUNITY_Community 157|Community 157]]
@@ -162,8 +164,8 @@
 1. `cn()` - 30 edges
 2. `Ecommerce Security Standard` - 29 edges
 3. `CheckoutRepository` - 26 edges
-4. `useAuth()` - 24 edges
-5. `ProductService` - 23 edges
+4. `ProductService` - 24 edges
+5. `useAuth()` - 24 edges
 6. `compilerOptions` - 23 edges
 7. `scripts` - 22 edges
 8. `useOrganization()` - 20 edges
@@ -185,15 +187,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (156 total, 35 thin omitted)
+## Communities (158 total, 36 thin omitted)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.21
 Nodes (4): CheckoutPricingService, CheckoutTotals, ShopCheckout, ItemProductDTO
 
 ### Community 2 - "Community 2"
-Cohesion: 0.08
-Nodes (24): useMerchantSettings(), useUpdateMerchantSettings(), AuthPage(), DashboardSettingsPage(), loginSchema, LoginValues, passwordSchema, registerSchema (+16 more)
+Cohesion: 0.09
+Nodes (24): useCheckoutReview(), useSubmitCheckout(), AuthPage(), CheckoutPage(), loginSchema, LoginValues, passwordSchema, registerSchema (+16 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.12
@@ -208,8 +210,8 @@ Cohesion: 0.05
 Nodes (43): dependencies, body-parser, builder-pattern, class-transformer, class-validator, compression, discord.js, dotenv (+35 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.15
-Nodes (16): useCategories(), useCategoryProducts(), useProducts(), Pagination(), PaginationProps, StorefrontHeader(), cn(), CategoryPage() (+8 more)
+Cohesion: 0.16
+Nodes (5): CommentController, CommentService, CreateCommentDTO, DeleteCommentDTO, GetCommentDTO
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
@@ -220,8 +222,8 @@ Cohesion: 0.05
 Nodes (37): 🔧 Backend Issues & Fixes Guide, 🔴 CRITICAL ISSUES, Critical Issues Found in Backend, Current Implementation, Current Implementation (BAD), Expected Results, Expected Results, Expected Results (+29 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.09
-Nodes (9): DiscountController, DiscountService, AmountDiscountDTO, Product, AppliesTo, CreateDiscountDTO, GetListDiscountDTO, getInfoData() (+1 more)
+Cohesion: 0.08
+Nodes (8): DiscountController, DiscountService, AmountDiscountDTO, Product, AppliesTo, CreateDiscountDTO, GetListDiscountDTO, getSelectData()
 
 ### Community 10 - "Community 10"
 Cohesion: 0.07
@@ -232,39 +234,39 @@ Cohesion: 0.09
 Nodes (9): HttpExceptionFilter, EntityNotFoundException, KeyDuplicationException, PrismaClientValidationException, WriteRelationNotFoundException, PrismaExceptionInterceptor, SuccessInterceptor, ValidationCustomPipe (+1 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.12
-Nodes (7): AuthController, AuthService, RegisterUserDTO, UserAuthModule, ShopController, UserModule, UserService
+Cohesion: 0.13
+Nodes (6): AuthController, AuthService, RegisterUserDTO, ShopController, UserModule, UserService
 
 ### Community 13 - "Community 13"
 Cohesion: 0.16
 Nodes (10): metadata, AppProviders(), SessionScopedProviders(), AuthContext, AuthContextValue, AuthProvider(), LoginInput, RegisterInput (+2 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.16
-Nodes (13): useDashboardSummary(), useMerchantOrders(), useMerchantProducts(), useRevenueSeries(), OrdersTable(), ProductsTable(), RevenueChartPlaceholder(), StatCards() (+5 more)
+Cohesion: 0.14
+Nodes (15): useDashboardSummary(), useMerchantOrders(), useMerchantProducts(), useRevenueSeries(), OrdersTable(), ProductsTable(), RevenueChartPlaceholder(), StatCards() (+7 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.07
 Nodes (28): devDependencies, eslint, eslint-config-prettier, @eslint/eslintrc, @eslint/js, eslint-plugin-prettier, glob, globals (+20 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.14
-Nodes (9): CartController, ServerCartProduct, ShopOrderIds, TxClient, CreateCartDTO, CreateProductDTO, ItemProductDTO, ShopOrderDTO (+1 more)
+Cohesion: 0.12
+Nodes (10): CartController, CartService, ServerCartProduct, ShopOrderIds, TxClient, CreateCartDTO, CreateProductDTO, ItemProductDTO (+2 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.08
 Nodes (25): compilerOptions, allowSyntheticDefaultImports, baseUrl, declaration, emitDecoratorMetadata, esModuleInterop, experimentalDecorators, forceConsistentCasingInFileNames (+17 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.14
-Nodes (16): useAddCartItem(), useProduct(), DashboardAuthGuard(), MarketingNavbar(), AccountPage(), ProductDetailPage(), useAuth(), EmptyStateProps (+8 more)
+Cohesion: 0.08
+Nodes (34): useAddCartItem(), useCart(), useClearCart(), useUpdateCartItem(), useCategories(), useCategoryProducts(), useProduct(), useProducts() (+26 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.08
 Nodes (23): 1. Mission, 2. Required Reading, 3. Project Facts, 4. How To Work, 5. Documentation Rules, 6. Implementation Rules, 7. Security Rules For Agents, 8. Ecommerce-Specific Quality Gate (+15 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.22
+Cohesion: 0.21
 Nodes (12): AuthModule, CartModule, CheckoutModule, CommentModule, DiscountModule, InventoryModule, KeyTokenModule, RequestIdMiddleware (+4 more)
 
 ### Community 21 - "Community 21"
@@ -292,20 +294,20 @@ Cohesion: 0.09
 Nodes (22): scripts, build, build:dev, build:fast, build:fast:watch, build:prod, dev, format (+14 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.18
-Nodes (5): CategoryController, CategoryModule, CategoryService, CreateCategoryDto, UpdateCategoryDto
+Cohesion: 0.16
+Nodes (4): CategoryController, CategoryModule, CategoryService, UpdateCategoryDto
 
 ### Community 28 - "Community 28"
 Cohesion: 0.16
 Nodes (15): login(), LoginInput, logout(), register(), RegisterInput, simulate(), toSession(), apiConfig (+7 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.18
-Nodes (10): useCart(), useClearCart(), useUpdateCartItem(), useCheckoutReview(), useSubmitCheckout(), CartPage(), CheckoutPage(), checkoutSchema (+2 more)
+Cohesion: 0.23
+Nodes (6): useMerchantSettings(), useUpdateMerchantSettings(), DashboardSettingsPage(), settingsSchema, SettingsValues, Checkbox
 
 ### Community 30 - "Community 30"
-Cohesion: 0.17
-Nodes (4): LoginManualDTO, RegisterShopDTO, ShopAuthController, ShopAuthService
+Cohesion: 0.14
+Nodes (5): LoginManualDTO, RegisterShopDTO, ShopAuthController, ShopAuthService, getInfoData()
 
 ### Community 31 - "Community 31"
 Cohesion: 0.04
@@ -324,8 +326,12 @@ Cohesion: 0.27
 Nodes (14): collectImages(), getProductBySlug(), listCategories(), listProducts(), listProductsByCategory(), normalizeCategory(), normalizeProduct(), normalizeProducts() (+6 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.05
-Nodes (15): CommentController, CommentService, CreateCommentDTO, DeleteCommentDTO, GetCommentDTO, CreateBrandDTO, CreateCategoryDTO, CreateProductDTO (+7 more)
+Cohesion: 0.11
+Nodes (7): CreateSkuDTO, CreateSpuDTO, CreateProductDTO, ProductSearchResult, ProductWithSkus, UpdateProductDTO, ProductService
+
+### Community 36 - "Community 36"
+Cohesion: 0.08
+Nodes (7): AuthAccountPayload, AuthenticatedRequest, Authentication, GoogleStrategy, UserAuthController, UserAuthModule, UserAuthService
 
 ### Community 39 - "Community 39"
 Cohesion: 0.18
@@ -340,8 +346,8 @@ Cohesion: 0.14
 Nodes (14): 10. **Order Cronjob Module** - Scheduled Tasks, 11. **Comment Module** - Product Reviews & Ratings, 12. **Notification Module** - Multi-Channel Notifications, 13. **KeyToken Module** - Session Management, 1. **Auth Module** - User Authentication, 2. **Shop Auth Module** - Seller Authentication, 3. **User Module** - User Profile Management, 4. **Product Module** - Product Management & Search (+6 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.31
-Nodes (5): BrandController, BrandModule, BrandService, CreateBrandDto, UpdateBrandDto
+Cohesion: 0.29
+Nodes (4): BrandController, BrandModule, BrandService, UpdateBrandDto
 
 ### Community 44 - "Community 44"
 Cohesion: 0.24
@@ -388,7 +394,7 @@ Cohesion: 0.22
 Nodes (8): API Endpoint Quick Reference, 📡 Backend API Reference Guide, Base URL, Error Codes Reference, Rate Limiting, 🏪 Shop Authentication Endpoints, Shop Login, Shop Register
 
 ### Community 56 - "Community 56"
-Cohesion: 0.41
+Cohesion: 0.38
 Nodes (3): RoleGuard, Roles(), AuthRequest
 
 ### Community 57 - "Community 57"
@@ -616,24 +622,24 @@ Cohesion: 0.29
 Nodes (6): DialogContent, DialogDescription, DialogFooter(), DialogHeader(), DialogOverlay, DialogTitle
 
 ## Knowledge Gaps
-- **692 isolated node(s):** `{ glob }`, `{ spawn }`, `os`, `path`, `$schema` (+687 more)
+- **696 isolated node(s):** `{ glob }`, `{ spawn }`, `os`, `path`, `$schema` (+691 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `DiscountService` connect `Community 9` to `Community 56`, `Community 20`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Why does `AuthService` connect `Community 12` to `Community 98`, `Community 20`, `Community 30`, `Community 36`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `ProductService` connect `Community 35` to `Community 20`, `Community 46`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `RoleGuard` connect `Community 56` to `Community 9`, `Community 35`, `Community 30`?**
+- **Why does `RoleGuard` connect `Community 56` to `Community 16`, `Community 35`, `Community 6`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `{ glob }`, `{ spawn }`, `os` to the rest of the system?**
-  _692 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _696 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.11578947368421053 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.08362369337979095 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08846153846153847 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._

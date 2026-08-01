@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/services/prisma/prisma.service";
-import { CreateSkuDTO, CreateSpuDTO, CreateBrandDTO } from "./dto/request-product.dto";
 import { ProducerService } from "src/services/kafka/services/producer.service";
 import { ItemProductDTO } from "src/modules/checkout/dto/checkout.dto";
 import { ProductSearchResult, ProductWithSkus } from "./interfaces/product.interface";
-
+import { CreateSkuDTO } from "./dto/create-sku.dto";
+import { CreateSpuDTO } from "./dto/create-spu.dto";
+import { CreateBrandDTO } from "./dto/create-brand.dto";
+import { CreateCategoryDTO } from "./dto/create-category.dto";
 @Injectable()
 export class ProductService {
     constructor( 
@@ -101,8 +103,6 @@ export class ProductService {
             ]
         });
         return { spu: result.newSPU, sku: result.newSKU };
-
-
     }
 
     async createBrand(body: CreateBrandDTO){
@@ -497,4 +497,69 @@ export class ProductService {
         return product
     }
 
+    async createCategory({ name, parentId, sort }: CreateCategoryDTO) {
+        const normalizedName = name.trim();
+
+        if (!normalizedName) {
+            throw new BadRequestException('Category name is required');
+        }
+
+        return this.prismaService.$transaction(async (tx) => {
+            let parentPaths: Array<{ ancestorId: string; depth: number }> = [];
+
+            if (parentId) {
+                const parent = await tx.category.findFirst({
+                    where: {
+                        id: parentId,
+                        isActive: true,
+                    },
+                    select: { id: true },
+                });
+
+                if (!parent) {
+                    throw new NotFoundException('Parent category not found');
+                }
+
+                parentPaths = await tx.categoryClosureTable.findMany({
+                    where: {
+                        descendantId: parentId,
+                        isActive: true,
+                    },
+                    select: {
+                        ancestorId: true,
+                        depth: true,
+                    },
+                });
+
+                // Older categories may exist without their required self path.
+                if (!parentPaths.some((path) => path.ancestorId === parentId)) {
+                    parentPaths.push({ ancestorId: parentId, depth: 0 });
+                }
+            }
+
+            const category = await tx.category.create({
+                data: {
+                    name: normalizedName,
+                    sort,
+                },
+            });
+
+            await tx.categoryClosureTable.createMany({
+                data: [
+                    {
+                        ancestorId: category.id,
+                        descendantId: category.id,
+                        depth: 0,
+                    },
+                    ...parentPaths.map((path) => ({
+                        ancestorId: path.ancestorId,
+                        descendantId: category.id,
+                        depth: path.depth + 1,
+                    })),
+                ],
+            });
+
+            return category;
+        });
+    }
 }
