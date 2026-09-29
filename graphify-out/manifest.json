@@ -785,7 +785,7 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/auth/shop-auth/shop-auth.controller.ts": {
-    "mtime": 1781335487.237738,
+    "mtime": 1785607594.6912513,
     "ast_hash": "671dabf5225fce3d3e3bada0d390ef5b",
     "semantic_hash": ""
   },
@@ -795,8 +795,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/auth/shop-auth/shop-auth.service.ts": {
-    "mtime": 1781335487.2387364,
-    "ast_hash": "5a4a6e6ee71cabcf9c45acfbba819893",
+    "mtime": 1785606878.9047005,
+    "ast_hash": "360b32f32cfdd2eb545b3bca3e7dc874",
     "semantic_hash": ""
   },
   "apps/api/src/modules/auth/user-auth/auth-jwt.strategy.ts": {
@@ -1120,8 +1120,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.controller.ts": {
-    "mtime": 1785583039.9606218,
-    "ast_hash": "35f20acd5bd8dd7581d87a0e991d82a5",
+    "mtime": 1785584556.910846,
+    "ast_hash": "b18f8d18740790699b597bb5bb38f025",
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.module.ts": {
@@ -1130,8 +1130,8 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/product.service.ts": {
-    "mtime": 1785583039.9636233,
-    "ast_hash": "023dfb507e042713a5ff48252632e38f",
+    "mtime": 1785583695.646974,
+    "ast_hash": "f26e366d3524a76b90548c8db6b94a73",
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/sku/sku.controller.ts": {
@@ -1455,8 +1455,13 @@
     "semantic_hash": ""
   },
   "apps/api/src/modules/product/dto/create-spu.dto.ts": {
-    "mtime": 1785579127.0082858,
-    "ast_hash": "bd049b882a4487806c253ed14d1a79f5",
+    "mtime": 1785584543.4942906,
+    "ast_hash": "b593b1399517418bb26c2a6b679e0105",
+    "semantic_hash": ""
+  },
+  "apps/api/prisma/migrations/20260802013000_align_sku_column_names/migration.sql": {
+    "mtime": 1785687410.7891243,
+    "ast_hash": "613fd6569a77aa4036f11bfcb9a4984b",
     "semantic_hash": ""
   }
 }
